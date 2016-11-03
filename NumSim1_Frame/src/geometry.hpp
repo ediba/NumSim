@@ -16,6 +16,9 @@
  */
 
 #include "typedef.hpp"
+#include <sstream>
+#include <fstream>
+#include <string>
 //------------------------------------------------------------------------------
 #ifndef __GEOMETRY_HPP
 #define __GEOMETRY_HPP
@@ -36,25 +39,29 @@ public:
   //    -------------
   //      u=0, v=0
   Geometry(){
-
-
-
+      _size[0] = 128;
+      _size[1] = 128;
+      _length[0] = 1.0;
+      _length[1] = 1.0;
+      double hx=_length[0] / _size[0];
+      double hy= _length[1] / _size[1];
+      _h = {hx, hy};
+      _velocity[0] = 0.0;
+      _velocity[1] = 0.0;
+      _pressure = 0.1;
   }
 
   /// Loads a geometry from a file
   void Load(const char *file){
-#include <sstream>
-#include <string>
 
-std::string line;
-while (std::getline(infile, line))
-{
-    std::istringstream iss(line);
-    int a, b;
-    if (!(iss >> a >> b)) { break; } // error
+       std::ifstream infile(file);
+       std::string line;
+       std::getline(infile, line);
+       std::istringstream iss(line);
+       if (!(iss >> _size[0] >> _size[1])) {  } // error
 
     // process pair (a,b)
-}
+
 
 }
   /// Returns the number of cells in each dimension
