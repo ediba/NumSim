@@ -98,14 +98,54 @@ void InteriorIterator::First()
     _valid=true;
 }
 
+//not yet finished
 void InteriorIterator::Next()
 {
     ///check if the position is already on the boundary of the x axis
-    if (Pos()[0] == _geom->Size()[0]-1){
+    if (Pos()[0] == _geom->Size()[0]-1)
             _value += 1;
 
 
     ///check if the position is already on the boundary of the y axis
     if (Pos()[1] >= _geom->Size()[1]-1) _valid = false; // maybe do this earlier?
 }
+
+
+
+
+
+    /** Iterator for domain boundary cells.
+    */
+
+
+
+
+    ///implementation of the BoundaryIterator
+    ///
+    ///
+
+      /// Constructs a new BoundaryIterator
+    BoundaryIterator(const Geometry *geom)
+    {Iterator(geom), _boundary(0);}
+
+      /// Sets the boundary to iterate
+
+    void BoundaryIterator::SetBoundary(const index_t& boundary)
+    {
+        _boundary = boundary;
+        First();
+    }
+
+    ///what values can the boundary have???
+      /// Sets the iterator to the first element
+     void BoundaryIterator::First()
+    {
+
+     }
+      /// Goes to the next element of the iterator, disables it if position is end
+     void BoundaryIterator::Next()
+    {
+
+     }
+
 
