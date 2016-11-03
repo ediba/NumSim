@@ -30,14 +30,18 @@ public:
   Iterator(const Geometry *geom, const index_t &value);
 
   ///     Returns the current position value
-  virtual const index_t &Value() const;
+  virtual const index_t &Value() const{
+      return _value;
+  }
   /// Cast operator to convert Iterators to integers
   virtual operator const index_t &() const;
   /// Returns the position coordinates
   virtual multi_index_t Pos() const;
 
   /// Sets the iterator to the first element
-  virtual void First();
+  virtual void First(){
+      return _value;
+  }
   /// Goes to the next element of the iterator, disables it if position is end
   virtual void Next();
 
@@ -87,10 +91,11 @@ class BoundaryIterator : public Iterator {
 public:
   /// Constructs a new BoundaryIterator
   BoundaryIterator(const Geometry *geom);
-
   /// Sets the boundary to iterate
-  void SetBoundary(const index_t &boundary);
-
+  void SetBoundary(const index_t &boundary){
+      _boundary=boundary;
+      First();
+ }
   /// Sets the iterator to the first element
   void First();
   /// Goes to the next element of the iterator, disables it if position is end
