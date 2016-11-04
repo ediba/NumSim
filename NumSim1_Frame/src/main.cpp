@@ -19,6 +19,7 @@
 #include "compute.hpp"
 #include "geometry.hpp"
 #include "parameter.hpp"
+#include "grid.hpp"
 //#include "visu.hpp"
 //#include "vtk.hpp"
 

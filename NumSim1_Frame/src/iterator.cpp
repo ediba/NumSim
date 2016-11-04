@@ -60,7 +60,7 @@ Iterator Iterator::Right() const
 }
 /// returns the up position of the iterator, and if it is on the boundary, it will
 ///return itself
-Iterator Iterator::Up() const
+Iterator Iterator::Top() const
 {
     ///checking if it is at the top boundary
     if (Pos()[1] == _geom->Size()[1]-1){
@@ -140,12 +140,14 @@ void InteriorIterator::Next()
       /// Sets the iterator to the first element
      void BoundaryIterator::First()
     {
+        _value=0;
 
      }
       /// Goes to the next element of the iterator, disables it if position is end
      void BoundaryIterator::Next()
     {
-
+        if ((Pos()[0] != _geom->Size()[0]-1) && ((Pos()[1] ==0)||(Pos()[1] ==_geom->Size()[1]-1))){ _boundary+=1;}
+        else if ((Pos()[0] != _geom->Size()[0]-1) && (Pos()[1] ==0)){ _boundary+=1;}
      }
 
 
