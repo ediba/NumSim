@@ -49,6 +49,10 @@ public:
   //    -------------
   //      u=0, v=0
   Geometry();
+  
+  
+  
+  
 
   /// Loads a geometry from a file
   void Load(const char *file);
