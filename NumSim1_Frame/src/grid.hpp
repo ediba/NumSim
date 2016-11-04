@@ -23,10 +23,7 @@
 class Grid {
 public:
   /// Constructs a grid based on a geometry
-  Grid(const Geometry *geom){
-
-
-  }
+  Grid(const Geometry *geom);
 
   /// Constructs a grid based on a geometry with an offset
   // @param geom   Geometry information
@@ -77,11 +74,11 @@ public:
   /// Returns the absolute maximal value
   real_t AbsMax() const;
 
+  /// Returns a pointer to the raw data
+  real_t *Data();
 
 private:
   real_t *_data;
-  /// Returns a pointer to the raw data
-  real_t *Data();
   multi_real_t _offset;
   const Geometry *_geom;
 };

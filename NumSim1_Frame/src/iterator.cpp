@@ -72,7 +72,7 @@ Iterator Iterator::Up() const
 
 ///returns the down position of the iterator, and if it is on the boundary, it will
 ///return itself
-Iterator Iterator::Up() const
+Iterator Iterator::Down() const
 {
     ///checking if it is at the lower boundary
     if (Pos()[1] == 0){
@@ -89,7 +89,7 @@ Iterator Iterator::Up() const
 ///Implemented classes for InteriorIterator
 
 InteriorIterator::InteriorIterator(const Geometry* geom)
-{Iterator(geom);}
+{Iterator(geom);_valid=true;}
 
 void InteriorIterator::First()
 {
@@ -102,12 +102,12 @@ void InteriorIterator::First()
 void InteriorIterator::Next()
 {
     ///check if the position is already on the boundary of the x axis
-    if (Pos()[0] == _geom->Size()[0]-1)
-            _value += 1;
+    if (Pos()[0] == _geom->Size()[0]-2)
+            _value += 3;
 
 
     ///check if the position is already on the boundary of the y axis
-    if (Pos()[1] >= _geom->Size()[1]-1) _valid = false; // maybe do this earlier?
+    if (Pos()[1] == _geom->Size()[1]-1) _valid = false; // maybe do this earlier?
 }
 
 
@@ -126,7 +126,7 @@ void InteriorIterator::Next()
 
       /// Constructs a new BoundaryIterator
     BoundaryIterator(const Geometry *geom)
-    {Iterator(geom), _boundary(0);}
+    {Iterator(geom); _boundary(0); _valid=false;}
 
       /// Sets the boundary to iterate
 
