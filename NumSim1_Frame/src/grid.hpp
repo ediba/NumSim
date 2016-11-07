@@ -23,10 +23,7 @@
 class Grid {
 public:
   /// Constructs a grid based on a geometry
-  Grid(const Geometry *geom){
-
-
-  }
+  Grid(const Geometry *geom);
 
   /// Constructs a grid based on a geometry with an offset
   // @param geom   Geometry information
