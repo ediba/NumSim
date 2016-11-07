@@ -16,6 +16,8 @@
  */
 
 #include "typedef.hpp"
+#include "iterator.hpp"
+#include "geometry.hpp"
 //------------------------------------------------------------------------------
 #ifndef __GRID_HPP
 #define __GRID_HPP
@@ -74,11 +76,11 @@ public:
   /// Returns the absolute maximal value
   real_t AbsMax() const;
 
+  /// Returns a pointer to the raw data
+  real_t *Data();
 
 private:
   real_t *_data;
-  /// Returns a pointer to the raw data
-  real_t *Data();
   multi_real_t _offset;
   const Geometry *_geom;
 };

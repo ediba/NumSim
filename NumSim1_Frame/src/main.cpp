@@ -19,6 +19,7 @@
 #include "compute.hpp"
 #include "geometry.hpp"
 #include "parameter.hpp"
+#include "grid.hpp"
 //#include "visu.hpp"
 //#include "vtk.hpp"
 
@@ -29,6 +30,15 @@ int main(int argc, char **argv) {
   Geometry geom;
   // Create the fluid solver
   Compute comp(&geom, &param);
+  
+  param.Load("default.param");
+  geom.Load("default.geom");
+  multi_index_t size = geom.Size();
+  std::cout << "Size = "<< size[0] <<" " <<size[1] <<std::endl;
+    multi_real_t length = geom.Length();
+    std::cout << "Length = "<< length[0] <<" " <<length[1] <<std::endl;
+    multi_real_t mesh = geom.Mesh();
+    std::cout << "MEsh = "<< mesh[0] << " " << mesh[1] << std::endl;
 
 
   const Grid *visugrid;

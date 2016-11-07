@@ -16,6 +16,11 @@
  */
 
 #include "typedef.hpp"
+#include <fstream>
+#include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string>
 //------------------------------------------------------------------------------
 #ifndef __PARAMETER_HPP
 #define __PARAMETER_HPP
@@ -24,10 +29,7 @@ class Parameter {
 public:
   /// Constructs a new Parameter set with default values
   // Driven Cavity parameters; see exercise sheet 1
-  Parameter(){
-
-
-  }
+  Parameter();
 
   /// Loads the parameter values from a file
   void Load(const char *file);

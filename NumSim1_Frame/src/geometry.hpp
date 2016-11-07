@@ -16,9 +16,19 @@
  */
 
 #include "typedef.hpp"
+
+#include <vector>
 #include <sstream>
 #include <fstream>
+#include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
 #include <string>
+
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+
 //------------------------------------------------------------------------------
 #ifndef __GEOMETRY_HPP
 #define __GEOMETRY_HPP
@@ -38,44 +48,21 @@ public:
   //    |           |
   //    -------------
   //      u=0, v=0
-  Geometry(){
-      _size[0] = 128;
-      _size[1] = 128;
-      _length[0] = 1.0;
-      _length[1] = 1.0;
-      double hx=_length[0] / _size[0];
-      double hy= _length[1] / _size[1];
-      _h = {hx, hy};
-      _velocity[0] = 0.0;
-      _velocity[1] = 0.0;
-      _pressure = 0.1;
-  }
+  Geometry();
+  
+  
+  
+  
 
   /// Loads a geometry from a file
-  void Load(const char *file){
+  void Load(const char *file);
 
-       std::ifstream infile(file);
-       std::string line;
-       std::getline(infile, line);
-       std::istringstream iss(line);
-       if (!(iss >> _size[0] >> _size[1])) {  } // error
-
-    // process pair (a,b)
-
-
-}
   /// Returns the number of cells in each dimension
-  const multi_index_t &Size() const{
-      return _size;
-  }
+  const multi_index_t &Size() const;
   /// Returns the length of the domain
-  const multi_real_t &Length() const{
-      return _length;
-  }
+  const multi_real_t &Length() const;
   /// Returns the meshwidth
-  const multi_real_t &Mesh() const{
-      return _h;
-  }
+  const multi_real_t &Mesh() const;
 
   /// Updates the velocity field u
   void Update_U(Grid *u) const;
@@ -88,6 +75,7 @@ private:
   multi_index_t _size;
   multi_real_t _length;
   multi_real_t _h;
+  multi_real_t _mesh;
 
   multi_real_t _velocity;
   real_t _pressure;
