@@ -6,10 +6,8 @@
 
 
 
-Grid::Grid(const Geometry *geom, const multi_real_t &offset)
+Grid::Grid(const Geometry *geom, const multi_real_t &offset):_geom(geom),_offset(offset)
  {
-    _geom(geom);
-    _offset(offset);
     ///plus 2 ???
     _data = new real_t[_geom->Size()[0] * _geom->Size()[1]];
   this->Initialize(real_t(0.0));
@@ -68,12 +66,14 @@ real_t Grid::DC_udu_x(const Iterator &it, const real_t &alpha) const{
 
      return left_var+right_var;
 }
+
+
 /// Computes v*du/dy with the donor cell method
-real_t DC_vdu_y(const Iterator &it, const real_t &alpha, const Grid *v) const;
+real_t Grid::DC_vdu_y(const Iterator &it, const real_t &alpha, const Grid *v) const{}
 /// Computes u*dv/dx with the donor cell method
-real_t DC_udv_x(const Iterator &it, const real_t &alpha, const Grid *u) const;
+real_t Grid::DC_udv_x(const Iterator &it, const real_t &alpha, const Grid *u) const{}
 /// Computes v*dv/dy with the donor cell method
-real_t DC_vdv_y(const Iterator &it, const real_t &alpha) const;
+real_t Grid:: DC_vdv_y(const Iterator &it, const real_t &alpha) const{}
 
 ///implement all other derivatives
 

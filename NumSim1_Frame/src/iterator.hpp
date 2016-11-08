@@ -88,10 +88,7 @@ public:
   /// Constructs a new BoundaryIterator
   BoundaryIterator(const Geometry *geom);
   /// Sets the boundary to iterate
-  void SetBoundary(const index_t &boundary){
-      _boundary=boundary;
-      First();
- }
+  void SetBoundary(const index_t &boundary);
   /// Sets the iterator to the first element
   void First();
   /// Goes to the next element of the iterator, disables it if position is end

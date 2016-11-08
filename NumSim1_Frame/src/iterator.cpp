@@ -7,10 +7,12 @@
 
 ///or maybe it is not alway valid? Should I check the geometry if the size is greater than zero?
 Iterator::Iterator(const Geometry* geom, const index_t& value)
-{ _geom(geom); _value(value); _valid(true);}
+{ _geom = geom; _value = value; _valid = true;}
 
-Iterator::Iterator(const Geometry *geom)
-{Iterator(geom,0);}
+Iterator::Iterator(const Geometry *geom){
+    _geom = geom; _value = 0; _valid = true;
+    
+}
 
 
 const index_t& Iterator::Value() const
@@ -22,6 +24,11 @@ Iterator::operator const index_t& () const
 void Iterator::First()
 {_value = 0;}
 
+void Iterator::Next(){
+if(_value == _geom->Size()[0]*_geom->Size()[1]-1){
+    _valid = false;}
+else{_value++;}    
+}
 bool Iterator::Valid() const
 {return _valid;}
 
@@ -88,8 +95,13 @@ Iterator Iterator::Down() const
 
 ///Implemented classes for InteriorIterator
 
-InteriorIterator::InteriorIterator(const Geometry* geom)
-{Iterator(geom);_valid=true;}
+InteriorIterator::InteriorIterator(const Geometry* geom): 
+Iterator(geom){
+    //Iterator(geom); //funktioniert bei mir nicht
+    //_geom = geom; _value = geom->Mesh()[0]+1;;
+    _valid=true;
+    
+}
 
 void InteriorIterator::First()
 {
@@ -125,8 +137,11 @@ void InteriorIterator::Next()
     ///
 
       /// Constructs a new BoundaryIterator
-    BoundaryIterator(const Geometry *geom)
-    {Iterator(geom); _boundary(0); _valid=false;}
+    BoundaryIterator::BoundaryIterator(const Geometry *geom):
+    Iterator(geom){
+        _boundary = 0; _valid=false;
+        
+    }
 
       /// Sets the boundary to iterate
 
