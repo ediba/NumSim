@@ -21,6 +21,7 @@
 #include "parameter.hpp"
 #include "grid.hpp"
 #include "visu.hpp"
+#include "visu.cpp"
 //#include "vtk.hpp"
 
 
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
   //visugrid = comp.GetVelocity();
 
   //visualize grid
-   // Renderer renderer=Renderer(length, mesh);
+   // Renderer renderer(length, mesh);
     //Renderer renderer=Renderer();
     
     // Run a few steps
