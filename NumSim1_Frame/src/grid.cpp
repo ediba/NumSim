@@ -47,6 +47,7 @@ const real_t &Grid::Cell(const Iterator &it) const{
 const index_t &Grid::IterFromPos(const multi_index_t &pos) const{
     index_t ind;
     ind = pos[1]*(_geom->Size()[0])+ pos[0];
+    std::cout << " index ind = " << ind << std::endl;
     
     return ind;
 }
@@ -68,8 +69,9 @@ real_t Grid::Interpolate(const multi_real_t &pos) const{
     coordinates[0] = (index_t) (pos[0]/(_geom->Mesh()[0])); //alte Version: (pos[0]-fmod(pos[0], _geom->Mesh()[0]))/_geom->Mesh()[0];
     coordinates[1] = (index_t) (pos[1]/(_geom->Mesh()[1])); //(pos[1]-fmod(pos[1], _geom->Mesh()[1]))/_geom->Mesh()[1];
     std::cout << coordinates[0] << ", " << coordinates[1] << std::endl;
-    Iterator it(_geom, IterFromPos(coordinates)); //TODO: Fehler
-    std::cout << "Iterator constructed" << std::endl;
+    Iterator it(_geom, IterFromPos(coordinates)); ////TODO: Fehler
+    
+    std::cout << "Iterator constructed value = " << it.Value() << std::endl;
     
     absX = fmod(pos[0], _geom->Mesh()[0])-_offset[0];
     absY = fmod(pos[1], _geom->Mesh()[1])-_offset[1];

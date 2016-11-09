@@ -6,10 +6,13 @@
 /// from the bottom to the top
 
 ///or maybe it is not alway valid? Should I check the geometry if the size is greater than zero?
-Iterator::Iterator(const Geometry* geom, const index_t& value)
-{ _geom = geom; _value = value; _valid = true;}
+Iterator::Iterator(const Geometry* geom, const index_t& value){
+    _geom = geom; _value = value; _valid = true;
+    
+}
 
-Iterator::Iterator(const Geometry *geom){
+Iterator::Iterator(const Geometry *geom)
+{
     _geom = geom; _value = 0; _valid = true;
     
 }
