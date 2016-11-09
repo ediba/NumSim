@@ -17,7 +17,7 @@
 
 #include "typedef.hpp"
 #include "grid.hpp"
-//#include "SDL2/SDL.h"
+#include "SDL2/SDL.h"
 //------------------------------------------------------------------------------
 #ifndef __VISU_HPP
 #define __VISU_HPP
