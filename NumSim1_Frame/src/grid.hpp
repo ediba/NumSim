@@ -41,6 +41,9 @@ public:
   real_t &Cell(const Iterator &it);
   /// Read access to the grid cell at position [it]
   const real_t &Cell(const Iterator &it) const;
+  
+  ///returns the iterator for one coordinate 
+  const Iterator &IterFromPos(const multi_index_t &pos) const;
 
   /// Interpolate the value at a arbitrary position
   real_t Interpolate(const multi_real_t &pos) const;

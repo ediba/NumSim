@@ -20,7 +20,7 @@
 #include "geometry.hpp"
 #include "parameter.hpp"
 #include "grid.hpp"
-//#include "visu.hpp"
+#include "visu.hpp"
 //#include "vtk.hpp"
 
 
@@ -28,29 +28,41 @@ int main(int argc, char **argv) {
   // Create parameter and geometry instances with default values
   Parameter param;
   Geometry geom;
+  //Renderer renderer;
   // Create the fluid solver
-  Compute comp(&geom, &param);
+  //Compute comp(&geom, &param);
   
   param.Load("default.param");
   geom.Load("default.geom");
+  Grid testgrid = Grid(&geom);
   multi_index_t size = geom.Size();
   std::cout << "Size = "<< size[0] <<" " <<size[1] <<std::endl;
     multi_real_t length = geom.Length();
     std::cout << "Length = "<< length[0] <<" " <<length[1] <<std::endl;
     multi_real_t mesh = geom.Mesh();
     std::cout << "MEsh = "<< mesh[0] << " " << mesh[1] << std::endl;
+    
+    
+    testgrid.Initialize(2);
+    
+    multi_real_t InterX = {0.5, 1};
+    real_t TestWert = testgrid.Interpolate(InterX);
+    
+    std::cout << " Interpoliert an der Stelle "<< InterX[0] << "/"<< InterX[1]<< " = " <<TestWert<<std::endl;
+    
+//   const Grid *visugrid;
+//   bool run = true;
 
+  //visugrid = comp.GetVelocity();
 
-  const Grid *visugrid;
-  bool run = true;
-
-  visugrid = comp.GetVelocity();
-
-
+  //visualize grid
+   // Renderer renderer=Renderer(length, mesh);
+    //Renderer renderer=Renderer();
+    
     // Run a few steps
-    for (uint32_t i = 0; i < 9; ++i)
-      comp.TimeStep(false);
-    comp.TimeStep(true);
+//     for (uint32_t i = 0; i < 9; ++i)
+//       comp.TimeStep(false);
+//     comp.TimeStep(true);
 
   return 0;
 }
