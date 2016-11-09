@@ -16,12 +16,13 @@ Grid::Grid(const Geometry *geom, const multi_real_t &offset)
 }
 Grid::Grid(const Geometry* geom)
 {
-    std::cout << " Grid Initialized " <<std::endl;
+    
      _geom=geom;
      _offset={0.0,0.0};
     ///plus 2 ???
     _data = new real_t[(_geom->Size()[0]) * (_geom->Size()[1])];
     this->Initialize(real_t(0.0));
+    std::cout << " Grid Initialized " <<std::endl;
     
 }
 Grid::~Grid()
@@ -43,15 +44,16 @@ const real_t &Grid::Cell(const Iterator &it) const{
 }
 ///returns the iterator for one coordinate 
 //Probs mit size() wenn es nur interior zellen enthält muss noch +2 hin
-const Iterator &Grid::IterFromPos(const multi_index_t &pos) const{
+const index_t &Grid::IterFromPos(const multi_index_t &pos) const{
     index_t ind;
     ind = pos[1]*(_geom->Size()[0])+ pos[0];
-    Iterator it = Iterator(_geom, ind);
-    return it;
+    
+    return ind;
 }
 ///Neuere interpolate
-//aufpassen mit Ursprung und wenn negative positionen eingefordert werden kann es zu komplikationen kommen..
+//TODO: aufpassen mit Ursprung und wenn negative positionen eingefordert werden kann es zu komplikationen kommen..
 real_t Grid::Interpolate(const multi_real_t &pos) const{
+    std::cout << "begin interpolate" << std::endl;
     multi_index_t coordinates;
     real_t absX;
     real_t relX;
@@ -60,18 +62,22 @@ real_t Grid::Interpolate(const multi_real_t &pos) const{
     
     real_t valueX1;
     real_t valueX2;
-    Iterator it(_geom);
+   
     
     
-    coordinates[0] = (pos[0]-fmod(pos[0], _geom->Mesh()[0]))/_geom->Mesh()[0];
-    coordinates[1] = (pos[1]-fmod(pos[1], _geom->Mesh()[1]))/_geom->Mesh()[1];
-    it = IterFromPos(coordinates);
+    coordinates[0] = (index_t) (pos[0]/(_geom->Mesh()[0])); //alte Version: (pos[0]-fmod(pos[0], _geom->Mesh()[0]))/_geom->Mesh()[0];
+    coordinates[1] = (index_t) (pos[1]/(_geom->Mesh()[1])); //(pos[1]-fmod(pos[1], _geom->Mesh()[1]))/_geom->Mesh()[1];
+    std::cout << coordinates[0] << ", " << coordinates[1] << std::endl;
+    Iterator it(_geom, IterFromPos(coordinates)); //TODO: Fehler
+    std::cout << "Iterator constructed" << std::endl;
     
     absX = fmod(pos[0], _geom->Mesh()[0])-_offset[0];
     absY = fmod(pos[1], _geom->Mesh()[1])-_offset[1];
+    std::cout << absX << ", " <<absY << std::endl;
     
     relX = absX/_geom->Mesh()[0];
     relY = absY/_geom->Mesh()[1];
+    std::cout << relX << ", " <<relY << std::endl;
     
     valueX1 = ((1-relX)*_data[it]+(relX)*_data[it.Right()]);
     
