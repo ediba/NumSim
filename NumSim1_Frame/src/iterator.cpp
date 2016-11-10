@@ -7,8 +7,9 @@
 
 ///or maybe it is not alway valid? Should I check the geometry if the size is greater than zero?
 Iterator::Iterator(const Geometry* geom, const index_t& value){
-    _geom = geom; _value = value; _valid = true;
-    
+    _geom = geom;
+    _value = value;
+    _valid = true;    
 }
 
 Iterator::Iterator(const Geometry *geom)
