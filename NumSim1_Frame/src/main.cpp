@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   Geometry geom;
   //Renderer renderer;
   // Create the fluid solver
-  //Compute comp(&geom, &param);
+  Compute comp(&geom, &param);
   
   param.Load("default.param");
   geom.Load("default.geom");
@@ -41,29 +41,33 @@ int main(int argc, char **argv) {
     multi_real_t length = geom.Length();
     std::cout << "Length = "<< length[0] <<" " <<length[1] <<std::endl;
     multi_real_t mesh = geom.Mesh();
-    std::cout << "MEsh = "<< mesh[0] << " " << mesh[1] << std::endl;
+    std::cout << "Mesh = "<< mesh[0] << " " << mesh[1] << std::endl;
     
     
     testgrid.Initialize(2);
     
+    
     multi_real_t InterX = {0.5, 1};
     real_t TestWert = testgrid.Interpolate(InterX);
     
-    std::cout << " Interpoliert an der Stelle "<< InterX[0] << "/"<< InterX[1]<< " = " <<TestWert<<std::endl;
+    std::cout << "Interpoliert an der Stelle "<< InterX[0] << "/"<< InterX[1]<< " = " <<TestWert<<std::endl;
     
-//   const Grid *visugrid;
+   
+    const Grid *visugrid;
 //   bool run = true;
 
-  //visugrid = comp.GetVelocity();
+    visugrid = comp.GetVelocity();
 
-  //visualize grid
-   // Renderer renderer(length, mesh);
-    //Renderer renderer=Renderer();
+  //visualize testgrid
+    Renderer renderer = Renderer(length, mesh);
+    renderer.Init(200,200,100);
+    renderer.Render(&testgrid);
+    renderer.ShowGrid(true);
+    std::cin.get();
     
     // Run a few steps
 //     for (uint32_t i = 0; i < 9; ++i)
 //       comp.TimeStep(false);
 //     comp.TimeStep(true);
-
   return 0;
 }
