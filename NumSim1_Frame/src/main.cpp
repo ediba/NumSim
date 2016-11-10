@@ -53,10 +53,10 @@ int main(int argc, char **argv) {
     std::cout << "Interpoliert an der Stelle "<< InterX[0] << "/"<< InterX[1]<< " = " <<TestWert<<std::endl;
     
    
-    const Grid *visugrid;
+//    const Grid *visugrid;
 //   bool run = true;
 
-    visugrid = comp.GetVelocity();
+//    visugrid = comp.GetVelocity();
 
   //visualize testgrid
     Renderer renderer = Renderer(length, mesh);

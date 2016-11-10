@@ -29,7 +29,7 @@ void Iterator::First()
 {_value = 0;}
 
 void Iterator::Next(){
-if(_value == _geom->Size()[0]*_geom->Size()[1]-1){
+if(_value == (_geom->Size()[0]+2)*(_geom->Size()[1]+2-1)){
     _valid = false;}
 else{_value++;}    
 }
@@ -41,8 +41,8 @@ bool Iterator::Valid() const
 multi_index_t Iterator::Pos() const
 {
     index_t x, y;
-    x = _value % _geom->Size()[0];
-    y = _value / _geom->Size()[0];
+    x = _value % (_geom->Size()[0]+2);
+    y = _value / (_geom->Size()[0]+2);
     return multi_index_t(x,y);
 }
 
@@ -64,7 +64,7 @@ Iterator Iterator::Left() const
 Iterator Iterator::Right() const
 {
     ///checking if it is at the right boundary
-    if (Pos()[0] == _geom->Size()[0]-1){
+    if (Pos()[0] == _geom->Size()[0]+2-1){
         return Iterator(_geom, _value);
     }else
         return Iterator(_geom, _value + 1);
@@ -74,10 +74,10 @@ Iterator Iterator::Right() const
 Iterator Iterator::Top() const
 {
     ///checking if it is at the top boundary
-    if (Pos()[1] == _geom->Size()[1]-1){
+    if (Pos()[1] == _geom->Size()[1]+2-1){
         return Iterator(_geom, _value);
     }else
-        return Iterator(_geom, _value + _geom->Size()[0]);
+        return Iterator(_geom, _value + _geom->Size()[0]+2);
 }
 
 
@@ -89,7 +89,7 @@ Iterator Iterator::Down() const
     if (Pos()[1] == 0){
         return Iterator(_geom, _value);
     }else
-        return Iterator(_geom, _value - _geom->Size()[0]);
+        return Iterator(_geom, _value - (_geom->Size()[0]+2));
 }
 
 
@@ -109,7 +109,7 @@ Iterator(geom){
 
 void InteriorIterator::First()
 {
-    _value = _geom->Size()[0] + 1;
+    _value = _geom->Size()[0]+2 + 1;
     ///check if this really should be true?
     _valid=true;
 }
@@ -118,12 +118,12 @@ void InteriorIterator::First()
 void InteriorIterator::Next()
 {
     ///check if the position is already on the boundary of the x axis
-    if (Pos()[0] == _geom->Size()[0]-2)
+    if (Pos()[0] == _geom->Size()[0]+2-2)
             _value += 3;
 
 
     ///check if the position is already on the boundary of the y axis
-    if (Pos()[1] == _geom->Size()[1]-1) _valid = false; // maybe do this earlier?
+    if (Pos()[1] == _geom->Size()[1]+2-1) _valid = false; // maybe do this earlier?
 }
 
 
@@ -165,8 +165,8 @@ void InteriorIterator::Next()
       /// Goes to the next element of the iterator, disables it if position is end
      void BoundaryIterator::Next()
     {
-        if ((Pos()[0] != _geom->Size()[0]-1) && ((Pos()[1] ==0)||(Pos()[1] ==_geom->Size()[1]-1))){ _boundary+=1;}
-        else if ((Pos()[0] != _geom->Size()[0]-1) && (Pos()[1] ==0)){ _boundary+=1;}
+        if ((Pos()[0] != _geom->Size()[0]+2-1) && ((Pos()[1] ==0)||(Pos()[1] ==_geom->Size()[1]+2-1))){ _boundary+=1;}
+        else if ((Pos()[0] != _geom->Size()[0]+2-1) && (Pos()[1] ==0)){ _boundary+=1;}
      }
 
 

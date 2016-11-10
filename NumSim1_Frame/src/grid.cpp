@@ -11,7 +11,7 @@ Grid::Grid(const Geometry *geom, const multi_real_t &offset)
      _geom=geom;
      _offset=offset;
     ///plus 2 ???
-    _data = new real_t[(_geom->Size()[0]) * (_geom->Size()[1])];
+    _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
   this->Initialize(real_t(0.0));
 }
 Grid::Grid(const Geometry* geom)
@@ -20,7 +20,7 @@ Grid::Grid(const Geometry* geom)
      _geom=geom;
      _offset={0.0,0.0};
     ///plus 2 ???
-    _data = new real_t[(_geom->Size()[0]) * (_geom->Size()[1])];
+    _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
     this->Initialize(real_t(0.0));
     std::cout << " Grid Initialized " <<std::endl;
     
@@ -30,7 +30,7 @@ Grid::~Grid()
 
 void Grid::Initialize(const real_t& value)
 {
-    for(int i=0; i<_geom->Size()[0]*_geom->Size()[1]; i++)
+    for(int i=0; i<(_geom->Size()[0]+2)*(_geom->Size()[1]+2); i++)
     {_data[i] = value;}
 }
 
@@ -44,9 +44,9 @@ const real_t &Grid::Cell(const Iterator &it) const{
 }
 ///returns the iterator for one coordinate 
 //Probs mit size() wenn es nur interior zellen enthält muss noch +2 hin
-const index_t Grid::IterFromPos(const multi_index_t &pos) const{
+index_t Grid::IterFromPos(const multi_index_t &pos) const{
     index_t ind;
-    ind = pos[1]*(_geom->Size()[0])+ pos[0];
+    ind = pos[1]*(_geom->Size()[0]+2)+ pos[0];
     return ind;
 }
 ///Neuere interpolate
@@ -62,17 +62,17 @@ real_t Grid::Interpolate(const multi_real_t &pos) const{
     real_t valueX1;
     real_t valueX2;
    
-    
+    absX = fmod(pos[0], _geom->Mesh()[0])-_offset[0];
+    absY = fmod(pos[1], _geom->Mesh()[1])-_offset[1];
     std::cout << "\tInterpolation position: " << pos[0] << "|" << pos[1] << std::endl;
-    coordinates[0] = (index_t) (pos[0]/(_geom->Mesh()[0])); //alte Version: (pos[0]-fmod(pos[0], _geom->Mesh()[0]))/_geom->Mesh()[0];
-    coordinates[1] = (index_t) (pos[1]/(_geom->Mesh()[1])); //(pos[1]-fmod(pos[1], _geom->Mesh()[1]))/_geom->Mesh()[1];
+    coordinates[0] = (index_t) (absX); //alte Version: (pos[0]-fmod(pos[0], _geom->Mesh()[0]))/_geom->Mesh()[0];
+    coordinates[1] = (index_t) (absY); //(pos[1]-fmod(pos[1], _geom->Mesh()[1]))/_geom->Mesh()[1];
     std::cout << "\t" << coordinates[0] << ", " << coordinates[1] << std::endl;
     Iterator it(_geom, IterFromPos(coordinates));
     
     std::cout << "\tIterator constructed value = " << it.Value() << std::endl;
     
-    absX = fmod(pos[0], _geom->Mesh()[0])-_offset[0];
-    absY = fmod(pos[1], _geom->Mesh()[1])-_offset[1];
+
     //std::cout <<"\t"<< absX << ", " <<absY << std::endl;
     
     relX = absX/_geom->Mesh()[0];
