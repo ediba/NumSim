@@ -29,7 +29,7 @@ void Iterator::First()
 {_value = 0;}
 
 void Iterator::Next(){
-if(_value == (_geom->Size()[0]+2)*(_geom->Size()[1]+2-1)){
+if(_value == (_geom->Size()[0]+2)*(_geom->Size()[1]+2)-1){
     _valid = false;}
 else{_value++;}    
 }
@@ -118,12 +118,22 @@ void InteriorIterator::First()
 void InteriorIterator::Next()
 {
     ///check if the position is already on the boundary of the x axis
-    if (Pos()[0] == _geom->Size()[0]+2-2)
-            _value += 3;
-
 
     ///check if the position is already on the boundary of the y axis
-    if (Pos()[1] == _geom->Size()[1]+2-1) _valid = false; // maybe do this earlier?
+        // falls an x boundary 
+            if (Pos()[0] == _geom->Size()[0]+2-2){
+            _value += 3;
+            }
+            // falls nicht einfach weiter
+            else {
+                _value +=1;
+                
+            }// maybe do this earlier?
+            
+            if (Pos()[1] == _geom->Size()[1]+2-1){
+            _valid = false;
+            }
+    
 }
 
 
@@ -143,7 +153,9 @@ void InteriorIterator::Next()
       /// Constructs a new BoundaryIterator
     BoundaryIterator::BoundaryIterator(const Geometry *geom):
     Iterator(geom){
-        _boundary = 0; _valid=false;
+        _value = 0;
+        _boundary = 0; 
+        _valid=true;
         
     }
 
@@ -159,14 +171,39 @@ void InteriorIterator::Next()
       /// Sets the iterator to the first element
      void BoundaryIterator::First()
     {
-        _value=0;
+        if (_boundary == 0 ||_boundary == 1 ||_boundary == 4){
+            _value=0;
+        }
+        else if(_boundary == 2){
+            _value = _geom->Size()[0]+2-1;
+        }
+        else if(_boundary == 3){
+            _value = (_geom->Size()[1]+2-1)*(_geom->Size()[0]+2);
+        }
 
      }
       /// Goes to the next element of the iterator, disables it if position is end
      void BoundaryIterator::Next()
     {
-        if ((Pos()[0] != _geom->Size()[0]+2-1) && ((Pos()[1] ==0)||(Pos()[1] ==_geom->Size()[1]+2-1))){ _boundary+=1;}
-        else if ((Pos()[0] != _geom->Size()[0]+2-1) && (Pos()[1] ==0)){ _boundary+=1;}
+        if (_boundary == 1|| _boundary == 3){
+            if(Pos()[0] == _geom->Size()[0]+2-1){
+                _valid = false;
+            }
+            else{
+            _value += 1;
+            }
+        }
+        else if  (_boundary == 2|| _boundary == 4){
+            if(Pos()[1] == _geom->Size()[1]+2-1){
+                _valid = false;
+            }
+            else{
+                _value += _geom->Size()[0]+2;
+            }
+        }
+        else{
+            std::cout << " Error Set the Boundary first !! "<< std::endl;
+        }
      }
 
 
