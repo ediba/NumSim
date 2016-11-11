@@ -2,6 +2,8 @@
 #include "iterator.hpp"
 #include "geometry.hpp"
 #include "grid.hpp"
+#include "typedef.hpp"
+#include <cmath>
 
 ///Implementing the solver class
 Solver::Solver(const Geometry *geom){
@@ -14,7 +16,7 @@ Solver::~Solver() {
 
 /// Returns the residual at [it] for the pressure-Poisson equation
 real_t Solver::localRes(const Iterator &it, const Grid *grid, const Grid *rhs) const {
-   return (rhs.Cell(it) - grid.dxx(it) - grid.dyy(it));
+   return std::abs(rhs->Cell(it) - grid->dxx(it) - grid->dyy(it));
 }
 
 
@@ -35,12 +37,17 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
     const real_t multiplier = _omega*0.5*h1*h1*h2*h2/(h1*h1+h2*h2);
     InteriorIterator iter(_geom);
     iter.First();
-     real_t residuum = 0.0;
-    for (iter; iter.Valid(); iter.Next()) {
-      real_t residual = localRes(iter, grid, rhs);
-      residuum =sum_of_squares + residual*residual;
-      grid->Cell(it) = grid->Cell(it) - multiplier * residual;
+    real_t totalRes(0.0);
+    while (iter.Valid()){
+        real_t residual = localRes(iter, grid, rhs);
+        totalRes += residual*residual;
+        grid->Cell(it) -= _omega*multiplier * residual;
+        iter.Next();
     }
-    return residuum;
+
+    // update the pressure boundary values
+    _geom->Update_P(grid);
+    //for averaging
+    return sqrt(totalRes)/(h1*h2);
 }
 
