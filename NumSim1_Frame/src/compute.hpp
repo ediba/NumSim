@@ -30,10 +30,7 @@ public:
   /// Execute one time step of the fluid simulation (with or without debug info)
   // @ param printInfo print information about current solver state (residual
   // etc.)
-  void TimeStep(bool printInfo){
-
-
-  }
+  void TimeStep(bool printInfo);
 
   /// Returns the simulated time in total
   const real_t &GetTime() const;
