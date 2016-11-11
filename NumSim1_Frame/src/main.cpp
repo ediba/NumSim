@@ -69,15 +69,15 @@ int main(int argc, char **argv) {
     */
     
     //test iterator
-    Grid testgrid2 = Grid(&geom);
+    Grid testgrid2 = Grid(&geom,{0.5,0.5});
     testgrid2.Initialize(1);
     Iterator test2iterator(&geom,0);
     testgrid2.Cell(test2iterator) = 0;
     Renderer renderer2 = Renderer(length, mesh);
-    renderer2.Init(200,200,100);
+    renderer2.Init(400,400,0);
     renderer2.Render(&testgrid2);
     renderer2.ShowGrid(true);
-    for(int i=0; i<20; i++){
+    for(int i=0; i<30; i++){
         std::cout << "Iterator value: " << test2iterator.Value() << std::endl;
         /*std::cout << "Unterste Zeile: ";
         for(int j=0; j<5; j++){

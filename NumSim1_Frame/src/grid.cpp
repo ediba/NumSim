@@ -63,15 +63,15 @@ real_t Grid::Interpolate(const multi_real_t &pos) const{
    
     
     //std::cout << "\tInterpolation position: " << pos[0] << "|" << pos[1] << std::endl;
-    coordinates[0] = (index_t) (pos[0]/(_geom->Mesh()[0])); //alte Version: (pos[0]-fmod(pos[0], _geom->Mesh()[0]))/_geom->Mesh()[0];
-    coordinates[1] = (index_t) (pos[1]/(_geom->Mesh()[1])); //(pos[1]-fmod(pos[1], _geom->Mesh()[1]))/_geom->Mesh()[1];
+    coordinates[0] = (index_t) (((pos[0]-_offset[0])/(_geom->Mesh()[0]))+1); //alte Version: (pos[0]-fmod(pos[0], _geom->Mesh()[0]))/_geom->Mesh()[0];
+    coordinates[1] = (index_t) (((pos[1]-_offset[1])/(_geom->Mesh()[1]))+1); //(pos[1]-fmod(pos[1], _geom->Mesh()[1]))/_geom->Mesh()[1];
     //std::cout << "\t" << coordinates[0] << ", " << coordinates[1] << std::endl;
     Iterator it(_geom, IterFromPos(coordinates));
     
     //std::cout << "\tIterator constructed value = " << it.Value() << std::endl;
     
-    absX = fmod(pos[0], _geom->Mesh()[0])-_offset[0];
-    absY = fmod(pos[1], _geom->Mesh()[1])-_offset[1];
+    absX = fmod(pos[0]-_offset[0]+_geom->Mesh()[0], _geom->Mesh()[0]);
+    absY = fmod(pos[1]-_offset[1]+_geom->Mesh()[1], _geom->Mesh()[1]);
     //std::cout <<"\t"<< absX << ", " <<absY << std::endl;
     
     relX = absX/_geom->Mesh()[0];
