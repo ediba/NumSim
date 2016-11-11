@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
     
     */
     
-    //test iterator
+    /*//test iterator
     Grid testgrid2 = Grid(&geom,{0.5,0.5});
     testgrid2.Initialize(1);
     Iterator test2iterator(&geom,0);
@@ -79,18 +79,14 @@ int main(int argc, char **argv) {
     renderer2.ShowGrid(true);
     for(int i=0; i<30; i++){
         std::cout << "Iterator value: " << test2iterator.Value() << std::endl;
-        /*std::cout << "Unterste Zeile: ";
-        for(int j=0; j<5; j++){
-            std::cout << testgrid2.Interpolate({0.5+j,0.5}) << "  ";
-        }
-        std::cout << std::endl;*/
         std::cin.get();
         testgrid2.Cell(test2iterator) = 1;
         test2iterator.Next();
         testgrid2.Cell(test2iterator) = 0;
         renderer2.Render(&testgrid2);
     }
-    
+    */
+        
     // Run a few steps
 //     for (uint32_t i = 0; i < 9; ++i)
 //       comp.TimeStep(false);

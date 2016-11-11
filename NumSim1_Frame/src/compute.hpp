@@ -23,15 +23,9 @@
 class Compute {
 public:
   /// Creates a compute instance with given geometry and parameter
-  Compute(const Geometry *geom, const Parameter *param){
-
-
-  }
+  Compute(const Geometry *geom, const Parameter *param);
   /// Deletes all grids
-  ~Compute(){
-
-
-  }
+  ~Compute();
 
   /// Execute one time step of the fluid simulation (with or without debug info)
   // @ param printInfo print information about current solver state (residual
