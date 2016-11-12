@@ -69,6 +69,7 @@ int main(int argc, char **argv) {
 //     
 // 
 //     
+    /*
     //test iterator
     Grid testgrid2 = Grid(&geom,{0.5,0.5});
     testgrid2.Initialize(1);
@@ -87,11 +88,6 @@ int main(int argc, char **argv) {
     while (test2iterator.Valid()){
         std::cout << "Iterator value: " << test2iterator.Value() << std::endl;
         std::cout << "\t left = " <<  testgrid2.Cell(test2iterator.Left()) << " mid = "<<  testgrid2.Cell(test2iterator) << " right = " <<  testgrid2.Cell(test2iterator.Right()) << std::endl;
-        /*std::cout << "Unterste Zeile: ";
-        for(int j=0; j<5; j++){
-            std::cout << testgrid2.Interpolate({0.5+j,0.5}) << "  ";
-        }
-        std::cout << std::endl;*/
         std::cin.get();
         testgrid2.Cell(test2iterator) = 1;
         test2iterator.Next();
@@ -101,7 +97,7 @@ int main(int argc, char **argv) {
 
         renderer2.Render(&testgrid2);
         
-    }
+    }*/
 //     for(int i=0; i<50; i++){
 //         std::cout << "Iterator value: " << test2iterator.Value() << std::endl;
 //         /*std::cout << "Unterste Zeile: ";
@@ -115,6 +111,30 @@ int main(int argc, char **argv) {
 //         testgrid2.Cell(test2iterator) = 0;
 //         renderer2.Render(&testgrid2);
 //     }
+
+    /*//test Update_U
+    Grid testgrid3 = Grid(&geom,{1,0.5});
+    testgrid3.Initialize(2);
+    Renderer renderer3 = Renderer(length, mesh);
+    renderer3.Init(500,500,0);
+    renderer3.Render(&testgrid3);
+    renderer3.ShowGrid(true);
+    geom.Update_U(&testgrid3);
+    std::cin.get();
+    renderer3.Render(&testgrid3);
+    std::cin.get();*/
+    
+    //test Update_V
+    Grid testgrid4 = Grid(&geom,{0.5,1});
+    testgrid4.Initialize(2);
+    Renderer renderer4 = Renderer(length, mesh);
+    renderer4.Init(500,500,0);
+    renderer4.Render(&testgrid4);
+    renderer4.ShowGrid(true);
+    geom.Update_V(&testgrid4);
+    std::cin.get();
+    renderer4.Render(&testgrid4);
+    std::cin.get();
     
     // Run a few steps
 //     for (uint32_t i = 0; i < 9; ++i)

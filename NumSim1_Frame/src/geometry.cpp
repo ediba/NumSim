@@ -133,4 +133,87 @@ _mesh[1] = _length[1]/_size[1];
 //   void Geometry::Update_V(Grid *v) const;
 //   /// Updates the pressure field p
 //   void Geometry::Update_P(Grid *p) const;
-
+  /// Updates the velocity field u
+    void Geometry::Update_U(Grid *u) const{
+        for(int bound_num = 1; bound_num <= 4; bound_num++){
+            BoundaryIterator it = BoundaryIterator(this);
+            it.SetBoundary(bound_num);
+            it.First();
+            while(it.Valid()){
+                switch(bound_num){
+                    case 1:
+                        u->Cell(it) = (-1)*u->Cell(it.Top());
+                        break;
+                    case 2:
+                        u->Cell(it.Left()) = 0;
+                        //TODO:Was ist mit den Zellen rechts daneben? Wichtig?
+                        break;
+                    case 3:
+                        u->Cell(it) = 2 - u->Cell(it.Down());
+                        break;
+                    case 4:
+                        u->Cell(it) = 0;
+                        break;
+                    default: std::cout << "Error" << std::endl;
+                }
+                it.Next();
+            }
+        }
+        //TODO:Ecken machen irgendwie noch nicht wirklich Sinn, sind im Moment auf irgendwelchen Werten
+    }
+   /// Updates the velocity field v
+   void Geometry::Update_V(Grid *v) const{
+       for(int bound_num = 1; bound_num <= 4; bound_num++){
+            BoundaryIterator it = BoundaryIterator(this);
+            it.SetBoundary(bound_num);
+            it.First();
+            while(it.Valid()){
+                switch(bound_num){
+                    case 1:
+                        v->Cell(it) = 0;
+                        break;
+                    case 2:
+                        v->Cell(it) = (-1)*v->Cell(it.Left());
+                        break;
+                    case 3:
+                        v->Cell(it.Down()) = 0;
+                        //TODO: Was ist mit den Zellen darüber? Wichtig?
+                        break;
+                    case 4:
+                        v->Cell(it) = (-1)*v->Cell(it.Right());
+                        break;
+                    default: std::cout << "Error" << std::endl;
+                }
+                it.Next();
+            }
+        }
+        //TODO:Ecken machen irgendwie noch nicht wirklich Sinn, sind im Moment auf irgendwelchen Werten
+   }
+   /// Updates the pressure field p
+   void Geometry::Update_P(Grid *p) const{
+       //TODO:Im Moment zero Gradient. Noch nicht kontrolliert ob das richtig ist
+       for(int bound_num = 1; bound_num <= 4; bound_num++){
+            BoundaryIterator it = BoundaryIterator(this);
+            it.SetBoundary(bound_num);
+            it.First();
+            while(it.Valid()){
+                switch(bound_num){
+                    case 1:
+                        p->Cell(it) = p->Cell(it.Top());
+                        break;
+                    case 2:
+                        p->Cell(it) = p->Cell(it.Left());
+                        break;
+                    case 3:
+                        p->Cell(it) = p->Cell(it.Down());
+                        break;
+                    case 4:
+                        p->Cell(it) = p->Cell(it.Right());
+                        break;
+                    default: std::cout << "Error" << std::endl;
+                }
+                it.Next();
+            }
+        }
+        //TODO:Ecken machen irgendwie noch nicht wirklich Sinn, sind im Moment auf irgendwelchen Werten
+   }

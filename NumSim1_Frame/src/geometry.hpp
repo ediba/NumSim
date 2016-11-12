@@ -16,6 +16,8 @@
  */
 
 #include "typedef.hpp"
+#include "iterator.hpp"
+#include "grid.hpp"
 
 #include <vector>
 #include <sstream>
