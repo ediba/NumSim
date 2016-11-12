@@ -104,6 +104,7 @@ Iterator(geom){
     //Iterator(geom); //funktioniert bei mir nicht
     //_geom = geom; _value = geom->Mesh()[0]+1;;
     _valid=true;
+    First();
     
 }
 
@@ -117,6 +118,7 @@ void InteriorIterator::First()
 //not yet finished
 void InteriorIterator::Next()
 {
+    //std::cout << "ITerator Nr : " << this << std::endl;
     ///check if the position is already on the boundary of the x axis
 
     ///check if the position is already on the boundary of the y axis
@@ -171,22 +173,43 @@ void InteriorIterator::Next()
       /// Sets the iterator to the first element
      void BoundaryIterator::First()
     {
-        if (_boundary == 0 ||_boundary == 1 ||_boundary == 4){
-            _value=0;
+        _valid = true;
+        if (_boundary == 0 ){
+            _value = 0;
         }
+        if ( _boundary == 1){
+            _value = 1;
+        }
+        
         else if(_boundary == 2){
-            _value = _geom->Size()[0]+2-1;
+            _value = 2*(_geom->Size()[0]+2)-1;
         }
         else if(_boundary == 3){
-            _value = (_geom->Size()[1]+2-1)*(_geom->Size()[0]+2);
+            _value = (_geom->Size()[1]+2-1)*(_geom->Size()[0]+2)+1;
+        }
+        if (_boundary == 4){
+            _value = _geom->Size()[0]+2;
         }
 
      }
       /// Goes to the next element of the iterator, disables it if position is end
      void BoundaryIterator::Next()
     {
-        if (_boundary == 1|| _boundary == 3){
-            if(Pos()[0] == _geom->Size()[0]+2-1){
+        //Hier ist die Reihenfolge so: 1: links unten, 2 :rechts unten, 3: links oben, 4: rechts oben 
+        if (_boundary == 0){
+            if(_value == (_geom->Size()[0]+2)*(_geom->Size()[1]+2)-1){
+                _valid = false;
+            }
+            else if(Pos()[0] == 0){
+                _value += _geom->Size()[0]+2-1;
+            }
+            else if(Pos()[0] == _geom->Size()[0]+2-1){
+                _value += (_geom->Size()[1]+2-2)*(_geom->Size()[0]+2)+1;
+            }
+                
+        }
+        else if (_boundary == 1|| _boundary == 3){
+            if(Pos()[0] == _geom->Size()[0]+2-2){
                 _valid = false;
             }
             else{
@@ -194,7 +217,7 @@ void InteriorIterator::Next()
             }
         }
         else if  (_boundary == 2|| _boundary == 4){
-            if(Pos()[1] == _geom->Size()[1]+2-1){
+            if(Pos()[1] == _geom->Size()[1]+2-2){
                 _valid = false;
             }
             else{

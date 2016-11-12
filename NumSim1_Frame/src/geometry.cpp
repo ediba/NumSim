@@ -119,22 +119,8 @@ _mesh[1] = _length[1]/_size[1];
   }
 
   /// Updates the velocity field u
-//   void Geometry::Update_U(Grid *u) const{
-//       Iterator iter;
-//       iter.First();
-//       while (iter.Valid())
-//       {
-//           //if(iter()!=inter.First()) {u[before]=0;}
-//           u[*iter()]= 0;
-//           u[*iter.Next()] = 1;
-//       }
-//   }
-//   /// Updates the velocity field v
-//   void Geometry::Update_V(Grid *v) const;
-//   /// Updates the pressure field p
-//   void Geometry::Update_P(Grid *p) const;
-  /// Updates the velocity field u
     void Geometry::Update_U(Grid *u) const{
+        std::cout << " Velocity = " << _velocity[0] << " " << _velocity[1]<< std::endl;
         for(int bound_num = 1; bound_num <= 4; bound_num++){
             BoundaryIterator it = BoundaryIterator(this);
             it.SetBoundary(bound_num);
@@ -143,22 +129,58 @@ _mesh[1] = _length[1]/_size[1];
                 switch(bound_num){
                     case 1:
                         u->Cell(it) = (-1)*u->Cell(it.Top());
+                        //std::cout << "case " << bound_num <<" Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
                         break;
                     case 2:
+                        u->Cell(it) = 0;
                         u->Cell(it.Left()) = 0;
+                        //std::cout << "case " << bound_num <<" Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
                         //TODO:Was ist mit den Zellen rechts daneben? Wichtig?
                         break;
                     case 3:
-                        u->Cell(it) = 2 - u->Cell(it.Down());
+                        u->Cell(it) = 2*_velocity[0] - u->Cell(it.Down());
+                        //std::cout << "2* " << _velocity[0] << " - " <<  u->Cell(it.Down())<< " it.Down() = "<< it.Down()<< std::endl;
+                        //std::cout << "case " << bound_num <<" Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
                         break;
                     case 4:
                         u->Cell(it) = 0;
+                        //std::cout << "case " << bound_num <<" Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
                         break;
                     default: std::cout << "Error" << std::endl;
                 }
                 it.Next();
             }
         }
+        //Setzt die vier eckpunkte bzw am linken Rand auch die links davon sinnvoll 
+        //Hier ist die Reihenfolge so: 1: links unten, 2 :rechts unten, 3: links oben, 4: rechts oben 
+        BoundaryIterator it = BoundaryIterator(this);
+        it.SetBoundary(0);
+        for (index_t i = 1; i<=4; i++){
+            switch(i){
+                case 1:
+                    u->Cell(it) = 0;
+                   //std::cout << "case 0 Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
+                    break;
+                case 2:
+                    u->Cell(it.Left())= (-1)*u->Cell((it.Left()).Top());
+                    u->Cell(it) = 0;
+                    //std::cout << "case  0  Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
+                    break;
+                case 3:
+                    //hier ists egal
+                    u->Cell(it) = 0;
+                    //u->Cell(it.Left()) = 0;
+                    //std::cout << "case  0  Cell Nr: "<<it.Left()<< " set to: " << u->Cell(it)<<std::endl;
+                        break;
+                case 4:
+                    u->Cell(it.Left()) = 0;
+                    //std::cout << "case  0  Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
+                    break;
+                default: std::cout << " Error bei outer 4 cells" << std::endl;
+            }
+            it.Next();
+        }
+        
         //TODO:Ecken machen irgendwie noch nicht wirklich Sinn, sind im Moment auf irgendwelchen Werten
     }
    /// Updates the velocity field v
@@ -176,8 +198,12 @@ _mesh[1] = _length[1]/_size[1];
                         v->Cell(it) = (-1)*v->Cell(it.Left());
                         break;
                     case 3:
-                        v->Cell(it.Down()) = 0;
+                        //v->Cell(it.Down()) = 0;
                         //TODO: Was ist mit den Zellen darüber? Wichtig?
+                        //Und die Zellen drüber würd ich auch auf den gleichen Wert setzten
+                        // Ich denke hier ist der zweite Wert von _velocity 
+                        v->Cell(it) = _velocity[1];
+                        v->Cell(it.Down()) = _velocity[1];
                         break;
                     case 4:
                         v->Cell(it) = (-1)*v->Cell(it.Right());
@@ -187,8 +213,24 @@ _mesh[1] = _length[1]/_size[1];
                 it.Next();
             }
         }
+
+        //Setzt die vier eckpunkte bzw am linken Rand auch die links davon sinnvoll 
+        //Hier ist die Reihenfolge so: 1: links unten, 2 :rechts unten, 3: links oben, 4: rechts oben 
+        BoundaryIterator it = BoundaryIterator(this);
+        it.SetBoundary(0);
+        for (index_t i=1; i<=4; i++){
+            v->Cell(it)=0;
+            //Die Ecke rechts oben wird vorher falsch gesetzt
+            //deshalb hier die Korrektur
+            if(i==4){
+                v->Cell(it.Down()) = _velocity[1];
+            }
+            it.Next();
+            std::cout<< " Cell number " << it << " set to 0" <<std::endl;
+        }
+    }
         //TODO:Ecken machen irgendwie noch nicht wirklich Sinn, sind im Moment auf irgendwelchen Werten
-   }
+   
    /// Updates the pressure field p
    void Geometry::Update_P(Grid *p) const{
        //TODO:Im Moment zero Gradient. Noch nicht kontrolliert ob das richtig ist
@@ -215,5 +257,25 @@ _mesh[1] = _length[1]/_size[1];
                 it.Next();
             }
         }
-        //TODO:Ecken machen irgendwie noch nicht wirklich Sinn, sind im Moment auf irgendwelchen Werten
+        //Setz die vier Eckpunkte gleich einer Nachbarzelle
+        //Hier ist die Reihenfolge so: 1: links unten, 2 :rechts unten, 3: links oben, 4: rechts oben 
+        BoundaryIterator it = BoundaryIterator(this);
+        it.SetBoundary(0);
+        for (index_t i = 1; i<=4; i++){
+            switch(i){
+                case 1:
+                    p->Cell(it) = p->Cell(it.Right());
+                    break;
+                case 2:
+                    p->Cell(it) = p->Cell(it.Left());
+                    break;
+                case 3:
+                    p->Cell(it) = p->Cell(it.Down());
+                        break;
+                case 4:
+                    p->Cell(it) = p->Cell(it.Down());
+                    break;
+            }
+            it.Next();
+        }
    }

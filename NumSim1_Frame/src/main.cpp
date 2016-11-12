@@ -22,7 +22,7 @@
 #include "grid.hpp"
 #include "visu.hpp"
 #include "visu.cpp"
-//#include "vtk.hpp"
+#include "vtk.hpp"
 #include "iterator.hpp"
 
 int main(int argc, char **argv) {
@@ -69,35 +69,35 @@ int main(int argc, char **argv) {
 //     
 // 
 //     
-    /*
+    
     //test iterator
-    Grid testgrid2 = Grid(&geom,{0.5,0.5});
-    testgrid2.Initialize(1);
-    //Iterator test2iterator(&geom,0);
-    //InteriorIterator test2iterator(&geom);
-    BoundaryIterator test2iterator(&geom);
-    test2iterator.SetBoundary(3);
-    test2iterator.First();
-    testgrid2.Cell(test2iterator) = 0;
-    //testgrid2.Cell(test2iterator) = 1;
-    Renderer renderer2 = Renderer(length, mesh);
-    renderer2.Init(500,500,0);
-    renderer2.Render(&testgrid2);
-    renderer2.ShowGrid(true);
-    real_t t;
-    while (test2iterator.Valid()){
-        std::cout << "Iterator value: " << test2iterator.Value() << std::endl;
-        std::cout << "\t left = " <<  testgrid2.Cell(test2iterator.Left()) << " mid = "<<  testgrid2.Cell(test2iterator) << " right = " <<  testgrid2.Cell(test2iterator.Right()) << std::endl;
-        std::cin.get();
-        testgrid2.Cell(test2iterator) = 1;
-        test2iterator.Next();
-        testgrid2.Cell(test2iterator) = 0;
-        //t = testgrid2.Interpolate({0.0,0.5});
-        //std::cout << " interpoliert an der stelle 0.0 0.5 = " << t << std::cout; 
-
-        renderer2.Render(&testgrid2);
-        
-    }*/
+//     Grid testgrid2 = Grid(&geom,{0.5,0.5});
+//     testgrid2.Initialize(1);
+//     //Iterator test2iterator(&geom,0);
+//     InteriorIterator test2iterator(&geom);
+//     //BoundaryIterator test2iterator(&geom);
+//     //test2iterator.SetBoundary(0);
+//     //test2iterator.First();
+//     testgrid2.Cell(test2iterator) = 0;
+//     //testgrid2.Cell(test2iterator) = 1;
+//     Renderer renderer2 = Renderer(length, mesh);
+//     renderer2.Init(500,500,0);
+//     renderer2.Render(&testgrid2);
+//     renderer2.ShowGrid(true);
+//     real_t t;
+//     while (test2iterator.Valid()){
+//         std::cout << "Iterator value: " << test2iterator.Value() << std::endl;
+//         std::cout << "\t left = " <<  testgrid2.Cell(test2iterator.Left()) << " mid = "<<  testgrid2.Cell(test2iterator) << " right = " <<  testgrid2.Cell(test2iterator.Right()) << std::endl;
+//         std::cin.get();
+//         testgrid2.Cell(test2iterator) = 1;
+//         test2iterator.Next();
+//         testgrid2.Cell(test2iterator) = 0;
+//         //t = testgrid2.Interpolate({0.0,0.5});
+//         //std::cout << " interpoliert an der stelle 0.0 0.5 = " << t << std::cout; 
+// 
+//         renderer2.Render(&testgrid2);
+//         
+//     }
 //     for(int i=0; i<50; i++){
 //         std::cout << "Iterator value: " << test2iterator.Value() << std::endl;
 //         /*std::cout << "Unterste Zeile: ";
@@ -124,17 +124,50 @@ int main(int argc, char **argv) {
     renderer3.Render(&testgrid3);
     std::cin.get();*/
     
-    //test Update_V
-    Grid testgrid4 = Grid(&geom,{0.5,1});
+    //test Update_V oder U oder P
+    Grid testgrid4 = Grid(&geom,{0.5*geom.Mesh()[0],1*geom.Mesh()[1]});
     testgrid4.Initialize(2);
+    
+    // Teil für P
+//     InteriorIterator itIn(&geom);
+//     itIn.First();
+//     while (itIn.Valid()){
+//         testgrid4.Cell(itIn) = 1;
+//         itIn.Next();
+//     }
+//     std::cout << "itIn done" << std::endl;
+//     BoundaryIterator itBoun(&geom);
+//     for (index_t i = 0; i<=4; i++){
+//     itBoun.SetBoundary(i);
+//     std::cout << " Setr boundary done " << std::endl;
+//     while(itBoun.Valid()){
+//         testgrid4.Cell(itBoun) = 0;
+//         itBoun.Next();
+//       //  std::cout << " iteration " << i << " done " << std::endl;
+//     }
+//     //std::cout << "itBoun " << i << " done" << std::endl;
+//     }
+//    std::cout << "itBoun complete done" << std::endl;
+    
+    //ende für P
+    
     Renderer renderer4 = Renderer(length, mesh);
     renderer4.Init(500,500,0);
     renderer4.Render(&testgrid4);
     renderer4.ShowGrid(true);
-    geom.Update_V(&testgrid4);
-    std::cin.get();
+    
     renderer4.Render(&testgrid4);
     std::cin.get();
+    geom.Update_V(&testgrid4);
+    renderer4.Render(&testgrid4);
+    renderer4.Render(&testgrid4);
+    std::cin.get();
+    
+//     Iterator it(&geom);
+//     while (it.Valid()){
+//         std::cout << " Zelle "<<it<< " = " << testgrid4.Cell(it) << std::endl;
+//         it.Next();
+//     }
     
     // Run a few steps
 //     for (uint32_t i = 0; i < 9; ++i)
