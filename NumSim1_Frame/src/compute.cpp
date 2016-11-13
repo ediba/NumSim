@@ -139,3 +139,29 @@ const Grid* Compute::GetP() const
 
 const Grid* Compute::GetRHS() const
 {return _rhs;}
+
+const Grid *Compute::GetVelocity(){
+
+  for(Iterator it(_geom); it.Valid(); it.Next()) {
+    //Mittelung auf den Mittelpunkt der Zelle
+    real_t uMean = (_u->Cell(it.Left()) + _u->Cell(it))/2;
+    real_t vMean = (_v->Cell(it) + _v->Cell(it.Down()))/2;
+    _tmp->Cell(it) = sqrt(uMean*uMean + vMean*vMean);
+  }
+  
+  return _tmp;
+}
+
+
+  /// Computes and returns the vorticity
+const Grid *Compute::GetVorticity(){
+    // vorticity gleich Rotation : du/y + dv/dx
+    // PRoblem hier: Vorticity wird oben rechts am Rand berechnet
+    real_t vort;
+    for(Iterator it(_geom); it.Valid(); it.Next()) {
+        _tmp->Cell(it) = _u->dy_r(it) +_v->dx_r(it);
+    }
+    return _tmp;
+}
+//   /// Computes and returns the stream line values
+// const Grid *Compute::GetStream();
