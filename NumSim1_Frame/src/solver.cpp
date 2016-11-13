@@ -15,7 +15,7 @@ Solver::~Solver() {
 
 /// Returns the residual at [it] for the pressure-Poisson equation
 real_t Solver::localRes(const Iterator &it, const Grid *grid, const Grid *rhs) const {
-   return (-rhs->Cell(it) + grid->dxx(it) + grid->dyy(it));
+   return (rhs->Cell(it) - grid->dxx(it) - grid->dyy(it));
 }
 
 
@@ -30,7 +30,7 @@ SOR::~SOR(){
 
 
 real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
-    std::cout << " Cycle start "<< std::endl;
+    //std::cout << " Cycle start "<< std::endl;
     const real_t h1 = _geom->Mesh()[0];
     const real_t h2 = _geom->Mesh()[1];
     ///the multiplier is not changing for any point in grid, that is why it is before the loop
@@ -42,12 +42,12 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
         //std::cout << " Cycle Loop iter: "<< iter << std::endl;
         real_t residual = localRes(iter, grid, rhs);
         totalRes += residual*residual;
-        grid->Cell(iter) += _omega*multiplier * residual;
+        grid->Cell(iter) -= multiplier * residual;
         iter.Next();
     }
 
     // update the pressure boundary values
-    _geom->Update_P(grid);
+    //_geom->Update_P(grid);
     //for averaging
     return sqrt(totalRes)/(h1*h2);
 }

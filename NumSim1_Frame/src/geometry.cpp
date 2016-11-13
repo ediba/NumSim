@@ -7,6 +7,7 @@ Geometry::Geometry(){
     _h = 0;
     _velocity = {0, 0};
     _pressure = 0;
+    Load("default.geom");
     std::cout << " Geometry constructor done " << std::endl;
     
 }
@@ -120,7 +121,7 @@ _mesh[1] = _length[1]/_size[1];
 
   /// Updates the velocity field u
     void Geometry::Update_U(Grid *u) const{
-        std::cout << " Velocity = " << _velocity[0] << " " << _velocity[1]<< std::endl;
+        //std::cout << " Velocity = " << _velocity[0] << " " << _velocity[1]<< std::endl;
         for(int bound_num = 1; bound_num <= 4; bound_num++){
             BoundaryIterator it = BoundaryIterator(this);
             it.SetBoundary(bound_num);
@@ -226,7 +227,7 @@ _mesh[1] = _length[1]/_size[1];
                 v->Cell(it.Down()) = _velocity[1];
             }
             it.Next();
-            std::cout<< " Cell number " << it << " set to 0" <<std::endl;
+            //std::cout<< " Cell number " << it << " set to 0" <<std::endl;
         }
     }
         //TODO:Ecken machen irgendwie noch nicht wirklich Sinn, sind im Moment auf irgendwelchen Werten

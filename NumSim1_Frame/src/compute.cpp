@@ -23,7 +23,6 @@ Compute::Compute(const Geometry *geom, const Parameter *param):
     _rhs = new Grid(geom);
     _tmp = new Grid(geom);
     _t = 0.;
-    real_t dt = 0.1;
     //_dtlimit
     _epslimit = _param->Eps();
     //real_t omega =  _param->Omega();
@@ -48,15 +47,33 @@ void Compute::TimeStep(bool printInfo){
     //Der Algorithmus wie er auf S. 22 im Skript steht:
     //1) compute dt (genaue Berechnung S.22)//TODO:hab nicht gecheckt wie wir den Zeitschritt berechnen sollen
     if(printInfo) std::cout << "Set timestep" << std::endl;
-    real_t dt = 0.1; //vorläufig
+    
+    //Gets dt from input file
+    real_t dt = _param->Dt();
+    
+    const multi_real_t &h = _geom->Mesh();
+    // Check diffusiove operator limitation (S.25)
+    _dtlimit = _param->Tau() * (_param->Re()/2) * (h[0]*h[0]*h[1]*h[1])/(h[0]*h[0]+h[1]*h[1]);
+    if(_dtlimit < dt) {
+    dt = _dtlimit;
+    std::cerr << "Time Step Diffusive Limitation dt = " << dt << std::endl;
+  }
+  // Convection Operator (S25)
+    _dtlimit = _param->Tau() * std::min(h[0] / _u->AbsMax(), h[1] / _v->AbsMax());
+    if(_dtlimit < dt) {
+    dt = _dtlimit;
+    std::cerr << "Time Step Linitation Convection Operator dt = " << dt << " umax Abs = " << _u->AbsMax()<< std::endl;
+  }
+
+  
+    
     //2) boundary_val
     if(printInfo) std::cout << "Setting boundary values" << std::endl;
     _geom->Update_U(_u);
-    std::cout << " U is updated "<< std::endl;
+    _geom->Update_U(_F);
     _geom->Update_V(_v);
-    std::cout << " V is updated "<< std::endl;
-    _geom->Update_P(_p);
-    std::cout << " P is updated "<< std::endl;
+    _geom->Update_V(_G);
+    //_geom->Update_P(_p);
     //3) compute _F and _G (vorläufige Geschwindigkeiten) //TODO:externe Kraft fehlt noch
     if(printInfo) std::cout << "Compute F and G" << std::endl;
     MomentumEqu(dt);
@@ -65,20 +82,22 @@ void Compute::TimeStep(bool printInfo){
     RHS(dt);
     //5) solve Poisson equation with SOR solver
     if(printInfo) std::cout << "Starting SOR solver" << std::endl;
-    real_t res = _solver->Cycle(_p, _rhs);
+    real_t res;
     for (index_t i = 1; i<=_param->IterMax(); i++){
+        _geom->Update_P(_p);
         res = _solver->Cycle(_p, _rhs);
-        std::cout << " Interation : " << i << " residual = " << res << std::endl;
-        if (res < _epslimit){break;}
+         if(printInfo) std::cout <<" Time " << _t << " Interation : " << i << " residual = " << res << std::endl;
+        if (res < _epslimit)
+        {
+            //std::cout<< "iteration needed: "<< i << std::endl;
+            break;
+        }
     }
+    
     //6) compute _u und _v
     if(printInfo) std::cout << "Compute u and v" << std::endl;
     NewVelocities(dt);
     //7) output  _u _v und _p
-//     if(printInfo) std::cout << "Output u, v and p" << std::endl;
-//     VTK outputfile =  VTK(_geom->Mesh(), _geom->Size());
-//     outputfile.AddScalar("pressure", _p);
-//     outputfile.AddField ("velocities", _u, _v);
     _t+=dt;
 }
 
@@ -95,9 +114,9 @@ void Compute::MomentumEqu(const real_t &dt){
     //externe Kraft fehlt noch
     for(InteriorIterator it = InteriorIterator(_geom); it.Valid(); it.Next()){
         _F->Cell(it) = _u->Cell(it) + dt*(1/(_param->Re())*(_u->dxx(it) + _u->dyy(it)) - 2*_u->DC_udu_x(it,_param->Alpha())-_u->DC_vdu_y(it,_param->Alpha(),_v)-_v->DC_vdu_y(it,_param->Alpha(),_u));
-        std::cout << " F (" << it <<" ) = " << _F->Cell(it)<< std::endl;
+        //std::cout << " F (" << it <<" ) = " << _F->Cell(it)<< std::endl;
         _G->Cell(it) = _v->Cell(it) + dt*(1/(_param->Re())*(_v->dxx(it) + _v->dyy(it)) - 2*_v->DC_vdv_y(it,_param->Alpha())-_u->DC_udv_x(it,_param->Alpha(),_v)-_u->DC_udv_x(it,_param->Alpha(),_v));
-        std::cout << " F (" << it <<" ) = " << _F->Cell(it)<< std::endl;
+        //std::cout << " F (" << it <<" ) = " << _F->Cell(it)<< std::endl;
     }
 }
 /// Compute the RHS of the poisson equation
