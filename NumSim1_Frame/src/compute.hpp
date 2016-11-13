@@ -16,6 +16,15 @@
  */
 
 #include "typedef.hpp"
+#include "geometry.hpp"
+#include "solver.hpp"
+#include "iterator.hpp"
+#include "grid.hpp"
+#include "parameter.hpp"
+#include "vtk.hpp"
+
+#include <math.h>
+#include <stdio.h>
 //------------------------------------------------------------------------------
 #ifndef __COMPUTE_HPP
 #define __COMPUTE_HPP
@@ -45,9 +54,7 @@ public:
   const Grid *GetRHS() const;
 
   /// Computes and returns the absolute velocity
-  const Grid *GetVelocity(){
-
-  }
+  const Grid *GetVelocity();
 
   /// Computes and returns the vorticity
   const Grid *GetVorticity();

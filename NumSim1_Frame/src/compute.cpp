@@ -1,17 +1,20 @@
 #include "compute.hpp"
-#include "geometry.hpp"
-#include "solver.hpp"
-#include "iterator.hpp"
-#include "grid.hpp"
-#include "parameter.hpp"
-#include "vtk.hpp"
+// #include "geometry.hpp"
+// #include "solver.hpp"
+// #include "iterator.hpp"
+// #include "grid.hpp"
+// #include "parameter.hpp"
+// #include "vtk.hpp"
+// 
+// #include <math.h>
+// #include <stdio.h>
 
-#include <math.h>
-#include <stdio.h>
-
-Compute::Compute(const Geometry *geom, const Parameter *param){
-    _geom = geom;
-    _param = param;
+Compute::Compute(const Geometry *geom, const Parameter *param):
+    _geom (geom),
+    _param (param)
+{
+//     _geom = geom;
+//     _param = param;
     _p = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]*0.5});
     _u = new Grid(geom,{_geom->Mesh()[0],_geom->Mesh()[1]*0.5});
     _v = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]});
@@ -23,7 +26,8 @@ Compute::Compute(const Geometry *geom, const Parameter *param){
     real_t dt = 0.1;
     //_dtlimit
     _epslimit = _param->Eps();
-    //_solver = new SOR(geom,_param->Omega()); //TODO:somehow doesnt work
+    //real_t omega =  _param->Omega();
+    _solver =  new SOR(_geom, _param->Omega()); //TODO:somehow doesnt work
     
 }
 
@@ -35,7 +39,7 @@ Compute::~Compute(){
     delete _G;
     delete _rhs;
     delete _tmp;
-    //delete _solver; //TODO:uncomment after issue above is solved
+    delete _solver; //TODO:uncomment after issue above is solved
 }
  /// Execute one time step of the fluid simulation (with or without debug info)
   // @ param printInfo print information about current solver state (residual
@@ -48,17 +52,17 @@ void Compute::TimeStep(bool printInfo){
     //2) boundary_val
     if(printInfo) std::cout << "Setting boundary values" << std::endl;
     _geom->Update_U(_u);
+    std::cout << " U is updated "<< std::endl;
     _geom->Update_V(_v);
+    std::cout << " V is updated "<< std::endl;
     _geom->Update_P(_p);
+    std::cout << " P is updated "<< std::endl;
     //3) compute _F and _G (vorläufige Geschwindigkeiten) //TODO:externe Kraft fehlt noch
     if(printInfo) std::cout << "Compute F and G" << std::endl;
     MomentumEqu(dt);
     //4) compute _rhs
     if(printInfo) std::cout << "Compute rhs" << std::endl;
     RHS(dt);
-//     for(InteriorIterator it = InteriorIterator(_geom); it.Valid(); it.Next()){
-//         _rhs->Cell(it) = 1/dt * (_F->dx_l(it)+_G->dy_l(it));
-//     }
     //5) solve Poisson equation with SOR solver
     if(printInfo) std::cout << "Starting SOR solver" << std::endl;
     real_t res = _solver->Cycle(_p, _rhs);
@@ -71,10 +75,11 @@ void Compute::TimeStep(bool printInfo){
     if(printInfo) std::cout << "Compute u and v" << std::endl;
     NewVelocities(dt);
     //7) output  _u _v und _p
-    if(printInfo) std::cout << "Output u, v and p" << std::endl;
-    VTK outputfile =  VTK(_geom->Mesh(), _geom->Size());
-    outputfile.AddScalar("pressure", _p);
-    outputfile.AddField ("velocities", _u, _v);
+//     if(printInfo) std::cout << "Output u, v and p" << std::endl;
+//     VTK outputfile =  VTK(_geom->Mesh(), _geom->Size());
+//     outputfile.AddScalar("pressure", _p);
+//     outputfile.AddField ("velocities", _u, _v);
+    _t+=dt;
 }
 
 /// Compute the new velocites u,v
@@ -90,7 +95,9 @@ void Compute::MomentumEqu(const real_t &dt){
     //externe Kraft fehlt noch
     for(InteriorIterator it = InteriorIterator(_geom); it.Valid(); it.Next()){
         _F->Cell(it) = _u->Cell(it) + dt*(1/(_param->Re())*(_u->dxx(it) + _u->dyy(it)) - 2*_u->DC_udu_x(it,_param->Alpha())-_u->DC_vdu_y(it,_param->Alpha(),_v)-_v->DC_vdu_y(it,_param->Alpha(),_u));
+        std::cout << " F (" << it <<" ) = " << _F->Cell(it)<< std::endl;
         _G->Cell(it) = _v->Cell(it) + dt*(1/(_param->Re())*(_v->dxx(it) + _v->dyy(it)) - 2*_v->DC_vdv_y(it,_param->Alpha())-_u->DC_udv_x(it,_param->Alpha(),_v)-_u->DC_udv_x(it,_param->Alpha(),_v));
+        std::cout << " F (" << it <<" ) = " << _F->Cell(it)<< std::endl;
     }
 }
 /// Compute the RHS of the poisson equation
@@ -99,7 +106,9 @@ void Compute::RHS(const real_t &dt){
         _rhs->Cell(it) = 1/dt * (_F->dx_l(it)+_G->dy_l(it));
     }
 }
-
+const real_t &Compute::GetTime() const{
+    return _t;
+}
 const Grid* Compute::GetU() const
 {return _u;}
 

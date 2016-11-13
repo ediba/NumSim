@@ -2,7 +2,6 @@
 #include "iterator.hpp"
 #include "geometry.hpp"
 #include "grid.hpp"
-#include "typedef.hpp"
 #include <cmath>
 
 ///Implementing the solver class
@@ -31,6 +30,7 @@ SOR::~SOR(){
 
 
 real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
+    std::cout << " Cycle start "<< std::endl;
     const real_t h1 = _geom->Mesh()[0];
     const real_t h2 = _geom->Mesh()[1];
     ///the multiplier is not changing for any point in grid, that is why it is before the loop
@@ -39,6 +39,7 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
     iter.First();
     real_t totalRes(0.0);
     while (iter.Valid()){
+        //std::cout << " Cycle Loop iter: "<< iter << std::endl;
         real_t residual = localRes(iter, grid, rhs);
         totalRes += residual*residual;
         grid->Cell(iter) += _omega*multiplier * residual;

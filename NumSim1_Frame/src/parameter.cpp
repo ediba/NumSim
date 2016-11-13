@@ -10,6 +10,7 @@ Parameter::Parameter()
    _eps = 0;
    _tau = 0;
    _itermax = 0;
+   Load("default.param");
    std::cout << "Parameter Constructor vollendet"<<std::endl;
 }
 

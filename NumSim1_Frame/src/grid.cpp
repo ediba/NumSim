@@ -12,7 +12,8 @@ Grid::Grid(const Geometry *geom, const multi_real_t &offset)
      _offset=offset;
     ///plus 2 ???
     _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
-  this->Initialize(real_t(0.0));
+  this->Initialize(0.0);
+   std::cout << " Grid Initialized " <<std::endl;
 }
 Grid::Grid(const Geometry* geom)
 {
@@ -21,7 +22,7 @@ Grid::Grid(const Geometry* geom)
      _offset={0.0,0.0};
     ///plus 2 ???
     _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
-    this->Initialize(real_t(0.0));
+    this->Initialize(0.0);
     std::cout << " Grid Initialized " <<std::endl;
     
 }
