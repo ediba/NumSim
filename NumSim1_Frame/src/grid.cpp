@@ -169,14 +169,50 @@ real_t Grid::dyy(const Iterator &it) const{
 /// Computes u*du/dx with the donor cell method
 real_t Grid::DC_udu_x(const Iterator &it, const real_t &alpha) const{
 
-    real_t DC_udu_x_var, left_var,right_var;
+    real_t left_var,right_var;
     left_var= (((_data[it]+_data[it.Right()])/2)*((_data[it]+_data[it.Right()])/2)-((_data[it]+_data[it.Left()])/2)*((_data[it]+_data[it.Left()])/2))/ ((_geom->Mesh())[0]);
-    right_var=alpha*(-std::fabs((_data[it]+_data[it.Right()])/2)*dx_r(it)/2+std::fabs((_data[it]+_data[it.Left()])/2)*dx_l(it)/2)/ ((_geom->Mesh())[0]);
+    right_var=alpha*(std::fabs((_data[it]+_data[it.Right()])/2)*((_data[it]-_data[it.Right()])/2)-std::fabs((_data[it]+_data[it.Left()])/2)*((_data[it.Left()]-_data[it])/2))/ ((_geom->Mesh())[0]);
 
 
      return left_var+right_var;
 }
 
+
+/// Computes v*du/dy with the donor cell method
+real_t Grid::DC_vdu_y(const Iterator &it, const real_t &alpha, const Grid *v) const{
+    real_t left_var, right_var;
+    InteriorIterator vIter(v);
+    vIter.First();
+    left_var = (((v->_data[vIter]+v->_data[vIter.Right()])/2)*((_data[it]+_data[it.Top()])/2)-((v->_data[vIter.Down()]+ v->_data[vIter.Right().Down()])/2)*((_data[it.Down()]+_data[it])/2))/ ((_geom->Mesh())[1]);
+    right_var=alpha*((std::fabs(v->_data[vIter]+v->_data[vIter.Right()])/2)*((_data[it]-_data[it.Top()])/2)-(std::fabs(v->_data[vIter.Down()]+v->_data[vIter.Right().Down()])/2)*((_data[it.Down()]-_data[it])/2)) / ((_geom->Mesh())[1]);
+
+    return left_var+right_var;
+
+}
+
+/// Computes u*dv/dx with the donor cell method
+real_t Grid::DC_udv_x(const Iterator &it, const real_t &alpha, const Grid *u) const{
+
+    real_t left_var, right_var;
+    InteriorIterator uIter(u);
+    uIter.First();
+    left_var = (((u->_data[uIter]+ u->_data[uIter.Top()])/2)*((_data[it]+_data[it.Right()])/2)-((u->_data[uIter.Left()]+ u->_data[vIter.Left().Top()])/2)*((_data[it.Left()]+_data[it])/2))/ ((_geom->Mesh())[0]);
+    right_var=alpha*((std::fabs(u->_data[uIter]+ u->_data[uIter.Top()])/2)*((_data[it.Right()]-_data[it])/2)-(std::fabs(u->_data[uIter.Left()]+ u->_data[vIter.Left().Top()])/2)*((_data[it]-_data[it.Left()])/2)) / ((_geom->Mesh())[0]);
+
+    return left_var+right_var;
+}
+
+
+/// Computes v*dv/dy with the donor cell method
+real_t Grid::DC_vdv_y(const Iterator &it, const real_t &alpha) const{
+
+    real_t left_var,right_var;
+    left_var= (((_data[it]+_data[it.Top()])/2)*((_data[it]+_data[it.Top()])/2)-((_data[it.Down()]+_data[it])/2)*((_data[it.Right()]-_data[it])/2))/ ((_geom->Mesh())[1]);
+    right_var=alpha*(std::fabs((_data[it]+_data[it.Top()])/2)*((_data[it.Right()]-_data[it])/2)-std::fabs((_data[it]+_data[it.Down()])/2)*((_data[it()]-_data[it.Left()])/2))/ ((_geom->Mesh())[1]);
+
+     return left_var+right_var;
+
+}
 /// Returns the absolute maximal value
 real_t Grid::AbsMax() const{
     
@@ -194,12 +230,6 @@ real_t Grid::AbsMax() const{
     return maxAbs;
 }
 
-/// Computes v*du/dy with the donor cell method
-real_t Grid::DC_vdu_y(const Iterator &it, const real_t &alpha, const Grid *v) const{}
-/// Computes u*dv/dx with the donor cell method
-real_t Grid::DC_udv_x(const Iterator &it, const real_t &alpha, const Grid *u) const{}
-/// Computes v*dv/dy with the donor cell method
-real_t Grid:: DC_vdv_y(const Iterator &it, const real_t &alpha) const{}
 
 ///implement all other derivatives
 
