@@ -64,8 +64,7 @@ void Compute::TimeStep(bool printInfo){
     dt = _dtlimit;
     std::cerr << "Time Step Linitation Convection Operator dt = " << dt << " umax Abs = " << _u->AbsMax()<< std::endl;
   }
-
-  
+    if(printInfo) std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
     
     //2) boundary_val
     if(printInfo) std::cout << "Setting boundary values" << std::endl;

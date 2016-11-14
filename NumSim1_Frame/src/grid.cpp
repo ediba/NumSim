@@ -279,3 +279,13 @@ real_t Grid::Min() const
     }
     return min;
 }
+
+void Grid::PrintGrid() const{
+    for(index_t y=_geom->Size()[1]+1; y<_geom->Size()[1]+2;y--){
+        for(index_t x=0; x<_geom->Size()[0]+2;x++){
+            Iterator it(_geom,IterFromPos({x,y}));
+            std::cout<< Cell(it) <<"\t";
+        }
+        std::cout<<std::endl;
+    }
+}

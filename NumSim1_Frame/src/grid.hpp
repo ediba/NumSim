@@ -76,6 +76,9 @@ public:
   real_t Min() const;
   /// Returns the absolute maximal value
   real_t AbsMax() const;
+  
+  ///prints grid to console
+  void PrintGrid() const;
 
 
 private:
