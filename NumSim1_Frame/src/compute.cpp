@@ -16,6 +16,7 @@ Compute::Compute(const Geometry *geom, const Parameter *param):
 //     _geom = geom;
 //     _param = param;
     _p = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]*0.5});
+    //_p->Initialize(0.1);
     _u = new Grid(geom,{_geom->Mesh()[0],_geom->Mesh()[1]*0.5});
     _v = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]});
     _F = new Grid(geom);
@@ -53,7 +54,7 @@ void Compute::TimeStep(bool printInfo){
     
     const multi_real_t &h = _geom->Mesh();
     // Check diffusiove operator limitation (S.25)
-    _dtlimit = _param->Tau() * (_param->Re()/2) * (h[0]*h[0]*h[1]*h[1])/(h[0]*h[0]+h[1]*h[1]);
+    _dtlimit = _param->Tau() * (_param->Re()/2) * ((h[0]*h[0]*h[1]*h[1])/(h[0]*h[0]+h[1]*h[1]));
     if(_dtlimit < dt) {
     dt = _dtlimit;
     std::cerr << "Time Step Diffusive Limitation dt = " << dt << std::endl;
@@ -86,18 +87,21 @@ void Compute::TimeStep(bool printInfo){
     for (index_t i = 1; i<=_param->IterMax(); i++){
         _geom->Update_P(_p);
         res = _solver->Cycle(_p, _rhs);
+        _geom->Update_P(_p);
          if(printInfo) std::cout <<" Time " << _t << " Interation : " << i << " residual = " << res << std::endl;
         if (res < _epslimit)
         {
             //std::cout<< "iteration needed: "<< i << std::endl;
             break;
         }
-        _geom->Update_P(_p);
+        //_geom->Update_P(_p);
     }
     
     //6) compute _u und _v
     if(printInfo) std::cout << "Compute u and v" << std::endl;
     NewVelocities(dt);
+    _geom->Update_U(_u);
+    _geom->Update_V(_v);
     
     //7) output  _u _v und _p
     _t+=dt;
@@ -115,11 +119,32 @@ void Compute::NewVelocities(const real_t &dt){
 void Compute::MomentumEqu(const real_t &dt){
     //externe Kraft fehlt noch
     for(InteriorIterator it = InteriorIterator(_geom); it.Valid(); it.Next()){
-        _F->Cell(it) = _u->Cell(it) + dt*(1/(_param->Re())*(_u->dxx(it) + _u->dyy(it)) - 2*_u->DC_udu_x(it,_param->Alpha())-_u->DC_vdu_y(it,_param->Alpha(),_v)-_v->DC_vdu_y(it,_param->Alpha(),_u));
+//         _F->Cell(it) = _u->Cell(it) + 
+//         dt*(1/(_param->Re())*(_u->dxx(it) + _u->dyy(it)) 
+//         - 2*_u->DC_udu_x(it,_param->Alpha())-
+//         _u->DC_vdu_y(it,_param->Alpha(),_v)-
+//         _v->DC_vdu_y(it,_param->Alpha(),_u));
+        
+        _F->Cell(it) = _u->Cell(it) + 
+        dt*(((_u->dxx(it) + _u->dyy(it))/_param->Re())
+        -_u->DC_udu_x(it,_param->Alpha())
+        -_u->DC_vdu_y(it,_param->Alpha(),_v));
+        
         //std::cout << " F (" << it <<" ) = " << _F->Cell(it)<< std::endl;
-        _G->Cell(it) = _v->Cell(it) + dt*(1/(_param->Re())*(_v->dxx(it) + _v->dyy(it)) - 2*_v->DC_vdv_y(it,_param->Alpha())-_u->DC_udv_x(it,_param->Alpha(),_v)-_u->DC_udv_x(it,_param->Alpha(),_v));
+//         _G->Cell(it) = _v->Cell(it) 
+//         + dt*(1/(_param->Re())*(_v->dxx(it) + _v->dyy(it)) 
+//         - 2*_v->DC_vdv_y(it,_param->Alpha())
+//         -_u->DC_udv_x(it,_param->Alpha(),_v)
+//         -_u->DC_udv_x(it,_param->Alpha(),_v));
+        
+        _G->Cell(it) = _v->Cell(it) 
+        + dt*(((_v->dxx(it) + _v->dyy(it))/_param->Re()) 
+        -_v->DC_vdv_y(it,_param->Alpha())
+        -_v->DC_udv_x(it,_param->Alpha(),_u));
         //std::cout << " F (" << it <<" ) = " << _F->Cell(it)<< std::endl;
     }
+    _geom->Update_V(_G);
+    _geom->Update_U(_F);
 }
 /// Compute the RHS of the poisson equation
 void Compute::RHS(const real_t &dt){
