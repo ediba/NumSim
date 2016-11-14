@@ -68,14 +68,15 @@ void Compute::TimeStep(bool printInfo){
     
     //2) boundary_val
     if(printInfo) std::cout << "Setting boundary values" << std::endl;
+
     _geom->Update_U(_u);
-    _geom->Update_U(_F);
     _geom->Update_V(_v);
-    _geom->Update_V(_G);
     //_geom->Update_P(_p);
     //3) compute _F and _G (vorläufige Geschwindigkeiten) //TODO:externe Kraft fehlt noch
     if(printInfo) std::cout << "Compute F and G" << std::endl;
     MomentumEqu(dt);
+        _geom->Update_V(_G);
+        _geom->Update_U(_F);
     //4) compute _rhs
     if(printInfo) std::cout << "Compute rhs" << std::endl;
     RHS(dt);
@@ -91,11 +92,13 @@ void Compute::TimeStep(bool printInfo){
             //std::cout<< "iteration needed: "<< i << std::endl;
             break;
         }
+        _geom->Update_P(_p);
     }
     
     //6) compute _u und _v
     if(printInfo) std::cout << "Compute u and v" << std::endl;
     NewVelocities(dt);
+    
     //7) output  _u _v und _p
     _t+=dt;
 }

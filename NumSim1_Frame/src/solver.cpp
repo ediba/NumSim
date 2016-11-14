@@ -38,6 +38,7 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
     InteriorIterator iter(_geom);
     iter.First();
     real_t totalRes(0.0);
+    
     while (iter.Valid()){
         //std::cout << " Cycle Loop iter: "<< iter << std::endl;
         real_t residual = localRes(iter, grid, rhs);
@@ -49,6 +50,6 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
     // update the pressure boundary values
     //_geom->Update_P(grid);
     //for averaging
-    return sqrt(totalRes)/(h1*h2);
+    return sqrt((totalRes)/(_geom->Size()[0]*_geom->Size()[1]));
 }
 

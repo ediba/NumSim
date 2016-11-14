@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
   const Grid *visugrid;
   bool run = true;
 
-  visugrid = comp.GetV();
+  visugrid = comp.GetP();
 
   // Run the time steps until the end is reached
 //   std::cout << " COmpTime() = " << comp.GetTime() << std::endl;
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 //       run = false;
 //       break;
 //     case 0:
-//       visugrid = comp.GetV();
+//       visugrid = comp.GetVelocity();
 //       break;
 //     case 1:
 //       visugrid = comp.GetU();
@@ -87,30 +87,28 @@ int main(int argc, char **argv) {
 //     default:
 //       break;
 //     };
-//#endif // DEBUG_VISU
-  
-  visugrid = comp.GetU();
+//#endif // DEBUG_VIS
+  visugrid = comp.GetP();
 //while (comp.GetTime() < param.Tend() && run) {
-    while (comp.GetTime() < 31 && run) {
+    while (comp.GetTime() < 50 && run) {
     // Create a VTK File in the folder VTK (must exist)
     //std::cout <<" create VTK file start" << std::endl;
-    //vtk.Init("VTK/field");
-    //vtk.AddField("Velocity", comp.GetU(), comp.GetV());
-    //vtk.AddScalar("Pressure", comp.GetP());
-    //vtk.Finish();
+//     vtk.Init("VTK/field");
+//     vtk.AddField("Velocity", comp.GetU(), comp.GetV());
+//     vtk.AddScalar("Pressure", comp.GetP());
+//     vtk.Finish();
     //std::cout <<" create VTK file end" << std::endl;
 
-    visugrid = comp.GetU();
+    //visugrid = comp.GetP();
     // Run a few steps
-    for (uint32_t i = 0; i < 2; ++i){
+    for (uint32_t i = 0; i < 10; ++i){
       comp.TimeStep(true);
-      std::cout<< " step number " << i << std::endl;
+      //std::cout<< " step number " << i << std::endl;
       //std::cin.get();
-      visugrid = comp.GetU();
-      visu.Render(visugrid);
-      visugrid->PrintGrid();
-      std::cin.get();
+      
     }
+    visugrid = comp.GetP();
+      visu.Render(visugrid);
     //comp.TimeStep(true);
 }
   return 0;
