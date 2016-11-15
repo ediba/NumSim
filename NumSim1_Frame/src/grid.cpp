@@ -84,8 +84,8 @@ real_t Grid::Interpolate(const multi_real_t &pos) const{
     //std::cout << "\toffset = " << _offset[0] << " " << _offset [1] << std::endl;
     //std::cout << "Indices : P1  = " << it.Value() << "Koordinaten: "<< it.Pos()[0]*_geom->Mesh()[0] <<" "<<it.Pos()[1]*_geom->Mesh()[1] << std::endl;
     it = it.Top();
-    valueX2 = (1-relX) * _data[it] + relX * _data[it.Right()];
-    return (valueX1 * (1-relY) + valueX2 * (relY));
+    valueX2 = (1.0-relX) * _data[it] + relX * _data[it.Right()];
+    return (valueX1 * (1.0-relY) + valueX2 * (relY));
     
     
 }
@@ -160,11 +160,11 @@ real_t Grid::dy_r(const Iterator& it) const
 
 
 real_t Grid:: dxx(const Iterator &it) const{
-    return (_data[it.Right()]-2*_data[it]+_data[it.Left()])/(((_geom->Mesh())[0])*((_geom->Mesh())[0]));
+    return (_data[it.Right()]-2.0*_data[it]+_data[it.Left()])/(((_geom->Mesh())[0])*((_geom->Mesh())[0]));
 }
 /// Computes the central difference quatient of 2nd order in y-dim at [it]
 real_t Grid::dyy(const Iterator &it) const{
-    return (_data[it.Top()]-2*_data[it]+_data[it.Down()])/(((_geom->Mesh())[1])*((_geom->Mesh())[1]));
+    return (_data[it.Top()]-2.0*_data[it]+_data[it.Down()])/(((_geom->Mesh())[1])*((_geom->Mesh())[1]));
 }
 
 /// Computes u*du/dx with the donor cell method

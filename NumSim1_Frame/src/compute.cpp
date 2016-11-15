@@ -24,10 +24,17 @@ Compute::Compute(const Geometry *geom, const Parameter *param):
     _rhs = new Grid(geom);
     _tmp = new Grid(geom);
     _t = 0.;
-    //_dtlimit
+    
     _epslimit = _param->Eps();
     //real_t omega =  _param->Omega();
     _solver =  new SOR(_geom, _param->Omega()); //TODO:somehow doesnt work
+    
+    _dtlimit = _param->Dt();
+  
+  
+  // Init time
+  _t = 0.0;
+  
     
 }
 
@@ -88,7 +95,10 @@ void Compute::TimeStep(bool printInfo){
         _geom->Update_P(_p);
         res = _solver->Cycle(_p, _rhs);
         _geom->Update_P(_p);
-         if(printInfo) std::cout <<" Time " << _t << " Interation : " << i << " residual = " << res << std::endl;
+         if(printInfo) {std::cout <<" Time " << _t << " Interation : " << i << " residual = " << res <<  std::endl;
+             //_p->PrintGrid();
+             
+        }
         if (res < _epslimit)
         {
             //std::cout<< "iteration needed: "<< i << std::endl;
@@ -149,7 +159,7 @@ void Compute::MomentumEqu(const real_t &dt){
 /// Compute the RHS of the poisson equation
 void Compute::RHS(const real_t &dt){
     for(InteriorIterator it = InteriorIterator(_geom); it.Valid(); it.Next()){
-        _rhs->Cell(it) = 1/dt * (_F->dx_l(it)+_G->dy_l(it));
+        _rhs->Cell(it) = 1.0/dt * (_F->dx_l(it)+_G->dy_l(it));
     }
 }
 const real_t &Compute::GetTime() const{

@@ -139,7 +139,7 @@ _mesh[1] = _length[1]/_size[1];
                         //TODO:Was ist mit den Zellen rechts daneben? Wichtig?
                         break;
                     case 3:
-                        u->Cell(it) = 2*_velocity[0] - u->Cell(it.Down());
+                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
                         //std::cout << "2* " << _velocity[0] << " - " <<  u->Cell(it.Down())<< " it.Down() = "<< it.Down()<< std::endl;
                         //std::cout << "case " << bound_num <<" Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
                         break;
@@ -163,7 +163,7 @@ _mesh[1] = _length[1]/_size[1];
                    //std::cout << "case 0 Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
                     break;
                 case 2:
-                    u->Cell(it.Left())= (-1)*u->Cell((it.Left()).Top());
+                    u->Cell(it.Left())= (-1.0)*u->Cell((it.Left()).Top());
                     u->Cell(it) = 0;
                     //std::cout << "case  0  Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
                     break;
@@ -175,6 +175,7 @@ _mesh[1] = _length[1]/_size[1];
                         break;
                 case 4:
                     u->Cell(it.Left()) = 0;
+                    u->Cell(it) = 0;
                     //std::cout << "case  0  Cell Nr: "<<it.Value()<< " set to: " << u->Cell(it)<<std::endl;
                     break;
                 default: std::cout << " Error bei outer 4 cells" << std::endl;
@@ -196,7 +197,7 @@ _mesh[1] = _length[1]/_size[1];
                         v->Cell(it) = 0;
                         break;
                     case 2:
-                        v->Cell(it) = (-1)*v->Cell(it.Left());
+                        v->Cell(it) = (-1.0)*v->Cell(it.Left());
                         break;
                     case 3:
                         //v->Cell(it.Down()) = 0;
@@ -207,7 +208,7 @@ _mesh[1] = _length[1]/_size[1];
                         v->Cell(it.Down()) = _velocity[1];
                         break;
                     case 4:
-                        v->Cell(it) = (-1)*v->Cell(it.Right());
+                        v->Cell(it) = (-1.0)*v->Cell(it.Right());
                         break;
                     default: std::cout << "Error" << std::endl;
                 }

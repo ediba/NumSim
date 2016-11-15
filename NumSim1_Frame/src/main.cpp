@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
   const Grid *visugrid;
   bool run = true;
 
-  visugrid = comp.GetP();
+  //visugrid = comp.GetP();
 
   // Run the time steps until the end is reached
 //   std::cout << " COmpTime() = " << comp.GetTime() << std::endl;
@@ -101,15 +101,52 @@ int main(int argc, char **argv) {
 
     //visugrid = comp.GetP();
     // Run a few steps
-    for (uint32_t i = 0; i < 10; ++i){
-      comp.TimeStep(true);
+    //for (uint32_t i = 0; i < 10; ++i){
+        
+        // Render and check if window is closed
+        int key = visu.Check();
+        visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+        if (key == 10) {
+            //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+            comp.TimeStep(true);
+        }
+        if (key == -1) {
+            run = false;
+        }
       //std::cout<< " step number " << i << std::endl;
-      //std::cin.get();
       
-    }
-    visugrid = comp.GetP();
-      visu.Render(visugrid);
+    //}
+    //visugrid = comp.GetU();
+    //  visu.Render(visugrid);
+    //  visugrid->PrintGrid();
+    //  std::cin.get();
     //comp.TimeStep(true);
 }
+
+  /*  //unit test SOR solver
+    multi_real_t offset = {0.5*geom.Mesh()[0],0.5*geom.Mesh()[1]};
+    Grid testgrid5(&geom, offset);
+    testgrid5.Initialize(0);
+    Grid zeroGrid(&geom,offset);
+    zeroGrid.Initialize(0);
+    Iterator it5(&geom, 66);
+    testgrid5.Cell(it5) = 1;
+    visu.Render(&testgrid5);
+    visu.Render(&testgrid5);
+    testgrid5.PrintGrid();
+    SOR sor(&geom, param.Omega());
+    // Run the time steps until the end is reached
+    while (run) {
+        // Render and check if window is closed
+        int key = visu.Check();
+        visu.Render(&testgrid5, testgrid5.Min(), testgrid5.Max());
+        if (key == 10) {
+            printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+            testgrid5.PrintGrid();
+        }
+        if (key == -1) {
+            run = false;
+        }
+    }*/
   return 0;
 }
