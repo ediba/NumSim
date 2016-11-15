@@ -15,7 +15,6 @@ Solver::~Solver() {
 
 /// Returns the residual at [it] for the pressure-Poisson equation
 real_t Solver::localRes(const Iterator &it, const Grid *grid, const Grid *rhs) const {
-   //return (rhs->Cell(it) - grid->dxx(it) - grid->dyy(it));
     return ((grid->Cell(it.Left())+grid->Cell(it.Right()))/(_geom->Mesh()[0])/(_geom->Mesh()[0])+(grid->Cell(it.Top())+grid->Cell(it.Down()))/(_geom->Mesh()[1])/(_geom->Mesh()[1]))-rhs->Cell(it);
 }
 
@@ -29,27 +28,21 @@ SOR::~SOR(){
 
 }
 
-
 real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
-    //std::cout << " Cycle start "<< std::endl;
     const real_t h1 = _geom->Mesh()[0];
     const real_t h2 = _geom->Mesh()[1];
-    ///the multiplier is not changing for any point in grid, that is why it is before the loop
+    //the multiplier is not changing for any point in grid, that is why it is before the loop
     const real_t multiplier = _omega*0.5*h1*h1*h2*h2/(h1*h1+h2*h2);
     InteriorIterator iter(_geom);
     iter.First();
     real_t totalRes(0.0);
     
     while (iter.Valid()){
-        //std::cout << " Cycle Loop iter: "<< iter << std::endl;
         real_t residual = localRes(iter, grid, rhs);
         totalRes += residual*residual;
         grid->Cell(iter) =(1.0-_omega)*grid->Cell(iter) + multiplier * residual;//old: -=multiplier*residual;
         iter.Next();
     }
-
-    // update the pressure boundary values
-    //_geom->Update_P(grid);
     //for averaging
     return sqrt((totalRes)/(_geom->Size()[0]*_geom->Size()[1]));
 }

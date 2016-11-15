@@ -4,8 +4,6 @@
 
 /// we decided that the iterations will go from left to right and
 /// from the bottom to the top
-
-///or maybe it is not alway valid? Should I check the geometry if the size is greater than zero?
 Iterator::Iterator(const Geometry* geom, const index_t& value){
     _geom = geom;
     _value = value;
@@ -15,10 +13,7 @@ Iterator::Iterator(const Geometry* geom, const index_t& value){
 Iterator::Iterator(const Geometry *geom)
 {
     _geom = geom; _value = 0; _valid = true;
-    
 }
-
-
 const index_t& Iterator::Value() const
 {return _value;}
 
@@ -63,7 +58,7 @@ Iterator Iterator::Left() const
 ///return itself
 Iterator Iterator::Right() const
 {
-    ///checking if it is at the right boundary
+    //checking if it is at the right boundary
     if (Pos()[0] == _geom->Size()[0]+2-1){
         return Iterator(_geom, _value);
     }else
@@ -73,7 +68,7 @@ Iterator Iterator::Right() const
 ///return itself
 Iterator Iterator::Top() const
 {
-    ///checking if it is at the top boundary
+    //checking if it is at the top boundary
     if (Pos()[1] == _geom->Size()[1]+2-1){
         return Iterator(_geom, _value);
     }else
@@ -85,7 +80,7 @@ Iterator Iterator::Top() const
 ///return itself
 Iterator Iterator::Down() const
 {
-    ///checking if it is at the lower boundary
+    //checking if it is at the lower boundary
     if (Pos()[1] == 0){
         return Iterator(_geom, _value);
     }else
@@ -115,12 +110,8 @@ void InteriorIterator::First()
     _valid=true;
 }
 
-//not yet finished
 void InteriorIterator::Next()
 {
-    //std::cout << "ITerator Nr : " << this << std::endl;
-    ///check if the position is already on the boundary of the x axis
-
     ///check if the position is already on the boundary of the y axis
         // falls an x boundary 
             if (Pos()[0] == _geom->Size()[0]+2-2){
@@ -137,40 +128,27 @@ void InteriorIterator::Next()
             }
     
 }
-
-
-
-
-
     /** Iterator for domain boundary cells.
     */
 
-
-
-
     ///implementation of the BoundaryIterator
-    ///
-    ///
-
       /// Constructs a new BoundaryIterator
     BoundaryIterator::BoundaryIterator(const Geometry *geom):
     Iterator(geom){
         _value = 0;
         _boundary = 0; 
         _valid=true;
-        
     }
 
       /// Sets the boundary to iterate
-
+      //boundary 0 are the 4 corner points; boundary 1 is the bottom row; boundary 2 is the left boundary;
+      // boundary 3 is the top boundary; and boundary 4 is the left boundary
     void BoundaryIterator::SetBoundary(const index_t& boundary)
     {
         _boundary = boundary;
         First();
     }
-
-    ///what values can the boundary have???
-      /// Sets the iterator to the first element
+    /// Sets the iterator to the first element
      void BoundaryIterator::First()
     {
         _valid = true;
