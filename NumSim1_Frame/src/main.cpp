@@ -44,14 +44,11 @@ int main(int argc, char **argv) {
   Compute comp(&geom, &param);
   std::cout << "compute done" << std::endl;
 
-//#ifdef USE_DEBUG_VISU
   // Create and initialize the visualization
-
   Renderer visu(geom.Length(), geom.Mesh());
     std::cout << "Renderer done" << std::endl;
   visu.Init(800, 800);
     std::cout << "Renderer done" << std::endl;
-//#endif // USE_DEBUG_VISU
 
   // Create a VTK generator
   VTK vtk(geom.Mesh(), geom.Size());
@@ -59,94 +56,232 @@ int main(int argc, char **argv) {
   const Grid *visugrid;
   bool run = true;
 
-  //visugrid = comp.GetP();
-
-  // Run the time steps until the end is reached
-//   std::cout << " COmpTime() = " << comp.GetTime() << std::endl;
-//   std::cout << " param.Tend() = " << param.Tend() << std::endl;
-//    while (comp.GetTime() < param.Tend() && run) {
-//        std::cout << " while loop start" <<std::endl;
-// // //#ifdef USE_DEBUG_VISU
-//     // Render and check if window is closed
-//     switch (visu.Render(visugrid)) {
-//     case -1:
-//       run = false;
-//       break;
-//     case 0:
-//       visugrid = comp.GetVelocity();
-//       break;
-//     case 1:
-//       visugrid = comp.GetU();
-//       break;
-//     case 2:
-//       visugrid = comp.GetV();
-//       break;
-//     case 3:
-//       visugrid = comp.GetP();
-//       break;
-//     default:
-//       break;
-//     };
-//#endif // DEBUG_VIS
-  visugrid = comp.GetP();
-//while (comp.GetTime() < param.Tend() && run) {
-    while (comp.GetTime() < 50 && run) {
-    // Create a VTK File in the folder VTK (must exist)
-    //std::cout <<" create VTK file start" << std::endl;
-//     vtk.Init("VTK/field");
-//     vtk.AddField("Velocity", comp.GetU(), comp.GetV());
-//     vtk.AddScalar("Pressure", comp.GetP());
-//     vtk.Finish();
-    //std::cout <<" create VTK file end" << std::endl;
-
-    //visugrid = comp.GetP();
-    // Run a few steps
-    //for (uint32_t i = 0; i < 10; ++i){
-        
-        // Render and check if window is closed
-        int key = visu.Check();
-        visu.Render(visugrid, visugrid->Min(), visugrid->Max());
-        if (key == 10) {
-            //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
-            comp.TimeStep(true);
+  //Ask user what to run
+  bool whileloop=true;
+  while(whileloop){
+    std::cout << "Which program would u like to run?" << std::endl;
+    std::cout << "1:\tDriven Cavity (not working properly)" <<std::endl;
+    std::cout << "2:\tIteratorTest"<<std::endl;
+    std::cout << "3:\tUpdate Boundary Condition Test"<<std::endl;
+    std::cout << "4:\tSOR Test"<<std::endl;
+    std::cout << "0:\tEscape"<<std::endl;
+    char choice;
+    std::cin>>choice;
+    switch(choice){
+        case '1':{
+            visugrid = comp.GetP();
+            while (comp.GetTime() < 50 && run) {
+                // Render and check if window is closed
+                int key = visu.Check();
+                visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+                if (key == 10) {
+                    //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+                    comp.TimeStep(true);
+                }
+                if (key == -1) {
+                    run = false;
+                }
+            }
         }
-        if (key == -1) {
-            run = false;
+            break;
+        case '2':{
+            bool whileloop2=true;
+            while(whileloop2){
+                std::cout << "Which program would u like to run?" << std::endl;
+                std::cout << "1:\tIterator" <<std::endl;
+                std::cout << "2:\tInteriorIterator"<<std::endl;
+                std::cout << "3:\tBoundary1"<<std::endl;
+                std::cout << "4:\tBoundary2"<<std::endl;
+                std::cout << "5:\tBoundary3"<<std::endl;
+                std::cout << "6:\tBoundary4"<<std::endl;
+                std::cout << "0:\tEscape"<<std::endl;
+                char choice2;
+                std::cin>>choice2;
+                switch(choice2){
+                    case '1':{
+                        bool plot=true;
+                        Grid testgrid(&geom,{geom.Mesh()[0]*0.5,geom.Mesh()[1]*0.5});
+                        visugrid=&testgrid;
+                        testgrid.Initialize(0);
+                        Iterator it(&geom);
+                        testgrid.Cell(it)=1;
+                        while (plot) {
+                            // Render and check if window is closed
+                            int key = visu.Check();
+                            visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+                            if (key == 10) {
+                                //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+                                testgrid.Cell(it)=0;
+                                it.Next();
+                                testgrid.Cell(it)=1;
+                            }
+                            if (key == -1) {
+                                plot = false;
+                            }
+                        }
+                    }
+                    break;
+                    case '2':{
+                        bool plot=true;
+                        Grid testgrid(&geom,{geom.Mesh()[0]*0.5,geom.Mesh()[1]*0.5});
+                        visugrid=&testgrid;
+                        testgrid.Initialize(0);
+                        InteriorIterator it(&geom);
+                        testgrid.Cell(it)=1;
+                        while (plot) {
+                            // Render and check if window is closed
+                            int key = visu.Check();
+                            visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+                            if (key == 10) {
+                                //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+                                testgrid.Cell(it)=0;
+                                it.Next();
+                                testgrid.Cell(it)=1;
+                            }
+                            if (key == -1) {
+                                plot = false;
+                            }
+                        }
+                    }
+                    break;
+                    case '3':{
+                        bool plot=true;
+                        Grid testgrid(&geom,{geom.Mesh()[0]*0.5,geom.Mesh()[1]*0.5});
+                        visugrid=&testgrid;
+                        testgrid.Initialize(0);
+                        BoundaryIterator it(&geom);
+                        it.SetBoundary(1);
+                        testgrid.Cell(it)=1;
+                        while (plot) {
+                            // Render and check if window is closed
+                            int key = visu.Check();
+                            visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+                            if (key == 10) {
+                                //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+                                testgrid.Cell(it)=0;
+                                it.Next();
+                                testgrid.Cell(it)=1;
+                            }
+                            if (key == -1) {
+                                plot = false;
+                            }
+                        }
+                    }
+                    break;
+                    case '4':{
+                        bool plot=true;
+                        Grid testgrid(&geom,{geom.Mesh()[0]*0.5,geom.Mesh()[1]*0.5});
+                        visugrid=&testgrid;
+                        testgrid.Initialize(0);
+                        BoundaryIterator it(&geom);
+                        it.SetBoundary(2);
+                        testgrid.Cell(it)=1;
+                        while (plot) {
+                            // Render and check if window is closed
+                            int key = visu.Check();
+                            visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+                            if (key == 10) {
+                                //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+                                testgrid.Cell(it)=0;
+                                it.Next();
+                                testgrid.Cell(it)=1;
+                            }
+                            if (key == -1) {
+                                plot = false;
+                            }
+                        }
+                    }
+                    break;
+                    case '5':{
+                        bool plot=true;
+                        Grid testgrid(&geom,{geom.Mesh()[0]*0.5,geom.Mesh()[1]*0.5});
+                        visugrid=&testgrid;
+                        testgrid.Initialize(0);
+                        BoundaryIterator it(&geom);
+                        it.SetBoundary(3);
+                        testgrid.Cell(it)=1;
+                        while (plot) {
+                            // Render and check if window is closed
+                            int key = visu.Check();
+                            visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+                            if (key == 10) {
+                                //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+                                testgrid.Cell(it)=0;
+                                it.Next();
+                                testgrid.Cell(it)=1;
+                            }
+                            if (key == -1) {
+                                plot = false;
+                            }
+                        }
+                    }
+                    break;
+                    case '6':{
+                        bool plot=true;
+                        Grid testgrid(&geom,{geom.Mesh()[0]*0.5,geom.Mesh()[1]*0.5});
+                        visugrid=&testgrid;
+                        testgrid.Initialize(0);
+                        BoundaryIterator it(&geom);
+                        it.SetBoundary(4);
+                        testgrid.Cell(it)=1;
+                        while (plot) {
+                            // Render and check if window is closed
+                            int key = visu.Check();
+                            visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+                            if (key == 10) {
+                                //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+                                testgrid.Cell(it)=0;
+                                it.Next();
+                                testgrid.Cell(it)=1;
+                            }
+                            if (key == -1) {
+                                plot = false;
+                            }
+                        }
+                    }
+                    break;
+                    case '0':
+                        whileloop2=false;
+                        break;
+                }
+            }
         }
-      //std::cout<< " step number " << i << std::endl;
-      
-    //}
-    //visugrid = comp.GetU();
-    //  visu.Render(visugrid);
-    //  visugrid->PrintGrid();
-    //  std::cin.get();
-    //comp.TimeStep(true);
-}
-
-  /*  //unit test SOR solver
-    multi_real_t offset = {0.5*geom.Mesh()[0],0.5*geom.Mesh()[1]};
-    Grid testgrid5(&geom, offset);
-    testgrid5.Initialize(0);
-    Grid zeroGrid(&geom,offset);
-    zeroGrid.Initialize(0);
-    Iterator it5(&geom, 66);
-    testgrid5.Cell(it5) = 1;
-    visu.Render(&testgrid5);
-    visu.Render(&testgrid5);
-    testgrid5.PrintGrid();
-    SOR sor(&geom, param.Omega());
-    // Run the time steps until the end is reached
-    while (run) {
-        // Render and check if window is closed
-        int key = visu.Check();
-        visu.Render(&testgrid5, testgrid5.Min(), testgrid5.Max());
-        if (key == 10) {
-            printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+            break;
+        case '3':
+            std::cout<<"not enough time to write down"<<std::endl;
+            break;
+        case '4':{
+            //unit test SOR solver
+            multi_real_t offset = {0.5*geom.Mesh()[0],0.5*geom.Mesh()[1]};
+            Grid testgrid5(&geom, offset);
+            testgrid5.Initialize(0);
+            Grid zeroGrid(&geom,offset);
+            zeroGrid.Initialize(0);
+            Iterator it5(&geom, (geom.Size()[0]+2)*(geom.Size()[1]+2)/2+(geom.Size()[0]/2));
+            testgrid5.Cell(it5) = 1;
+            visu.Render(&testgrid5);
+            visu.Render(&testgrid5);
             testgrid5.PrintGrid();
-        }
-        if (key == -1) {
-            run = false;
-        }
-    }*/
+            SOR sor(&geom, param.Omega());
+            // Run the time steps until the end is reached
+            while (run) {
+                // Render and check if window is closed
+                int key = visu.Check();
+                visu.Render(&testgrid5, testgrid5.Min(), testgrid5.Max());
+                if (key == 10) {
+                    printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+                    testgrid5.PrintGrid();
+                }
+                if (key == -1) {
+                    run = false;
+                }
+            }}
+            break;
+        case '0':
+            whileloop=false;
+            break;
+            
+    }
+  }
   return 0;
 }
