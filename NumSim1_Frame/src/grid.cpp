@@ -160,7 +160,7 @@ real_t Grid::dy_r(const Iterator& it) const
 
 
 real_t Grid:: dxx(const Iterator &it) const{
-    return (_data[it.Right()]-2*_data[it]+_data[it.Left()])/(((_geom->Mesh())[0])*((_geom->Mesh())[1]));
+    return (_data[it.Right()]-2*_data[it]+_data[it.Left()])/(((_geom->Mesh())[0])*((_geom->Mesh())[0]));
 }
 /// Computes the central difference quatient of 2nd order in y-dim at [it]
 real_t Grid::dyy(const Iterator &it) const{
