@@ -112,6 +112,7 @@ void InteriorIterator::First()
 
 void InteriorIterator::Next()
 {
+    if (!_valid) return;
     ///check if the position is already on the boundary of the y axis
         // falls an x boundary 
             if (Pos()[0] == _geom->Size()[0]+2-2){
@@ -123,7 +124,7 @@ void InteriorIterator::Next()
                 
             }// maybe do this earlier?
             
-            if (Pos()[1] == _geom->Size()[1]+2-1){
+            if (_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-2){
             _valid = false;
             }
     
@@ -178,11 +179,14 @@ void InteriorIterator::Next()
             if(_value == (_geom->Size()[0]+2)*(_geom->Size()[1]+2)-1){
                 _valid = false;
             }
-            else if(Pos()[0] == 0){
-                _value += _geom->Size()[0]+2-1;
+            else if(_value == 0){
+                _value = _geom->Size()[0]+2-1;
             }
             else if(Pos()[0] == _geom->Size()[0]+2-1){
-                _value += (_geom->Size()[1]+2-2)*(_geom->Size()[0]+2)+1;
+                _value = (_geom->Size()[0]+2)*(_geom->Size()[1]+1);
+            }
+            else {
+              _value = (_geom->Size()[0]+2)*(_geom->Size()[1]+2)-1;
             }
                 
         }

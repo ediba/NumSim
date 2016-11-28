@@ -6,18 +6,15 @@
 
 
 
-Grid::Grid(const Geometry *geom, const multi_real_t &offset)
+Grid::Grid(const Geometry *geom, const multi_real_t &offset) : _geom(geom)
  {
-     _geom=geom;
      _offset=offset;
      _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
   this->Initialize(0.0);
    std::cout << " Grid Initialized " <<std::endl;
 }
-Grid::Grid(const Geometry* geom)
+Grid::Grid(const Geometry* geom) :_geom(geom)
 {
-    
-     _geom=geom;
      _offset={0.0,0.0};
     ///plus 2 ???
     _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
@@ -91,16 +88,15 @@ real_t Grid::dy_r(const Iterator& it) const
 {return (_data[it.Top()] - _data[it])/((_geom->Mesh())[1]);}
 
 real_t Grid:: dxx(const Iterator &it) const{
-    return (_data[it.Right()]-2.0*_data[it]+_data[it.Left()])/(((_geom->Mesh())[0])*((_geom->Mesh())[0]));
+    return (_data[it.Right()]-(2.0*_data[it])+_data[it.Left()])/(((_geom->Mesh())[0])*((_geom->Mesh())[0]));
 }
 /// Computes the central difference quatient of 2nd order in y-dim at [it]
 real_t Grid::dyy(const Iterator &it) const{
-    return (_data[it.Top()]-2.0*_data[it]+_data[it.Down()])/(((_geom->Mesh())[1])*((_geom->Mesh())[1]));
+    return (_data[it.Top()]-(2.0*_data[it])+_data[it.Down()])/(((_geom->Mesh())[1])*((_geom->Mesh())[1]));
 }
 
 /// Computes u*du/dx with the donor cell method
 real_t Grid::DC_udu_x(const Iterator &it, const real_t &alpha) const{
-
     real_t left_var,right_var;
     left_var= (((_data[it]+_data[it.Right()])/2)*((_data[it]+_data[it.Right()])/2)-((_data[it]+_data[it.Left()])/2)*((_data[it]+_data[it.Left()])/2))/ ((_geom->Mesh())[0]);
     right_var=alpha*(std::fabs((_data[it]+_data[it.Right()])/2)*((_data[it]-_data[it.Right()])/2)-std::fabs((_data[it]+_data[it.Left()])/2)*((_data[it.Left()]-_data[it])/2))/ ((_geom->Mesh())[0]);
@@ -124,13 +120,12 @@ real_t Grid::DC_vdu_y(const Iterator &it, const real_t &alpha, const Grid *v) co
 
 /// Computes u*dv/dx with the donor cell method
 real_t Grid::DC_udv_x(const Iterator &it, const real_t &alpha, const Grid *u) const{
-    
     real_t left_var, right_var;
     
      left_var = (((u->_data[it]+ u->_data[it.Top()])/2)*((_data[it]+_data[it.Right()])/2)-((u->_data[it.Left()]+ u->_data[it.Left().Top()])/2)*((_data[it.Left()]+_data[it])/2))/ ((_geom->Mesh())[0]);
      
      
-    right_var=alpha*((std::fabs(u->_data[it]+ u->_data[it.Top()])/2)*((_data[it.Right()]-_data[it])/2)-(std::fabs(u->_data[it.Left()]+ u->_data[it.Left().Top()])/2)*((_data[it]-_data[it.Left()])/2)) / ((_geom->Mesh())[0]);
+    right_var=alpha*((std::fabs(u->_data[it]+ u->_data[it.Top()])/2)*((_data[it]-_data[it.Right()])/2)-(std::fabs(u->_data[it.Left()]+ u->_data[it.Left().Top()])/2)*((_data[it.Left()]-_data[it])/2)) / ((_geom->Mesh())[0]);
 
     return left_var+right_var;
 }
@@ -138,10 +133,9 @@ real_t Grid::DC_udv_x(const Iterator &it, const real_t &alpha, const Grid *u) co
 
 /// Computes v*dv/dy with the donor cell method
 real_t Grid::DC_vdv_y(const Iterator &it, const real_t &alpha) const{
-
     real_t left_var,right_var;
-    left_var= (((_data[it]+_data[it.Top()])/2)*((_data[it]+_data[it.Top()])/2)-((_data[it.Down()]+_data[it])/2)*((_data[it.Right()]-_data[it])/2))/ ((_geom->Mesh())[1]);
-    right_var=alpha*(std::fabs((_data[it]+_data[it.Top()])/2)*((_data[it.Right()]-_data[it])/2)-std::fabs((_data[it]+_data[it.Down()])/2)*((_data[it]-_data[it.Left()])/2))/ ((_geom->Mesh())[1]);
+    left_var= (((_data[it]+_data[it.Top()])/2)*((_data[it]+_data[it.Top()])/2)-((_data[it.Down()]+_data[it])/2)*((_data[it.Down()]+_data[it])/2))/ ((_geom->Mesh())[1]);
+    right_var=alpha*(std::fabs((_data[it]+_data[it.Top()])/2)*((_data[it]-_data[it.Right()])/2)-std::fabs((_data[it]+_data[it.Down()])/2)*((_data[it.Left()]-_data[it])/2))/ ((_geom->Mesh())[1]);
 
      return left_var+right_var;
 
@@ -167,7 +161,7 @@ real_t Grid::Max() const
 {
     Iterator it (_geom);
     real_t max = _data[it];
-    it.Next();
+    it.First();
     while (it.Valid()){
         if(_data[it]>max){
             max = _data[it];
@@ -181,7 +175,7 @@ real_t Grid::Min() const
 {
     Iterator it (_geom);
     real_t min = _data[it];
-    it.Next();
+    it.First();
     while (it.Valid()){
         if(_data[it]<min){
             min = _data[it];

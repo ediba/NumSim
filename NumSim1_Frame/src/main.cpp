@@ -69,11 +69,11 @@ int main(int argc, char **argv) {
     std::cin>>choice;
     switch(choice){
         case '1':{
-            visugrid = comp.GetP();
             while (comp.GetTime() < 50 && run) {
+              visugrid = comp.GetVelocity();
                 // Render and check if window is closed
                 int key = visu.Check();
-                visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+                visu.Render(visugrid);//, visugrid->Min(), visugrid->Max());
                 if (key == 10) {
                     //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
                     comp.TimeStep(true);
@@ -94,6 +94,7 @@ int main(int argc, char **argv) {
                 std::cout << "4:\tBoundary2"<<std::endl;
                 std::cout << "5:\tBoundary3"<<std::endl;
                 std::cout << "6:\tBoundary4"<<std::endl;
+                std::cout << "7:\tBoundary0"<<std::endl;
                 std::cout << "0:\tEscape"<<std::endl;
                 char choice2;
                 std::cin>>choice2;
@@ -223,6 +224,29 @@ int main(int argc, char **argv) {
                         testgrid.Initialize(0);
                         BoundaryIterator it(&geom);
                         it.SetBoundary(4);
+                        testgrid.Cell(it)=1;
+                        while (plot) {
+                            // Render and check if window is closed
+                            int key = visu.Check();
+                            visu.Render(visugrid, visugrid->Min(), visugrid->Max());
+                            if (key == 10) {
+                                //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
+                                testgrid.Cell(it)=0;
+                                it.Next();
+                                testgrid.Cell(it)=1;
+                            }
+                            if (key == -1) {
+                                plot = false;
+                            }
+                        }
+                    }
+                    case '7':{
+                        bool plot=true;
+                        Grid testgrid(&geom,{geom.Mesh()[0]*0.5,geom.Mesh()[1]*0.5});
+                        visugrid=&testgrid;
+                        testgrid.Initialize(0);
+                        BoundaryIterator it(&geom);
+                        it.SetBoundary(0);
                         testgrid.Cell(it)=1;
                         while (plot) {
                             // Render and check if window is closed

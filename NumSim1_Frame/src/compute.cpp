@@ -4,14 +4,27 @@ Compute::Compute(const Geometry *geom, const Parameter *param):
     _geom (geom),
     _param (param)
 {
-    _p = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]*0.5});
-    //_p->Initialize(0.1);
+    /*_p = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]*0.5});
+    _p->Initialize(0.0);
     _u = new Grid(geom,{_geom->Mesh()[0],_geom->Mesh()[1]*0.5});
     _v = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]});
     _F = new Grid(geom);
     _G = new Grid(geom);
     _rhs = new Grid(geom);
-    _tmp = new Grid(geom);
+    _tmp = new Grid(geom);*/
+    
+    multi_real_t offset;
+	offset[0] = 0.0; offset[1] = -0.5*_geom->Mesh()[1];
+	_u   = new Grid(_geom, offset);
+	_F   = new Grid(_geom, offset);
+	offset[0] = -0.5*_geom->Mesh()[0]; offset[1] = 0.0;
+	_v   = new Grid(_geom, offset);
+	_G   = new Grid(_geom, offset);
+	offset[0] = -0.5*_geom->Mesh()[0]; offset[1] = -0.5*_geom->Mesh()[1];
+	_p   = new Grid(_geom, offset);
+	_rhs = new Grid(_geom, offset);
+	_tmp = new Grid(_geom, offset);
+  
     _t = 0.;
     
     _epslimit = _param->Eps();
@@ -20,6 +33,10 @@ Compute::Compute(const Geometry *geom, const Parameter *param):
     _dtlimit = _param->Dt();
   // Init time
   _t = 0.0;
+  
+   _geom->Update_U(_u);
+    _geom->Update_V(_v);
+    _geom->Update_P(_p);
 }
 
 Compute::~Compute(){
@@ -41,7 +58,9 @@ void Compute::TimeStep(bool printInfo){
     if(printInfo) std::cout << "Set timestep" << std::endl;
     
     //Gets dt from input file
-    real_t dt = _param->Dt();
+    real_t dt = 10000;
+    if ( _param->Dt() != 0.0)
+     dt = _param->Dt();
     
     const multi_real_t &h = _geom->Mesh();
     

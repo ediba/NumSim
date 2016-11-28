@@ -81,7 +81,7 @@ _mesh[1] = _length[1]/_size[1];
             while(it.Valid()){
                 switch(bound_num){
                     case 1:
-                        u->Cell(it) = (-1)*u->Cell(it.Top());
+                        u->Cell(it) = (-1.0)*u->Cell(it.Top());
                         break;
                     case 2:
                         u->Cell(it) = 0;
@@ -108,15 +108,15 @@ _mesh[1] = _length[1]/_size[1];
                     u->Cell(it) = 0;
                     break;
                 case 2:
-                    u->Cell(it.Left())= (-1.0)*u->Cell((it.Left()).Top());
+                    //u->Cell(it.Left())= (-1.0)*u->Cell((it.Left()).Top());
                     u->Cell(it) = 0;
                     break;
                 case 3:
-                    u->Cell(it) = 0;
+                    u->Cell(it) =  2.0*_velocity[0] - u->Cell(it.Down());
                         break;
                 case 4:
-                    u->Cell(it.Left()) = 0;
-                    u->Cell(it) = 0;
+                    u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Down());
+                    //u->Cell(it) = 0;
                     break;
                 default: std::cout << " Error bei outer 4 cells" << std::endl;
             }
