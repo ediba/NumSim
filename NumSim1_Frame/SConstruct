@@ -30,7 +30,7 @@ debug = ARGUMENTS.get('debug', 0)
 # env.Replace(CXX='mpic++')
 
 # serial
-env.Replace(CXX='g++')
+env.Replace(CXX='mpic++')
 
 # define some general compiler flags
 env.Append(

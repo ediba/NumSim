@@ -21,6 +21,7 @@
 #include "parameter.hpp"
 #include "grid.hpp"
 #include "visu.hpp"
+#include "visu.cpp"
 #include "vtk.hpp"
 #include "solver.hpp"
 
@@ -36,8 +37,10 @@
 int main(int argc, char **argv) {
   // Create parameter and geometry instances with default values
     std::cout << "main start" << std::endl;
+    //Communicator:
+    const Communicator comm(&argc, &argv);
   Parameter param;
-  Geometry geom;
+  Geometry geom(&comm);
   // Create the fluid solver
   std::cout << "compute start" << std::endl;
   Compute comp(&geom, &param);

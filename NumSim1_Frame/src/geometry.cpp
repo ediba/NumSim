@@ -1,7 +1,8 @@
 #include "geometry.hpp"
 
 ///Constructor Geometry
-Geometry::Geometry(){
+Geometry::Geometry(const Communicator* comm):_comm(comm)
+{
     
     _size = {0, 0};
     _length = 0;
@@ -12,6 +13,7 @@ Geometry::Geometry(){
     std::cout << " Geometry constructor done " << std::endl;
     
 }
+
 
   /// Loads a geometry from a file
 void Geometry::Load(const char *file){
@@ -50,21 +52,57 @@ while (!feof(handle)) {
 	}
 }
 fclose(handle);
+GetSizesOfThreads();
 //berechnet die Höhe und Breite eines Elements
-_mesh[0] = _length[0]/_size[0];
-_mesh[1] = _length[1]/_size[1];
-}
 
+}
+    void Geometry::GetSizesOfThreads (){
+        if(_size[0]%2 != 0) _size[0]--;
+        if(_size[1]%2 != 0) _size[1]--;
+        _mesh[0] = _length[0]/_size[0];
+        _mesh[1] = _length[1]/_size[1];
+        
+        index_t mpiRank = _comm->ThreadNum();
+        index_t mpiSize = _comm->ThreadCnt();
+        switch(mpiRank){
+            case 1 : 
+                _blength = _length;
+                _bsize = _size;
+                break;
+            case 2 :
+                _blength[0] = _length[0]/2;
+                _bsize[0] = _size[0]/2;
+                break;
+            case 4 :
+                _blength[0] = _length[0]/2;
+                _bsize[0] = _size[0]/2;
+                _blength[1] = _length[1]/2;
+                _bsize[1] = _size[1]/2;
+                break;
+            default: 
+                std::cout << "Error not a valid number of Processes declared valid are 1, 2 an 4" << std::endl;
+        }
+    }
+        
+    
   /// Returns the number of cells in each dimension
   const multi_index_t &Geometry::Size() const
   {
-      return _size;
+      //return _size;
+      return _bsize;
   }
   /// Returns the length of the domain
   const multi_real_t &Geometry::Length() const
   {
-      return _length;
+      //return _length;
+      return _blength;
   }
+   const multi_index_t& Geometry::TotalSize() const {
+       return _size;
+   }
+   const multi_real_t& Geometry::TotalLength() const {
+       return _length;
+   }
   /// Returns the meshwidth
   const multi_real_t &Geometry::Mesh() const
   {
