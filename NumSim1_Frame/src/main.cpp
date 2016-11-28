@@ -21,7 +21,6 @@
 #include "parameter.hpp"
 #include "grid.hpp"
 #include "visu.hpp"
-#include "visu.cpp"
 #include "vtk.hpp"
 #include "solver.hpp"
 
