@@ -43,6 +43,7 @@ int main(int argc, char **argv) {
     
   Parameter param;
   Geometry geom(&comm);
+  std::cout << "Size = " << geom.Size()[0] << " " << geom.Size()[1] << std::endl;
   // Create the fluid solver
   std::cout << "compute start" << std::endl;
   Compute comp(&geom, &param);

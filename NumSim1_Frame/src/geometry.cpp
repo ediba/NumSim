@@ -71,7 +71,9 @@ GetSizesOfThreads();
                 break;
             case 2 :
                 _blength[0] = _length[0]/2;
+                _blength[1] = _length[1];
                 _bsize[0] = _size[0]/2;
+                _bsize[1] = _size[1];
                 break;
             case 4 :
                 _blength[0] = _length[0]/2;

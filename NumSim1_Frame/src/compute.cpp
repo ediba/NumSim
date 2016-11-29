@@ -24,19 +24,22 @@ Compute::Compute(const Geometry *geom, const Parameter *param):
 	_p   = new Grid(_geom, offset);
 	_rhs = new Grid(_geom, offset);
 	_tmp = new Grid(_geom, offset);
+    
   
     _t = 0.;
     
     _epslimit = _param->Eps();
+    std::cout << "vor Solver" << std::endl;
     _solver =  new SOR(_geom, _param->Omega());
-    
+    std::cout << "nach Solver" << std::endl;
     _dtlimit = _param->Dt();
   // Init time
   _t = 0.0;
-  
+  std::cout << "vor Updates" << std::endl;
    _geom->Update_U(_u);
     _geom->Update_V(_v);
     _geom->Update_P(_p);
+    std::cout << "nach Updates" << std::endl;
 }
 
 Compute::~Compute(){
