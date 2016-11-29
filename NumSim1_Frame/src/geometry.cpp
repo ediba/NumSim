@@ -21,7 +21,7 @@ void Geometry::Load(const char *file){
 FILE* handle = fopen(file,"r");
 double inval[2];
 char name[20];
-      
+
 while (!feof(handle)) {
 	if (!fscanf(handle, "%s =", name)) continue;
 	if (strcmp(name,"size") == 0) {
