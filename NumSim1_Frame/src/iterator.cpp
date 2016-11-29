@@ -212,3 +212,70 @@ void InteriorIterator::Next()
      }
 
 
+RedIterator::RedIterator(const Geometry* geom): 
+Iterator(geom){
+    First();
+}
+
+void RedIterator::First(){
+    _valid=true;
+    _value=_geom->Size()[0]+2 + 1;
+}
+
+void RedIterator::Next(){
+    if (!_valid) return;
+    // falls am Ende der Zeile 
+    if (Pos()[0] == _geom->Size()[0]+2-2){
+        _value += 3;
+        if(Pos()[1] % 2 == 0){
+            _value += 1;
+        }
+    }else if(Pos()[0] == _geom->Size()[0]+2-3){
+        _value += 4;
+        if(Pos()[1] % 2 == 0){
+            _value += 1;
+        }
+    }else {
+        _value +=2;
+        
+    }    
+    if (_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-2){
+        _valid = false;
+    }else if(_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-3){
+        _valid = false;
+    }
+}
+
+BlackIterator::BlackIterator(const Geometry* geom): 
+Iterator(geom){
+    First();
+}
+
+void BlackIterator::First(){
+    _valid=true;
+    _value=_geom->Size()[0]+2 + 1 + 1;
+}
+
+void BlackIterator::Next(){
+    if (!_valid) return;
+    // falls am Ende der Zeile 
+    if (Pos()[0] == _geom->Size()[0]+2-2){
+        _value += 3;
+        if(Pos()[1] % 2 == 1){
+            _value += 1;
+        }
+    }else if(Pos()[0] == _geom->Size()[0]+2-3){
+        _value += 4;
+        if(Pos()[1] % 2 == 1){
+            _value += 1;
+        }
+    }else {
+        _value +=2;
+        
+    }    
+    if (_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-2){
+        _valid = false;
+    }else if(_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-3){
+        _valid = false;
+    }
+}

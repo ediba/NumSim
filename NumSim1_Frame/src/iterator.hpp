@@ -98,4 +98,30 @@ private:
   index_t _boundary;
 };
 //------------------------------------------------------------------------------
+/** Iterator for red cells (starting on first interior cell)
+*/
+class RedIterator : public Iterator {
+public:
+  /// Construct a new InteriorIterator
+  RedIterator(const Geometry *geom);
+
+  /// Sets the iterator to the first element
+  void First();
+  /// Goes to the next element of the iterator, disables it if position is end
+  void Next();
+};
+//------------------------------------------------------------------------------
+/** Iterator for black cells (starting on second interior cell)
+*/
+class BlackIterator : public Iterator {
+public:
+  /// Construct a new InteriorIterator
+  BlackIterator(const Geometry *geom);
+
+  /// Sets the iterator to the first element
+  void First();
+  /// Goes to the next element of the iterator, disables it if position is end
+  void Next();
+};
+//------------------------------------------------------------------------------
 #endif // __ITERATOR_HPP
