@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
     //Communicator:
     const Communicator comm(&argc, &argv);
     std::cout << "Communicator constructed" << std::endl;
+    
   Parameter param;
   Geometry geom(&comm);
   // Create the fluid solver
