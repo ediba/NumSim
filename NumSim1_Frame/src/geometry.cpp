@@ -64,7 +64,7 @@ GetSizesOfThreads();
         
         index_t mpiRank = _comm->ThreadNum();
         index_t mpiSize = _comm->ThreadCnt();
-        switch(mpiRank){
+        switch(mpiSize){
             case 1 : 
                 _blength = _length;
                 _bsize = _size;
