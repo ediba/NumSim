@@ -63,16 +63,75 @@ _tidx(), _tdim(), _mpi_cart_comm(){
 
     void Communicator::copyBoundary (Grid* grid) const{
     //TODO 
+        std::cout<< " copy bpunday aufgerufen "<< std::endl;
+        if(_size > 1){
+            if(isLeft()){
+                copyRightBoundary(grid);
+            }
+            if(isRight()){
+                copyLeftBoundary(grid);
+            }
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+        if (_size > 2){
+            if(isTop()){
+                copyBottomBoundary(grid);
+            }
+            if(isBottom()){
+                copyTopBoundary(grid);
+            }
+            
+        }
+    }
+    
+    bool Communicator::copyLeftBoundary(Grid* grid) const{
+        //TODO atuomatisch nachbar mpi
+        real_t* buffer = grid->LeftBoundarySwap();
+        std::cout << " Copy Left Boundary " << _rank << std::endl;
+
+        if (!this->isLeft()) {
+            //MPI_Send(buffer, sizeof(buffer)/sizeof(*buffer), MPI_DOUBLE, leftNeighbor, MPI_TAG_BOUNDARY, MPI_COMM_WORLD);
+            int dest = _rank-1;
+            int tag = 0;
+            MPI_Status stat;
+            MPI_Sendrecv_replace( buffer, 4, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
+            grid->RightBoundaryChange(buffer);
+        }   
+        else{return false;}
+        
+    }
+    bool Communicator::copyRightBoundary(Grid* grid) const{
+        real_t* buffer = grid->RightBoundarySwap();
+        std::cout << buffer [0]<<buffer [1]<<buffer [2]<<buffer [3]<<std::endl;
+        std::cout << " Copy Right Boundary " << _rank <<" " << std::endl;
+        //std::cout << " Size of Buffer       "  << (sizeof(&buffer))<< std::endl;
+        
+        if (!this->isRight()) {
+            int dest = _rank+1;
+            int tag = 0;
+            MPI_Status stat;
+            MPI_Sendrecv_replace( buffer, 4, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
+            grid->LeftBoundaryChange(buffer);
+            return true;
+        }
+        else {return false;}
+    }
+    bool Communicator::copyTopBoundary(Grid* grid) const{
+        real_t* buffer = grid->TopBoundarySwap();
+    }
+        
+    bool Communicator::copyBottomBoundary(Grid* grid) const{
+        real_t* buffer = grid->BotBoundarySwap();
     }
 
     const bool Communicator::isLeft () const{
         return (_tidx[0] == 0);
     }
     const bool Communicator::isRight () const{
-        return (_tidx[0] == 1);
+        return (_tidx[0] == _tdim[0]-1);
     }
     const bool Communicator::isTop () const{
-        return (_tidx[1] == 1);
+        return (_tidx[1] == _tdim[1]-1);
     }
     const bool Communicator::isBottom () const{
         return (_tidx[1] == 0);

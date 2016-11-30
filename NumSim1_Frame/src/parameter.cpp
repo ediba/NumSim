@@ -72,14 +72,14 @@ Parameter::Parameter()
               
         }
           ParamFile.close();
-          cout<< " re = " << _re << endl;
-          cout<< " omega = " << _omega << endl;
-          cout<< " alpha = " << _alpha << endl;
-          cout<< " dt = " << _dt << endl;
-          cout<< " tend = " << _tend << endl;
-          cout<< " itermax = " << _itermax << endl;
-          cout<< " eps = " << _eps << endl;
-          cout<< " tau = " << _tau << endl;
+//           cout<< " re = " << _re << endl;
+//           cout<< " omega = " << _omega << endl;
+//           cout<< " alpha = " << _alpha << endl;
+//           cout<< " dt = " << _dt << endl;
+//           cout<< " tend = " << _tend << endl;
+//           cout<< " itermax = " << _itermax << endl;
+//           cout<< " eps = " << _eps << endl;
+//           cout<< " tau = " << _tau << endl;
       }
       else 
       {

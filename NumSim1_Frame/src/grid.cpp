@@ -10,6 +10,8 @@ Grid::Grid(const Geometry *geom, const multi_real_t &offset) : _geom(geom)
  {
      _offset=offset;
      _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
+     _bufferX = new real_t[_geom->Size()[0]];
+     _bufferY = new real_t[_geom->Size()[1]];
   this->Initialize(0.0);
    std::cout << " Grid Initialized " <<std::endl;
 }
@@ -18,12 +20,17 @@ Grid::Grid(const Geometry* geom) :_geom(geom)
      _offset={0.0,0.0};
     ///plus 2 ???
     _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
+    _bufferX = new real_t[_geom->Size()[0]];
+     _bufferY = new real_t[_geom->Size()[1]];
     this->Initialize(0.0);
     std::cout << " Grid Initialized " <<std::endl;
     
 }
-Grid::~Grid()
-{delete[] _data;}
+Grid::~Grid(){
+    delete[] _data;
+    delete[] _bufferX;
+    delete[] _bufferY;
+}
 
 void Grid::Initialize(const real_t& value)
 {
@@ -192,5 +199,72 @@ void Grid::PrintGrid() const{
             std::cout<< Cell(it) <<"\t";
         }
         std::cout<<std::endl;
+    }
+}
+
+///Copy Boundaries for parallel
+//evtl noch mit bool variable bestimmen ob rand oder neben rand
+real_t *Grid::TopBoundarySwap ()const{
+    BoundaryIterator iter(_geom);
+    iter.SetBoundary(3);
+    index_t i = 0;
+    while (iter.Valid()){
+        _bufferX[i] = Cell(iter.Down());
+        iter.Next();
+        i++;
+    }
+    return _bufferX;
+}
+real_t* Grid::LeftBoundarySwap ()const{
+    BoundaryIterator iter(_geom);
+    iter.SetBoundary(2);
+    index_t i = 0;
+    while (iter.Valid()){
+        _bufferY[i] = Cell(iter.Right());
+        iter.Next();
+        i++;
+    }
+    return _bufferY;
+}
+real_t* Grid::BotBoundarySwap ()const{
+    BoundaryIterator iter(_geom);
+    iter.SetBoundary(1);
+    index_t i = 0;
+    while (iter.Valid()){
+        _bufferX[i] = Cell(iter.Top());
+        iter.Next();
+        i++;
+    }
+    return _bufferX;
+}
+real_t* Grid::RightBoundarySwap ()const{
+    BoundaryIterator iter(_geom);
+    iter.SetBoundary(4);
+    index_t i = 0;
+    while (iter.Valid()){
+        _bufferY[i] = Cell(iter.Left());
+        iter.Next();
+        i++;
+    }
+    return _bufferY;
+}
+void Grid::RightBoundaryChange(real_t* bufferYNew){
+    BoundaryIterator iter(_geom);
+    iter.SetBoundary(4);
+    index_t i = 0;
+    while (iter.Valid()){
+        Cell(iter)=bufferYNew[i];
+        iter.Next();
+        i++;
+    }
+}
+void Grid::LeftBoundaryChange(real_t* bufferYNew){
+    BoundaryIterator iter(_geom);
+    iter.SetBoundary(2);
+    index_t i = 0;
+    while (iter.Valid()){
+        Cell(iter)=bufferYNew[i];
+        iter.Next();
+        i++;
     }
 }

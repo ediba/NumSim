@@ -23,7 +23,7 @@ public:
     real_t	geatherMin		(const real_t& val) const;
     real_t	geatherMax		(const real_t& val) const;
 
-	void	copyBoundary	(Grid* grid) const;
+    void copyBoundary	(Grid* grid) const;
 
 	const bool isLeft () const;
 	const bool isRight () const;
@@ -32,16 +32,16 @@ public:
 private:
     // evtl nicht notwendig
     MPI_Comm _mpi_cart_comm;
-	multi_index_t _tidx;
-	multi_index_t _tdim;
-	int _rank;
-	int _size;
-	bool _evenodd;
+    multi_index_t _tidx;
+    multi_index_t _tdim;
+    int _rank;
+    int _size;
+    bool _evenodd;
 
-	bool copyLeftBoundary	(Grid* grid) const;
-    bool copyRightBoundary	(Grid* grid) const;
-    bool copyTopBoundary	(Grid* grid) const;
-    bool copyBottomBoundary	(Grid* grid) const;
+    bool copyLeftBoundary (Grid* grid) const;
+    bool copyRightBoundary (Grid* grid) const;
+    bool copyTopBoundary (Grid* grid) const;
+    bool copyBottomBoundary (Grid* grid) const;
 };
 //------------------------------------------------------------------------------
 #endif // __COMM_HPP

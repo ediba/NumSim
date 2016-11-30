@@ -79,10 +79,23 @@ public:
   
   ///prints grid to console
   void PrintGrid() const;
+  
+  ///copy Boundaries for parallel
+  real_t* TopBoundarySwap ()const;
+  real_t* LeftBoundarySwap ()const;
+  real_t* BotBoundarySwap ()const;
+  real_t* RightBoundarySwap ()const;
+  void RightBoundaryChange(real_t* bufferYNew);
+  void LeftBoundaryChange(real_t* bufferYNew);
+
+  
 
 
 private:
   real_t *_data;
+  //Buffers for parallel
+  real_t *_bufferX;
+  real_t *_bufferY;
   /// Returns a pointer to the raw data
   real_t *Data();
   multi_real_t _offset;
