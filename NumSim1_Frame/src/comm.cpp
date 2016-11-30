@@ -94,7 +94,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
             int dest = _rank-1;
             int tag = 0;
             MPI_Status stat;
-            MPI_Sendrecv_replace( buffer, 4, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
+            MPI_Sendrecv_replace( buffer, sizeof(buffer)/sizeof(*buffer), MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
             grid->RightBoundaryChange(buffer);
         }   
         else{return false;}
@@ -110,7 +110,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
             int dest = _rank+1;
             int tag = 0;
             MPI_Status stat;
-            MPI_Sendrecv_replace( buffer, 4, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
+            MPI_Sendrecv_replace( buffer, sizeof(buffer)/sizeof(*buffer), MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
             grid->LeftBoundaryChange(buffer);
             return true;
         }
