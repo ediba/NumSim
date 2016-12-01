@@ -48,36 +48,38 @@ int main(int argc, char **argv) {
   
   Grid Testgrid(&geom);
   ////////////////////////////////////////////////
-  // Test für comm.copyBoundary für zwei Prozesse
+  // Test für comm.copyBoundary
   // im input file kleine anzahl an gitter nehmen!!
   ///////////////////////////////////////////////
-  if (comm.ThreadNum() == 0){
-  Testgrid.Initialize(0);
+  //Intialisiere
+  Testgrid.Initialize(comm.ThreadNum());
+  MPI_Barrier(MPI_COMM_WORLD);
+  //Gib Koordinaten für jeden Prozess aus
+  for(int i=0; i<comm.ThreadCnt();i++){
+      if(comm.ThreadNum() == i){
+          std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein Position ist " <<comm.ThreadIdx()[0]<<"|"<<comm.ThreadIdx()[1]<< std::endl;
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
   }
-  else if(comm.ThreadNum() == 1){
-      Testgrid.Initialize(1);
-  }
-    MPI_Barrier(MPI_COMM_WORLD);
-  if(comm.ThreadNum() == 0){
-      std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid vor dem Swap " << std::endl;
-      Testgrid.PrintGrid();
+  //Gitter am Anfang ausgeben
+  for(int i=0; i<comm.ThreadCnt();i++){
+      if(comm.ThreadNum() == i){
+          std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid vor dem Swap " << std::endl;
+          Testgrid.PrintGrid();
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
   }
   MPI_Barrier(MPI_COMM_WORLD);
-  if(comm.ThreadNum() == 1){
-      std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid vor dem Swap " << std::endl;
-      Testgrid.PrintGrid();
-  }
-  MPI_Barrier(MPI_COMM_WORLD);
+  //Swap durchführen
   comm.copyBoundary(&Testgrid);
   MPI_Barrier(MPI_COMM_WORLD);
-  if(comm.ThreadNum() == 0){
-      std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid nach dem Swap " << std::endl;
-      Testgrid.PrintGrid();
-  }
-  MPI_Barrier(MPI_COMM_WORLD);
-  if(comm.ThreadNum() == 1){
-      std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid nach dem Swap " << std::endl;
-      Testgrid.PrintGrid();
+  //Gitter nach dem Swap ausgeben
+  for(int i=0; i<comm.ThreadCnt();i++){
+      if(comm.ThreadNum() == i){
+          std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid nach dem Swap " << std::endl;
+          Testgrid.PrintGrid();
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
   }
   
   //std::cout<<" \n" << std::endl;

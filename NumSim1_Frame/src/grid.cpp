@@ -10,8 +10,6 @@ Grid::Grid(const Geometry *geom, const multi_real_t &offset) : _geom(geom)
  {
      _offset=offset;
      _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
-     _bufferX = new real_t[_geom->Size()[0]];
-     _bufferY = new real_t[_geom->Size()[1]];
   this->Initialize(0.0);
    std::cout << " Grid Initialized " <<std::endl;
 }
@@ -20,16 +18,12 @@ Grid::Grid(const Geometry* geom) :_geom(geom)
      _offset={0.0,0.0};
     ///plus 2 ???
     _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
-    _bufferX = new real_t[_geom->Size()[0]];
-     _bufferY = new real_t[_geom->Size()[1]];
     this->Initialize(0.0);
     std::cout << " Grid Initialized " <<std::endl;
     
 }
 Grid::~Grid(){
     delete[] _data;
-    delete[] _bufferX;
-    delete[] _bufferY;
 }
 
 void Grid::Initialize(const real_t& value)
@@ -254,22 +248,42 @@ void Grid::RightBoundarySwap (real_t* buffer){
         i++;
     }
 }
-void Grid::RightBoundaryChange(real_t* bufferYNew){
+void Grid::RightBoundaryChange(real_t* bufferNew){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(4);
     index_t i = 0;
     while (iter.Valid()){
-        Cell(iter)=bufferYNew[i];
+        Cell(iter)=bufferNew[i];
         iter.Next();
         i++;
     }
 }
-void Grid::LeftBoundaryChange(real_t* bufferYNew){
+void Grid::LeftBoundaryChange(real_t* bufferNew){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(2);
     index_t i = 0;
     while (iter.Valid()){
-        Cell(iter)=bufferYNew[i];
+        Cell(iter)=bufferNew[i];
+        iter.Next();
+        i++;
+    }
+}
+void Grid::BotBoundaryChange(real_t* bufferNew){
+    BoundaryIterator iter(_geom);
+    iter.SetBoundary(1);
+    index_t i = 0;
+    while (iter.Valid()){
+        Cell(iter)=bufferNew[i];
+        iter.Next();
+        i++;
+    }
+}
+void Grid::TopBoundaryChange(real_t* bufferNew){
+    BoundaryIterator iter(_geom);
+    iter.SetBoundary(3);
+    index_t i = 0;
+    while (iter.Valid()){
+        Cell(iter)=bufferNew[i];
         iter.Next();
         i++;
     }

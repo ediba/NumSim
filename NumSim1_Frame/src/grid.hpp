@@ -89,17 +89,16 @@ public:
   void LeftBoundarySwap (real_t* buffer);
   void BotBoundarySwap (real_t* buffer);
   void RightBoundarySwap (real_t* buffer);
-  void RightBoundaryChange(real_t* bufferYNew);
-  void LeftBoundaryChange(real_t* bufferYNew);
+  void RightBoundaryChange(real_t* bufferNew);
+  void LeftBoundaryChange(real_t* bufferNew);
+  void BotBoundaryChange(real_t* bufferNew);
+  void TopBoundaryChange(real_t* bufferNew);
 
   
 
 
 private:
   real_t *_data;
-  //Buffers for parallel
-  real_t *_bufferX;
-  real_t *_bufferY;
   /// Returns a pointer to the raw data
   real_t *Data();
   multi_real_t _offset;
