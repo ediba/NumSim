@@ -63,21 +63,21 @@ _tidx(), _tdim(), _mpi_cart_comm(){
 
     void Communicator::copyBoundary (Grid* grid) const{
     //TODO 
-        std::cout<< " copy bpunday aufgerufen "<< std::endl;
+        std::cout<< " copyBoundary aufgerufen "<< std::endl;
         if(_size > 1){
-            if(isLeft()){
+            if(!isRight()){
                 copyRightBoundary(grid);
             }
-            if(isRight()){
+            if(!isLeft()){
                 copyLeftBoundary(grid);
             }
         }
         MPI_Barrier(MPI_COMM_WORLD);
         if (_size > 2){
-            if(isTop()){
+            if(!isBottom()){
                 copyBottomBoundary(grid);
             }
-            if(isBottom()){
+            if(!isTop()){
                 copyTopBoundary(grid);
             }
             
@@ -85,24 +85,27 @@ _tidx(), _tdim(), _mpi_cart_comm(){
     }
     
     bool Communicator::copyLeftBoundary(Grid* grid) const{
-        //TODO atuomatisch nachbar mpi
-        real_t* buffer = grid->LeftBoundarySwap();
-        std::cout << " Copy Left Boundary " << _rank << std::endl;
+        //TODO atuomatisch nachbar mpi:rank des Nachbarfeldes
+        index_t size = grid->SizeY();
+        real_t buffer[size];
+        grid->LeftBoundarySwap(buffer);
+        std::cout << " Copy Left Boundary "<< _rank << " with size " << size <<std::endl;
 
         if (!this->isLeft()) {
             //MPI_Send(buffer, sizeof(buffer)/sizeof(*buffer), MPI_DOUBLE, leftNeighbor, MPI_TAG_BOUNDARY, MPI_COMM_WORLD);
             int dest = _rank-1;
             int tag = 0;
             MPI_Status stat;
-            MPI_Sendrecv_replace( buffer, sizeof(buffer)/sizeof(*buffer), MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
+            MPI_Sendrecv_replace( buffer, size, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
             grid->RightBoundaryChange(buffer);
         }   
         else{return false;}
         
     }
     bool Communicator::copyRightBoundary(Grid* grid) const{
-        real_t* buffer = grid->RightBoundarySwap();
-        std::cout << buffer [0]<<buffer [1]<<buffer [2]<<buffer [3]<<std::endl;
+        index_t size = grid->SizeY();
+        real_t buffer[size];
+        grid->RightBoundarySwap(buffer);
         std::cout << " Copy Right Boundary " << _rank <<" " << std::endl;
         //std::cout << " Size of Buffer       "  << (sizeof(&buffer))<< std::endl;
         
@@ -110,18 +113,18 @@ _tidx(), _tdim(), _mpi_cart_comm(){
             int dest = _rank+1;
             int tag = 0;
             MPI_Status stat;
-            MPI_Sendrecv_replace( buffer, sizeof(buffer)/sizeof(*buffer), MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
+            MPI_Sendrecv_replace( buffer, size, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
             grid->LeftBoundaryChange(buffer);
             return true;
         }
         else {return false;}
     }
     bool Communicator::copyTopBoundary(Grid* grid) const{
-        real_t* buffer = grid->TopBoundarySwap();
+        //real_t* buffer = grid->TopBoundarySwap();
     }
         
     bool Communicator::copyBottomBoundary(Grid* grid) const{
-        real_t* buffer = grid->BotBoundarySwap();
+        //real_t* buffer = grid->BotBoundarySwap();
     }
 
     const bool Communicator::isLeft () const{

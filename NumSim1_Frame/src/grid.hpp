@@ -77,14 +77,18 @@ public:
   /// Returns the absolute maximal value
   real_t AbsMax() const;
   
+  ///Returns the size of the grid in x-Direction
+  index_t SizeX();
+  ///Returns the size of the grid in y-Direction
+  index_t SizeY();
   ///prints grid to console
   void PrintGrid() const;
   
   ///copy Boundaries for parallel
-  real_t* TopBoundarySwap ()const;
-  real_t* LeftBoundarySwap ()const;
-  real_t* BotBoundarySwap ()const;
-  real_t* RightBoundarySwap ()const;
+  void TopBoundarySwap (real_t* buffer);
+  void LeftBoundarySwap (real_t* buffer);
+  void BotBoundarySwap (real_t* buffer);
+  void RightBoundarySwap (real_t* buffer);
   void RightBoundaryChange(real_t* bufferYNew);
   void LeftBoundaryChange(real_t* bufferYNew);
 
