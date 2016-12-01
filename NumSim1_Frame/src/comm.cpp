@@ -85,74 +85,80 @@ _tidx(), _tdim(), _mpi_cart_comm(){
     }
     
     bool Communicator::copyLeftBoundary(Grid* grid) const{
-        //TODO atuomatisch nachbar mpi:rank des Nachbarfeldes
         index_t size = grid->SizeY();
         real_t buffer[size];
         grid->LeftBoundarySwap(buffer);
-        std::cout << "Prozess: " << _rank << ": Copy Left Boundary "<< " with size " << size <<std::endl;
 
-        if (!this->isLeft()) {
+        //if (!this->isLeft()) {
             //MPI_Send(buffer, sizeof(buffer)/sizeof(*buffer), MPI_DOUBLE, leftNeighbor, MPI_TAG_BOUNDARY, MPI_COMM_WORLD);
-            int dest = _rank-1;
+            int dest,source;
+            MPI_Cart_shift(this->_mpi_cart_comm,0,-1,&source,&dest);
             int tag = 0;
             MPI_Status stat;
             MPI_Sendrecv_replace( buffer, size, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
             grid->RightBoundaryChange(buffer);
-        }   
-        else{return false;}
+        //}
+        std::cout << "Prozess: " << _rank << ": Copy Left Boundary "<< " with size " << size << " to process " << dest << std::endl;   
+        //else{return false;}
         
     }
     bool Communicator::copyRightBoundary(Grid* grid) const{
         index_t size = grid->SizeY();
         real_t buffer[size];
         grid->RightBoundarySwap(buffer);
-        std::cout << "Prozess: " << _rank << ": Copy Right Boundary "<< " with size " << size <<std::endl;
         //std::cout << " Size of Buffer       "  << (sizeof(&buffer))<< std::endl;
         
-        if (!this->isRight()) {
-            int dest = _rank+1;
+        //if (!this->isRight()) {
+            int dest,source;
+            MPI_Cart_shift(this->_mpi_cart_comm,0,1,&source,&dest);
             int tag = 0;
             MPI_Status stat;
             MPI_Sendrecv_replace( buffer, size, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
             grid->LeftBoundaryChange(buffer);
-            return true;
-        }
-        else {return false;}
+            
+        //}
+        std::cout << "Prozess: " << _rank << ": Copy Right Boundary "<< " with size " << size << " to process " << dest << std::endl;
+        return true;
+        //else {return false;}
     }
     bool Communicator::copyTopBoundary(Grid* grid) const{
         index_t size = grid->SizeX();
         real_t buffer[size];
         grid->TopBoundarySwap(buffer);
-        std::cout << "Prozess: " << _rank << ": Copy Top Boundary "<< " with size " << size <<std::endl;
         //std::cout << " Size of Buffer       "  << (sizeof(&buffer))<< std::endl;
         
-        if (!this->isRight()) {
-            int dest = _rank+2;
+        //if (!this->isRight()) {
+            int dest,source;
+            MPI_Cart_shift(this->_mpi_cart_comm,1,1,&source,&dest);
             int tag = 0;
             MPI_Status stat;
             MPI_Sendrecv_replace( buffer, size, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
             grid->BotBoundaryChange(buffer);
-            return true;
-        }
-        else {return false;}
+            
+        //}
+        std::cout << "Prozess: " << _rank << ": Copy Top Boundary "<< " with size " << size << " to process " << dest << std::endl;
+        return true;
+        //else {return false;}
     }
         
     bool Communicator::copyBottomBoundary(Grid* grid) const{
         index_t size = grid->SizeX();
         real_t buffer[size];
         grid->BotBoundarySwap(buffer);
-        std::cout << "Prozess: " << _rank << ": Copy Bottom Boundary "<< " with size " << size <<std::endl;
         //std::cout << " Size of Buffer       "  << (sizeof(&buffer))<< std::endl;
         
-        if (!this->isRight()) {
-            int dest = _rank-2;
+        //if (!this->isRight()) {
+            int dest,source;
+            MPI_Cart_shift(this->_mpi_cart_comm,1,-1,&source,&dest);
             int tag = 0;
             MPI_Status stat;
             MPI_Sendrecv_replace( buffer, size, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
             grid->TopBoundaryChange(buffer);
-            return true;
-        }
-        else {return false;}
+            
+        //}
+        std::cout << "Prozess: " << _rank << ": Copy Bot Boundary "<< " with size " << size << " to process " << dest << std::endl;
+        return true;
+        //else {return false;}
     }
 
     const bool Communicator::isLeft () const{
