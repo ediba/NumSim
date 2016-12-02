@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     //Communicator:
     const Communicator comm(&argc, &argv);
     std::cout << " ich bin " << comm.ThreadNum() << " meine Position ist " << comm.ThreadIdx()[0] << " " << comm.ThreadIdx()[1]<< " die Groesse ist:  "<< comm.ThreadDim()[0] << " "<<  comm.ThreadDim()[1] <<" Ich bin " << comm.EvenOdd() << std::endl;
-
+    MPI_Barrier(MPI_COMM_WORLD);
     std::cout << "Communicator constructed" << std::endl;
     
   Parameter param;
@@ -55,13 +55,14 @@ int main(int argc, char **argv) {
   Testgrid.Initialize(comm.ThreadNum());
   MPI_Barrier(MPI_COMM_WORLD);
   //Gib Koordinaten für jeden Prozess aus
-  for(int i=0; i<comm.ThreadCnt();i++){
-      if(comm.ThreadNum() == i){
-          std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein Position ist " <<comm.ThreadIdx()[0]<<"|"<<comm.ThreadIdx()[1]<< std::endl;
-      }
-      MPI_Barrier(MPI_COMM_WORLD);
-  }
+//   for(int i=0; i<comm.ThreadCnt();i++){
+//       if(comm.ThreadNum() == i){
+//           std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein Position ist " <<comm.ThreadIdx()[0]<<"|"<<comm.ThreadIdx()[1]<< std::endl;
+//       }
+//       MPI_Barrier(MPI_COMM_WORLD);
+//   }
   //Gitter am Anfang ausgeben
+  MPI_Barrier(MPI_COMM_WORLD);
   for(int i=0; i<comm.ThreadCnt();i++){
       if(comm.ThreadNum() == i){
           std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid vor dem Swap " << std::endl;
@@ -78,9 +79,11 @@ int main(int argc, char **argv) {
       if(comm.ThreadNum() == i){
           std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid nach dem Swap " << std::endl;
           Testgrid.PrintGrid();
+          MPI_Barrier(MPI_COMM_WORLD);
       }
       MPI_Barrier(MPI_COMM_WORLD);
   }
+  MPI_Barrier(MPI_COMM_WORLD);
   
   //std::cout<<" \n" << std::endl;
   //MPI_Barrier(MPI_COMM_WORLD);
