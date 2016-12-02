@@ -44,3 +44,55 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
     return sqrt((totalRes)/(_geom->Size()[0]*_geom->Size()[1]));
 }
 
+/// Constructs an actual SOR solver
+RedOrBlackSOR::RedOrBlackSOR (const Geometry* geom, const real_t& omega) : SOR(geom,omega) {}
+// Destructor
+RedOrBlackSOR::~RedOrBlackSOR(){}
+
+real_t RedOrBlackSOR::Cycle(Grid *grid, const Grid *rhs) const{
+    real_t totalRes = 0;
+    totalRes += RedCycle(grid,rhs);
+    //TODO: And diese Stelle kommt die Kommunikation zwischen den parallelen Grids (über Geometry?!)
+    totalRes += BlackCycle(grid,rhs);
+    
+    //for averaging
+    return sqrt((totalRes)/(_geom->Size()[0]*_geom->Size()[1]));
+}
+
+real_t RedOrBlackSOR::RedCycle (Grid* grid, const Grid* rhs) const{
+    const real_t h1 = _geom->Mesh()[0];
+    const real_t h2 = _geom->Mesh()[1];
+    //the multiplier is not changing for any point in grid, that is why it is before the loop
+    const real_t multiplier = _omega*0.5*h1*h1*h2*h2/((h1*h1)+(h2*h2));
+    RedIterator iter(_geom);
+    iter.First();
+    real_t totalRes = 0;
+    
+    while (iter.Valid()){
+        real_t residual = localRes(iter, grid, rhs);
+        totalRes += residual*residual;
+        //grid->Cell(iter) =(1.0-_omega)*grid->Cell(iter) + multiplier * residual;//old: -=multiplier*residual;
+        grid->Cell(iter) += multiplier * residual;
+        iter.Next();
+    }
+    return totalRes;
+}
+
+real_t RedOrBlackSOR::BlackCycle (Grid* grid, const Grid* rhs) const{
+    const real_t h1 = _geom->Mesh()[0];
+    const real_t h2 = _geom->Mesh()[1];
+    //the multiplier is not changing for any point in grid, that is why it is before the loop
+    const real_t multiplier = _omega*0.5*h1*h1*h2*h2/((h1*h1)+(h2*h2));
+    BlackIterator iter(_geom);
+    iter.First();
+    real_t totalRes = 0;
+    
+    while (iter.Valid()){
+        real_t residual = localRes(iter, grid, rhs);
+        totalRes += residual*residual;
+        //grid->Cell(iter) =(1.0-_omega)*grid->Cell(iter) + multiplier * residual;//old: -=multiplier*residual;
+        grid->Cell(iter) += multiplier * residual;
+        iter.Next();
+    }
+    return totalRes;
+}
