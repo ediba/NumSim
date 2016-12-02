@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     std::cout << "main start" << std::endl;
     //Communicator:
     const Communicator comm(&argc, &argv);
-    std::cout << " ich bin " << comm.ThreadNum() << " meine Position ist " << comm.ThreadIdx()[0] << " " << comm.ThreadIdx()[1]<< " die Groesse ist:  "<< comm.ThreadDim()[0] << " "<<  comm.ThreadDim()[1] << std::endl;
+    std::cout << " ich bin " << comm.ThreadNum() << " meine Position ist " << comm.ThreadIdx()[0] << " " << comm.ThreadIdx()[1]<< " die Groesse ist:  "<< comm.ThreadDim()[0] << " "<<  comm.ThreadDim()[1] <<" Ich bin " << comm.EvenOdd() << std::endl;
 
     std::cout << "Communicator constructed" << std::endl;
     

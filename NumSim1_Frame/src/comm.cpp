@@ -63,6 +63,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
 
     void Communicator::copyBoundary (Grid* grid) const{
         //std::cout<< " copyBoundary aufgerufen "<< std::endl;
+        //TODO: EvenOdd einbauen, also Kommuikation in 2 Schritten
         if(_size > 1){
             if(!isRight()){
                 copyRightBoundary(grid);
