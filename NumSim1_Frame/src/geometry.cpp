@@ -55,11 +55,16 @@ fclose(handle);
 GetSizesOfThreads();
 //berechnet die Höhe und Breite eines Elements
 
+//std::cout << "Prozess " << _comm->ThreadNum() << ": Geometry constructed with _blength[0]=" << _blength[0] << "; _bsize[0]=" << _bsize[0] << "; _mesh[0]=" << _mesh[0] << std::endl;
+
 }
     void Geometry::GetSizesOfThreads (){
         //changes the total number of cells (_size) into an even number with respect to the number of threads
         _size[0] = _size[0] - (_size[0]%(_comm->ThreadDim ()[0]*2));
         _size[1] = _size[1] - (_size[1]%(_comm->ThreadDim ()[1]*2));
+        
+        _mesh[0] = _length[0]/_size[0];
+        _mesh[1] = _length[1]/_size[1];
         
         //calculates the number of cells for each thread (_bsize)
         _bsize[0] = _size[0]/_comm->ThreadDim ()[0];
@@ -70,8 +75,9 @@ GetSizesOfThreads();
         }
         
         //calculates the legnth of each thread (_blength)
-        _blength[0] = _length[0]/_size[0];
-        _blength[1] = _length[1]/_size[1];
+        _blength[0] = _length[0]/(_comm->ThreadDim ()[0]);
+        _blength[1] = _length[1]/(_comm->ThreadDim ()[1]);
+        
     }
         
     

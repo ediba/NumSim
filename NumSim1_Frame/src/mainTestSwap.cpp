@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
       if(comm.ThreadNum() == i){
           std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid nach dem Swap " << std::endl;
           Testgrid.PrintGrid();
-          MPI_Barrier(MPI_COMM_WORLD);
       }
       MPI_Barrier(MPI_COMM_WORLD);
   }
