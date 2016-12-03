@@ -21,7 +21,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
   for(index_t dim = 0; dim < DIM; dim++) {
     this->_tdim[dim] = dims[dim];
   }
-    
+
     //TODO vll nicht notwendig und anders lösbar (nurkopiert)
   MPI_Cart_create(MPI_COMM_WORLD, (int)DIM, dims, periodic, 0, &this->_mpi_cart_comm);
   int coords[DIM];
@@ -57,9 +57,27 @@ _tidx(), _tdim(), _mpi_cart_comm(){
         return _evenodd;
     }
 
-//     real_t	geatherSum		(const real_t& val) const;
-//     real_t	geatherMin		(const real_t& val) const;
-//     real_t	geatherMax		(const real_t& val) const;
+    // MPI_Gather und MPI_Gatherv sammeln Daten von allen Prozessen ein,
+    // ein einzelner Prozeß, der "Besitzer" der Funktion erhält die Daten.
+    // MPI_Reduce, MPI_Allreduce und MPI_Scan, wie MPI_Gather(v), nur daß man noch mitteilen muß wie die Daten zu verrechnen sind.
+
+    ///int MPI_Allreduce(void *sendbuf, void *recvbuf, int count, MPI_Datatype type, MPI_Op op, MPI_Comm comm);
+    ///Sammelt Daten von allen Prozessen im Kommunikator, verrechnet sie und sendet das Ergebnis an alle Prozesse im Kommunikator.
+//     real_t Communicator::geatherSum (const real_t& val) const{
+//         real_t sum;
+//         MPI_Allreduce(&val, &sum, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+//         return sum;
+//     }
+//     real_t Communicator::geatherMin (const real_t& val) const{
+//         real_t minGather;
+//         MPI_Allreduce(&val, &minGather, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+//         return minGather;
+//     }
+//     real_t Communicator::geatherMax (const real_t& val) const{
+//         real_t maxGather;
+//         MPI_Allreduce(&val, &maxGather, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+//         return maxGather;
+//     }
 
     void Communicator::copyBoundary (Grid* grid) const{
         //std::cout<< " copyBoundary aufgerufen "<< std::endl;
@@ -80,10 +98,10 @@ _tidx(), _tdim(), _mpi_cart_comm(){
             if(!isTop()){
                 copyTopBoundary(grid);
             }
-            
+
         }
     }
-    
+
     bool Communicator::copyLeftBoundary(Grid* grid) const{
         index_t size = grid->SizeY();
         real_t buffer[size];
@@ -94,9 +112,9 @@ _tidx(), _tdim(), _mpi_cart_comm(){
         MPI_Status stat;
         MPI_Sendrecv_replace( buffer, size, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
         grid->RightBoundaryChange(buffer);
-        std::cout << "Prozess: " << _rank << ": Copy Left Boundary "<< " with size " << size << " to process " << dest << std::endl;   
+        std::cout << "Prozess: " << _rank << ": Copy Left Boundary "<< " with size " << size << " to process " << dest << std::endl;
         return true;
-        
+
     }
     bool Communicator::copyRightBoundary(Grid* grid) const{
         index_t size = grid->SizeY();
@@ -124,7 +142,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
         std::cout << "Prozess: " << _rank << ": Copy Top Boundary "<< " with size " << size << " to process " << dest << std::endl;
         return true;
     }
-        
+
     bool Communicator::copyBottomBoundary(Grid* grid) const{
         index_t size = grid->SizeX();
         real_t buffer[size];
@@ -157,7 +175,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
 // 	int _rank;
 // 	int _size;
 // 	bool _evenodd;
-// 
+//
 //     bool copyLeftBoundary	(Grid* grid) const;
 //     bool copyRightBoundary	(Grid* grid) const;
 //     bool copyTopBoundary	(Grid* grid) const;

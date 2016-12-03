@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
   std::cout << "Size = " << geom.Size()[0] << " " << geom.Size()[1] << std::endl;
   // Create the fluid solver
   std::cout << "compute start" << std::endl;
-  Compute comp(&geom, &param);
+  Compute comp(&geom, &param, &comm);
   std::cout << "compute done" << std::endl;
 
   // Create and initialize the visualization

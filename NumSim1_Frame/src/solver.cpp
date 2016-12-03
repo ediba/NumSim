@@ -32,7 +32,7 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
     InteriorIterator iter(_geom);
     iter.First();
     real_t totalRes = 0;
-    
+
     while (iter.Valid()){
         real_t residual = localRes(iter, grid, rhs);
         totalRes += residual*residual;
@@ -45,19 +45,25 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
 }
 
 /// Constructs an actual SOR solver
-RedOrBlackSOR::RedOrBlackSOR (const Geometry* geom, const real_t& omega) : SOR(geom,omega) {}
+RedOrBlackSOR::RedOrBlackSOR (const Geometry* geom, const real_t& omega, const Communicator* comm) : SOR(geom,omega), _comm(comm) {}
 // Destructor
 RedOrBlackSOR::~RedOrBlackSOR(){}
 
 real_t RedOrBlackSOR::Cycle(Grid *grid, const Grid *rhs) const{
     real_t totalRes = 0;
     totalRes += RedCycle(grid,rhs);
+
     //TODO: And diese Stelle kommt die Kommunikation zwischen den parallelen Grids (über Geometry?!)
+    /// Communicate the pressure values
+    _comm->copyBoundary(grid);
     totalRes += BlackCycle(grid,rhs);
-    
+     /// Communicate the pressure values
+    _comm->copyBoundary(grid);
+
     //for averaging
     return sqrt((totalRes)/(_geom->Size()[0]*_geom->Size()[1]));
 }
+
 
 real_t RedOrBlackSOR::RedCycle (Grid* grid, const Grid* rhs) const{
     const real_t h1 = _geom->Mesh()[0];
@@ -67,7 +73,7 @@ real_t RedOrBlackSOR::RedCycle (Grid* grid, const Grid* rhs) const{
     RedIterator iter(_geom);
     iter.First();
     real_t totalRes = 0;
-    
+
     while (iter.Valid()){
         real_t residual = localRes(iter, grid, rhs);
         totalRes += residual*residual;
@@ -86,7 +92,7 @@ real_t RedOrBlackSOR::BlackCycle (Grid* grid, const Grid* rhs) const{
     BlackIterator iter(_geom);
     iter.First();
     real_t totalRes = 0;
-    
+
     while (iter.Valid()){
         real_t residual = localRes(iter, grid, rhs);
         totalRes += residual*residual;

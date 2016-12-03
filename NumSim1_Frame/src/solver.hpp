@@ -16,6 +16,7 @@
  */
 //------------------------------------------------------------------------------
 #include "typedef.hpp"
+#include "comm.hpp"
 //------------------------------------------------------------------------------
 #ifndef __SOLVER_HPP
 #define __SOLVER_HPP
@@ -68,12 +69,14 @@ protected:
 /** concrete Red or Balck SOR solver
  */
 class RedOrBlackSOR : public SOR {
+    private:
+     const Communicator* _comm;
 public:
 	/// Constructs an actual SOR solver
-	RedOrBlackSOR (const Geometry* geom, const real_t& omega);
+	RedOrBlackSOR (const Geometry* geom, const real_t& omega,  const Communicator* comm);
 	/// Destructor
 	~RedOrBlackSOR();
-        
+
         real_t Cycle(Grid *grid, const Grid *rhs) const;
 	real_t RedCycle (Grid* grid, const Grid* rhs) const;
 	real_t BlackCycle (Grid* grid, const Grid* rhs) const;

@@ -32,7 +32,7 @@
 class Compute {
 public:
   /// Creates a compute instance with given geometry and parameter
-  Compute(const Geometry *geom, const Parameter *param);
+  Compute(const Geometry *geom, const Parameter *param, const Communicator *comm);
   /// Deletes all grids
   ~Compute();
 
@@ -89,6 +89,7 @@ private:
   Grid *_tmp;
 
   Solver *_solver;
+   const Communicator* _comm;
 
   const Geometry *_geom;
   const Parameter *_param;

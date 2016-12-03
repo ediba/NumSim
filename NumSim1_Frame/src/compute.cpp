@@ -1,8 +1,9 @@
 #include "compute.hpp"
 
-Compute::Compute(const Geometry *geom, const Parameter *param):
+Compute::Compute(const Geometry *geom, const Parameter *param, const Communicator *comm):
     _geom (geom),
-    _param (param)
+    _param (param),
+    _comm (comm)
 {
     /*_p = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]*0.5});
     _p->Initialize(0.0);
@@ -12,7 +13,7 @@ Compute::Compute(const Geometry *geom, const Parameter *param):
     _G = new Grid(geom);
     _rhs = new Grid(geom);
     _tmp = new Grid(geom);*/
-    
+
     multi_real_t offset;
 	offset[0] = 0.0; offset[1] = -0.5*_geom->Mesh()[1];
 	_u   = new Grid(_geom, offset);
@@ -24,10 +25,10 @@ Compute::Compute(const Geometry *geom, const Parameter *param):
 	_p   = new Grid(_geom, offset);
 	_rhs = new Grid(_geom, offset);
 	_tmp = new Grid(_geom, offset);
-    
-  
+
+
     _t = 0.;
-    
+
     _epslimit = _param->Eps();
     std::cout << "vor Solver" << std::endl;
     _solver =  new SOR(_geom, _param->Omega());
@@ -59,14 +60,14 @@ void Compute::TimeStep(bool printInfo){
     //Der Algorithmus wie er auf S. 22 im Skript steht:
     //1) compute dt (genaue Berechnung S.22)
     if(printInfo) std::cout << "Set timestep" << std::endl;
-    
+
     //Gets dt from input file
     real_t dt = 10000;
     if ( _param->Dt() != 0.0)
      dt = _param->Dt();
-    
+
     const multi_real_t &h = _geom->Mesh();
-    
+
     // Check diffusiove operator limitation (S.25)
     _dtlimit = _param->Tau() * (_param->Re()/2) * ((h[0]*h[0]*h[1]*h[1])/(h[0]*h[0]+h[1]*h[1]));
     if(_dtlimit < dt) {
@@ -80,7 +81,7 @@ void Compute::TimeStep(bool printInfo){
     std::cerr << "Time Step Linitation Convection Operator dt = " << dt << " umax Abs = " << _u->AbsMax()<< std::endl;
   }
     if(printInfo) std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
-    
+
     //2) boundary_val
     if(printInfo) std::cout << "Setting boundary values" << std::endl;
 
@@ -89,24 +90,32 @@ void Compute::TimeStep(bool printInfo){
     _geom->Update_P(_p);
     _geom->Update_V(_G);
     _geom->Update_U(_F);
+    /// Since we have now more Grids, to fulfill the required inequalities for stability
+    ///we need to take the minimum of all the grids.
+   // dt = _comm->gatherMin(dt);
 
-    //3) compute _F and _G (vorläufige Geschwindigkeiten) 
+    //3) compute _F and _G (vorläufige Geschwindigkeiten)
     if(printInfo) std::cout << "Compute F and G" << std::endl;
+    ///After the computation of the MomentumEquations, we need to communicate the velocities
     MomentumEqu(dt);
+    _comm->copyBoundary(_F);
+    _comm->copyBoundary(_G);
 
     //4) compute _rhs
     if(printInfo) std::cout << "Compute rhs" << std::endl;
     RHS(dt);
-    
+
     //5) solve Poisson equation with SOR solver
     if(printInfo) std::cout << "Starting SOR solver" << std::endl;
-    
+
     real_t res = 0;
     for (index_t i = 1; i<=_param->IterMax(); i++){
         res = _solver->Cycle(_p, _rhs);
+        ///everybody needs the same residual afterwards
+//        res = _comm->gatherMax(res);
         _geom->Update_P(_p);
          if(printInfo) {std::cout <<" Time " << _t << " Interation : " << i << " residual = " << res <<  std::endl;
-             
+
         }
         if (res < _epslimit)
         {
@@ -115,12 +124,16 @@ void Compute::TimeStep(bool printInfo){
         }
 
     }
-    
+
     //6) compute _u und _v
     if(printInfo) std::cout << "Compute u and v" << std::endl;
     NewVelocities(dt);
+
+        _comm->copyBoundary(_u);
+        _comm->copyBoundary(_v);
+
     _t+=dt;
-    
+
 }
 
 /// Compute the new velocites u,v
@@ -137,13 +150,13 @@ void Compute::NewVelocities(const real_t &dt){
 void Compute::MomentumEqu(const real_t &dt){
     //externe Kraft fehlt noch
     for(InteriorIterator it = InteriorIterator(_geom); it.Valid(); it.Next()){
-        _F->Cell(it) = _u->Cell(it) + 
+        _F->Cell(it) = _u->Cell(it) +
         dt*(((_u->dxx(it) + _u->dyy(it))/_param->Re())
         -_u->DC_udu_x(it,_param->Alpha())
         -_u->DC_vdu_y(it,_param->Alpha(),_v));
-        
-        _G->Cell(it) = _v->Cell(it) 
-        + dt*(((_v->dxx(it) + _v->dyy(it))/_param->Re()) 
+
+        _G->Cell(it) = _v->Cell(it)
+        + dt*(((_v->dxx(it) + _v->dyy(it))/_param->Re())
         -_v->DC_vdv_y(it,_param->Alpha())
         -_v->DC_udv_x(it,_param->Alpha(),_u));
     }
@@ -188,7 +201,7 @@ const Grid *Compute::GetVelocity(){
 
 /// Computes and returns the vorticity
 const Grid *Compute::GetVorticity(){
-    
+
     // vorticity gleich Rotation : du/y + dv/dx
     // PRoblem hier: Vorticity wird oben rechts am Rand berechnet
     real_t vort;
