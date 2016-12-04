@@ -31,7 +31,9 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
 
     _epslimit = _param->Eps();
     std::cout << "vor Solver" << std::endl;
-    _solver =  new SOR(_geom, _param->Omega());
+    
+    //_solver =  new SOR(_geom, _param->Omega());
+    _solver = new RedOrBlackSOR(_geom, _param->Omega(), _comm);
     std::cout << "nach Solver" << std::endl;
     _dtlimit = _param->Dt();
   // Init time
