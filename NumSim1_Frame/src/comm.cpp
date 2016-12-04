@@ -104,7 +104,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
     }
 
     bool Communicator::copyLeftBoundary(Grid* grid) const{
-        index_t size = grid->SizeY();
+        index_t size = grid->SizeY()+2;
         real_t buffer[size];
         grid->LeftBoundarySwap(buffer);
         int dest,source;
@@ -118,7 +118,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
 
     }
     bool Communicator::copyRightBoundary(Grid* grid) const{
-        index_t size = grid->SizeY();
+        index_t size = grid->SizeY()+2;
         real_t buffer[size];
         grid->RightBoundarySwap(buffer);
         int dest,source;
@@ -131,7 +131,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
         return true;
     }
     bool Communicator::copyTopBoundary(Grid* grid) const{
-        index_t size = grid->SizeX();
+        index_t size = grid->SizeX()+2;
         real_t buffer[size];
         grid->TopBoundarySwap(buffer);
         int dest,source;
@@ -145,7 +145,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
     }
 
     bool Communicator::copyBottomBoundary(Grid* grid) const{
-        index_t size = grid->SizeX();
+        index_t size = grid->SizeX()+2;
         real_t buffer[size];
         grid->BotBoundarySwap(buffer);
         int dest,source;

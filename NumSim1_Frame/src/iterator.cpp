@@ -157,17 +157,17 @@ void InteriorIterator::Next()
             _value = 0;
         }
         if ( _boundary == 1){
-            _value = 1;
+            _value = 0;//1;
         }
         
         else if(_boundary == 2){
-            _value = 2*(_geom->Size()[0]+2)-1;
+            _value = _geom->Size()[0]+1;//2*(_geom->Size()[0]+2)-1;
         }
         else if(_boundary == 3){
-            _value = (_geom->Size()[1]+2-1)*(_geom->Size()[0]+2)+1;
+            _value = (_geom->Size()[1]+2-1)*(_geom->Size()[0]+2);//(_geom->Size()[1]+2-1)*(_geom->Size()[0]+2)+1;
         }
         if (_boundary == 4){
-            _value = _geom->Size()[0]+2;
+            _value = 0;//_geom->Size()[0]+2;
         }
 
      }
@@ -191,7 +191,7 @@ void InteriorIterator::Next()
                 
         }
         else if (_boundary == 1|| _boundary == 3){
-            if(Pos()[0] == _geom->Size()[0]+2-2){
+            if(Pos()[0] == _geom->Size()[0]+1){     //== _geom->Size()[0]+2-2){
                 _valid = false;
             }
             else{
@@ -199,7 +199,7 @@ void InteriorIterator::Next()
             }
         }
         else if  (_boundary == 2|| _boundary == 4){
-            if(Pos()[1] == _geom->Size()[1]+2-2){
+            if(Pos()[1] == _geom->Size()[1]+1){//== _geom->Size()[1]+2-2){
                 _valid = false;
             }
             else{
