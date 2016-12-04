@@ -36,6 +36,7 @@ _tidx(), _tdim(), _mpi_cart_comm(){
 //   printf("Dims: %lu %lu Rank: %i Idx: %lu %lu odd: %i\n", _tdim[0], _tdim[1], _rank, _tidx[0], _tidx[1], _evenodd);
 }
     Communicator::~Communicator (){
+        MPI_Barrier(MPI_COMM_WORLD);
         MPI_Finalize();
     }
 
@@ -63,21 +64,21 @@ _tidx(), _tdim(), _mpi_cart_comm(){
 
     ///int MPI_Allreduce(void *sendbuf, void *recvbuf, int count, MPI_Datatype type, MPI_Op op, MPI_Comm comm);
     ///Sammelt Daten von allen Prozessen im Kommunikator, verrechnet sie und sendet das Ergebnis an alle Prozesse im Kommunikator.
-//     real_t Communicator::geatherSum (const real_t& val) const{
-//         real_t sum;
-//         MPI_Allreduce(&val, &sum, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-//         return sum;
-//     }
-//     real_t Communicator::geatherMin (const real_t& val) const{
-//         real_t minGather;
-//         MPI_Allreduce(&val, &minGather, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
-//         return minGather;
-//     }
-//     real_t Communicator::geatherMax (const real_t& val) const{
-//         real_t maxGather;
-//         MPI_Allreduce(&val, &maxGather, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-//         return maxGather;
-//     }
+    real_t Communicator::geatherSum (real_t& val) const{
+        real_t sum;
+        MPI_Allreduce(&val, &sum, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        return sum;
+    }
+    real_t Communicator::geatherMin (real_t& val) const{
+        real_t minGather;
+        MPI_Allreduce(&val, &minGather, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+        return minGather;
+    }
+    real_t Communicator::geatherMax (real_t& val) const{
+        real_t maxGather;
+        MPI_Allreduce(&val, &maxGather, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+        return maxGather;
+    }
 
     void Communicator::copyBoundary (Grid* grid) const{
         //std::cout<< " copyBoundary aufgerufen "<< std::endl;
@@ -164,10 +165,10 @@ _tidx(), _tdim(), _mpi_cart_comm(){
         return (_tidx[0] == _tdim[0]-1);
     }
     const bool Communicator::isTop () const{
-        return (_tidx[1] == _tdim[1]-1);
+        return (_tidx[1] == 0);
     }
     const bool Communicator::isBottom () const{
-        return (_tidx[1] == 0);
+        return (_tidx[1] == _tdim[1]-1);
     }
 // private:
 // 	multi_index_t _tidx;

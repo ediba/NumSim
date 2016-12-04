@@ -114,7 +114,7 @@ void Compute::TimeStep(bool printInfo){
     for (index_t i = 1; i<=_param->IterMax(); i++){
         res = _solver->Cycle(_p, _rhs);
         ///everybody needs the same residual afterwards
-//        res = _comm->gatherMax(res);
+        res = _comm->geatherMax(res);
         _geom->Update_P(_p);
          if(printInfo) {std::cout <<" Time " << _t << " Interation : " << i << " residual = " << res <<  std::endl;
 

@@ -19,9 +19,9 @@ public:
 
     const bool&	EvenOdd		() const;
 
-    real_t	geatherSum		(const real_t& val) const;
-    real_t	geatherMin		(const real_t& val) const;
-    real_t	geatherMax		(const real_t& val) const;
+    real_t	geatherSum		(real_t& val) const;
+    real_t	geatherMin		(real_t& val) const;
+    real_t	geatherMax		(real_t& val) const;
 
     void copyBoundary	(Grid* grid) const;
 
