@@ -15,13 +15,13 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
     _tmp = new Grid(geom);*/
 
     multi_real_t offset;
-	offset[0] = 0.0; offset[1] = -0.5*_geom->Mesh()[1];
+	offset[0] = _geom->Mesh()[0]; offset[1] = 0.5*_geom->Mesh()[1];
 	_u   = new Grid(_geom, offset);
 	_F   = new Grid(_geom, offset);
-	offset[0] = -0.5*_geom->Mesh()[0]; offset[1] = 0.0;
+	offset[0] = 0.5*_geom->Mesh()[0]; offset[1] = _geom->Mesh()[1];
 	_v   = new Grid(_geom, offset);
 	_G   = new Grid(_geom, offset);
-	offset[0] = -0.5*_geom->Mesh()[0]; offset[1] = -0.5*_geom->Mesh()[1];
+	offset[0] = 0.5*_geom->Mesh()[0]; offset[1] = 0.5*_geom->Mesh()[1];
 	_p   = new Grid(_geom, offset);
 	_rhs = new Grid(_geom, offset);
 	_tmp = new Grid(_geom, offset);
@@ -94,8 +94,8 @@ void Compute::TimeStep(bool printInfo){
     _geom->Update_U(_F);
     /// Since we have now more Grids, to fulfill the required inequalities for stability
     ///we need to take the minimum of all the grids.
-   // dt = _comm->gatherMin(dt);
-
+    dt = _comm->geatherMin(dt);
+    MPI_Barrier(MPI_COMM_WORLD);
     //3) compute _F and _G (vorläufige Geschwindigkeiten)
     if(printInfo) std::cout << "Compute F and G" << std::endl;
     ///After the computation of the MomentumEquations, we need to communicate the velocities
