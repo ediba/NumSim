@@ -82,7 +82,8 @@ void Compute::TimeStep(bool printInfo){
     dt = _dtlimit;
     std::cerr << "Time Step Linitation Convection Operator dt = " << dt << " umax Abs = " << _u->AbsMax()<< std::endl;
   }
-    if(printInfo) std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
+    //if(printInfo) std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
+    std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
 
     //2) boundary_val
     if(printInfo) std::cout << "Setting boundary values" << std::endl;
@@ -116,12 +117,11 @@ void Compute::TimeStep(bool printInfo){
         ///everybody needs the same residual afterwards
         res = _comm->geatherMax(res);
         _geom->Update_P(_p);
-         if(printInfo) {std::cout <<" Time " << _t << " Interation : " << i << " residual = " << res <<  std::endl;
-
-        }
+         //if(printInfo) {std::cout <<" Time " << _t << " Interation : " << i << " residual = " << res <<  std::endl;}
         if (res < _epslimit)
         {
-        if(printInfo) {std::cout <<"Convergence after " << i << " iterations" <<  std::endl;}
+        //if(printInfo) {std::cout <<"Convergence after " << i << " iterations" <<  std::endl;}
+        std::cout <<"Convergence after " << i << " iterations" <<  std::endl;
             break;
         }
 

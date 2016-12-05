@@ -47,7 +47,6 @@ public:
 
   /// Interpolate the value at a arbitrary position
   real_t Interpolate(const multi_real_t &pos) const;
-
   /// Computes the left-sided difference quatient in x-dim at [it]
   real_t dx_l(const Iterator &it) const;
   /// Computes the right-sided difference quatient in x-dim at [it]
@@ -84,18 +83,24 @@ public:
   ///prints grid to console
   void PrintGrid() const;
   
-  ///copy Boundaries for parallel
-  void TopBoundarySwap (real_t* buffer);
-  void LeftBoundarySwap (real_t* buffer);
-  void BotBoundarySwap (real_t* buffer);
-  void RightBoundarySwap (real_t* buffer);
-  void RightBoundaryChange(real_t* bufferNew);
-  void LeftBoundaryChange(real_t* bufferNew);
-  void BotBoundaryChange(real_t* bufferNew);
-  void TopBoundaryChange(real_t* bufferNew);
-
+  ///Getting and setting the Boundaries for parallel simulations
   
-
+  ///copies the top row of the grid into the buffer
+  void GetTopBoundary (real_t* buffer);
+  ///copies the Left collum of the grid into the buffer
+  void GetLeftBoundary (real_t* buffer);
+  ///copies the bottom row of the grid into the buffer
+  void GetBotBoundary (real_t* buffer);
+  ///copies the right row of the grid into the buffer
+  void GetRightBoundary (real_t* buffer);
+  ///copies the values of the bufferNew into the Left boundary of the grid
+  void SetLeftBoundary(real_t* bufferNew);
+  ///copies the values of the bufferNew into the right boundary of the grid
+  void SetRightBoundary(real_t* bufferNew);
+  ///copies the values of the bufferNew into the top boundary of the grid
+  void SetTopBoundary(real_t* bufferNew);
+  ///copies the values of the bufferNew into the bottom  boundary of the grid
+  void SetBotBoundary(real_t* bufferNew);
 
 private:
   real_t *_data;

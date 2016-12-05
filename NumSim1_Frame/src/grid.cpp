@@ -208,7 +208,7 @@ void Grid::PrintGrid() const{
 
 ///Copy Boundaries for parallel
 //evtl noch mit bool variable bestimmen ob rand oder neben rand
-void Grid::TopBoundarySwap (real_t* buffer){
+void Grid::GetTopBoundary (real_t* buffer){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(3);
     index_t i = 0;
@@ -218,7 +218,7 @@ void Grid::TopBoundarySwap (real_t* buffer){
         i++;
     }
 }
-void Grid::LeftBoundarySwap (real_t* buffer){
+void Grid::GetLeftBoundary (real_t* buffer){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(4);
     index_t i = 0;
@@ -228,7 +228,7 @@ void Grid::LeftBoundarySwap (real_t* buffer){
         i++;
     }
 }
-void Grid::BotBoundarySwap (real_t* buffer){
+void Grid::GetBotBoundary (real_t* buffer){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(1);
     index_t i = 0;
@@ -238,7 +238,7 @@ void Grid::BotBoundarySwap (real_t* buffer){
         i++;
     }
 }
-void Grid::RightBoundarySwap (real_t* buffer){
+void Grid::GetRightBoundary (real_t* buffer){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(2);
     index_t i = 0;
@@ -248,7 +248,7 @@ void Grid::RightBoundarySwap (real_t* buffer){
         i++;
     }
 }
-void Grid::RightBoundaryChange(real_t* bufferNew){
+void Grid::SetLeftBoundary(real_t* bufferNew){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(4);
     index_t i = 0;
@@ -258,7 +258,7 @@ void Grid::RightBoundaryChange(real_t* bufferNew){
         i++;
     }
 }
-void Grid::LeftBoundaryChange(real_t* bufferNew){
+void Grid::SetRightBoundary(real_t* bufferNew){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(2);
     index_t i = 0;
@@ -268,7 +268,7 @@ void Grid::LeftBoundaryChange(real_t* bufferNew){
         i++;
     }
 }
-void Grid::BotBoundaryChange(real_t* bufferNew){
+void Grid::SetTopBoundary(real_t* bufferNew){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(3);
     index_t i = 0;
@@ -278,7 +278,7 @@ void Grid::BotBoundaryChange(real_t* bufferNew){
         i++;
     }
 }
-void Grid::TopBoundaryChange(real_t* bufferNew){
+void Grid::SetBotBoundary(real_t* bufferNew){
     BoundaryIterator iter(_geom);
     iter.SetBoundary(1);
     index_t i = 0;
