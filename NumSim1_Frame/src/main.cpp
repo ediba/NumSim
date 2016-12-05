@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
         visugrid = comp.GetVelocity();
         // Render and check if window is closed
         int key = visu.Check();
-        visu.Render(visugrid);//, visugrid->Min(), visugrid->Max());
+        visu.Render(visugrid,0.0,1.0);//, visugrid->Min(), visugrid->Max());
         //if (key == 10) {
             //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
             comp.TimeStep(true);

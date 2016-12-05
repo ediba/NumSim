@@ -124,7 +124,7 @@ void InteriorIterator::Next()
                 
             }// maybe do this earlier?
             
-            if (_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-2){
+            if (_value >= ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-1){
             _valid = false;
             }
     
@@ -239,11 +239,11 @@ void RedIterator::Next(){
         _value +=2;
         
     }    
-    if (_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-2){
+    if (_value > ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-2){
         _valid = false;
-    }else if(_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-3){
+    }/*else if(_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-3){
         _valid = false;
-    }
+    }*/
 }
 
 BlackIterator::BlackIterator(const Geometry* geom): 
@@ -273,9 +273,9 @@ void BlackIterator::Next(){
         _value +=2;
         
     }    
-    if (_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-2){
+    if (_value > ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-2){
         _valid = false;
-    }else if(_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-3){
+    }/*else if(_value == ((_geom->Size()[0]+2)*(_geom->Size()[1]+1))-3){
         _valid = false;
-    }
+    }*/
 }
