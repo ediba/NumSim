@@ -52,7 +52,9 @@ int main(int argc, char **argv) {
   // Create and initialize the visualization
   Renderer visu(geom.Length(), geom.Mesh());
     std::cout << "Renderer done" << std::endl;
-  visu.Init(800, 800);
+    int xsize=800;
+    int ysize=800;
+  visu.Init(xsize/comm.ThreadDim()[0], ysize/comm.ThreadDim()[1]);
     std::cout << "Renderer done" << std::endl;
 
   // Create a VTK generator
@@ -66,10 +68,10 @@ int main(int argc, char **argv) {
         // Render and check if window is closed
         int key = visu.Check();
         visu.Render(visugrid);//, visugrid->Min(), visugrid->Max());
-        if (key == 10) {
+        //if (key == 10) {
             //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
             comp.TimeStep(true);
-        }
+        //}
         if (key == -1) {
             run = false;
         }
