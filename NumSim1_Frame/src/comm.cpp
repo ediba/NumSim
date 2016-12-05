@@ -165,10 +165,10 @@ _tidx(), _tdim(), _mpi_cart_comm(){
         return (_tidx[0] == _tdim[0]-1);
     }
     const bool Communicator::isTop () const{
-        return (_tidx[1] == 0);
+        return (_tidx[1] == _tdim[1]-1);
     }
     const bool Communicator::isBottom () const{
-        return (_tidx[1] == _tdim[1]-1);
+        return (_tidx[1] == 0);
     }
 // private:
 // 	multi_index_t _tidx;

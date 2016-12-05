@@ -270,7 +270,7 @@ void Grid::LeftBoundaryChange(real_t* bufferNew){
 }
 void Grid::BotBoundaryChange(real_t* bufferNew){
     BoundaryIterator iter(_geom);
-    iter.SetBoundary(1);
+    iter.SetBoundary(3);
     index_t i = 0;
     while (iter.Valid()){
         Cell(iter)=bufferNew[i];
@@ -280,7 +280,7 @@ void Grid::BotBoundaryChange(real_t* bufferNew){
 }
 void Grid::TopBoundaryChange(real_t* bufferNew){
     BoundaryIterator iter(_geom);
-    iter.SetBoundary(3);
+    iter.SetBoundary(1);
     index_t i = 0;
     while (iter.Valid()){
         Cell(iter)=bufferNew[i];
