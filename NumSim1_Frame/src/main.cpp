@@ -57,13 +57,32 @@ int main(int argc, char **argv) {
   visu.Init(xsize/comm.ThreadDim()[0], ysize/comm.ThreadDim()[1]);
     std::cout << "Renderer done" << std::endl;
 
+    //Delete old files
+    if(comm.ThreadNum() == 0) {
+        system("exec rm -r ./VTK/*");
+    }
   // Create a VTK generator
-  VTK vtk(geom.Mesh(), geom.Size());
+  //VTK vtk(geom.Mesh(), geom.Size());
+    real_t dt_vtk = 1.0, t_nextVtk=0.3;
+    multi_real_t offset_vtk = {comm.ThreadIdx()[0]*geom.Length()[0],comm.ThreadIdx()[1]*geom.Length()[1]};
+    multi_index_t local_size = geom.Size();
+    local_size[0]+=2;
+    local_size[1]+=2;
+    VTK vtk(geom.Mesh(), local_size,geom.TotalSize(), offset_vtk,comm.ThreadNum(), comm.ThreadCnt(), comm.ThreadDim());
 
   const Grid *visugrid;
   bool run = true;
 
-    while (comp.GetTime() < 50 && run) {
+    while (comp.GetTime() < 3.5 && run) {
+        if(comp.GetTime() >= t_nextVtk){
+            vtk.Init("VTK/field");
+            vtk.AddCellScalar("p",comp.GetP());
+            vtk.SwitchToPointData();
+            //vtk.AddPointField("Velocity",comp.GetU(),comp.GetV());
+            //vtk.AddPointScalar("Absolute Velocity",comp.GetVelocity());
+            vtk.Finish();
+            t_nextVtk += dt_vtk;
+        }
         visugrid = comp.GetVelocity();
         // Render and check if window is closed
         int key = visu.Check();
@@ -76,5 +95,7 @@ int main(int argc, char **argv) {
             run = false;
         }
     }
+    
+    
   return 0;
 }
