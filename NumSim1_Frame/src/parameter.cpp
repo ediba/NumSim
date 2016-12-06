@@ -11,7 +11,7 @@ Parameter::Parameter()
    _tau = 0;
    _itermax = 0;
    Load("default.param");
-   std::cout << "Parameter Constructor vollendet"<<std::endl;
+   //std::cout << "Parameter Constructor vollendet"<<std::endl;
 }
 
   /// Loads the parameter values from a file
@@ -24,7 +24,7 @@ Parameter::Parameter()
       string variableValue;
       if (ParamFile)
       {
-          cout << "ParameterFile eingelesen"<<endl;
+          //cout << "ParameterFile eingelesen"<<endl;
           while (getline ( ParamFile, line))
           {
               // only for space=space in the parameter file

@@ -10,7 +10,7 @@ Geometry::Geometry(const Communicator* comm):_comm(comm)
     _velocity = {0, 0};
     _pressure = 0;
     Load("default.geom");
-    std::cout << " Geometry constructor done " << std::endl;
+    //std::cout << " Geometry constructor done " << std::endl;
     
 }
 

@@ -25,37 +25,23 @@
 #include "vtk.hpp"
 #include "solver.hpp"
 
-// #include "typedef.hpp"
-// #include "compute.hpp"
-// #include "geometry.hpp"
-// #include "parameter.hpp"
-// #include "grid.hpp"
-// #include "visu.hpp"
-// #include "visu.cpp"
-// #include "vtk.hpp"
-// #include "iterator.hpp"
 int main(int argc, char **argv) {
   // Create parameter and geometry instances with default values
-    std::cout << "main start" << std::endl;
+  std::cout << "main start" << std::endl;
     //Communicator:
-    const Communicator comm(&argc, &argv);
-    std::cout << "Communicator constructed" << std::endl;
+  const Communicator comm(&argc, &argv);
     
   Parameter param;
   Geometry geom(&comm);
-  std::cout << "Size = " << geom.Size()[0] << " " << geom.Size()[1] << std::endl;
   // Create the fluid solver
-  std::cout << "compute start" << std::endl;
   Compute comp(&geom, &param, &comm);
-  std::cout << "compute done" << std::endl;
-
   // Create and initialize the visualization
   Renderer visu(geom.Length(), geom.Mesh());
-    std::cout << "Renderer done" << std::endl;
+
     int xsize=800;
     int ysize=800;
-  visu.Init(xsize/comm.ThreadDim()[0], ysize/comm.ThreadDim()[1]);
-    std::cout << "Renderer done" << std::endl;
+    visu.Init(xsize/comm.ThreadDim()[0], ysize/comm.ThreadDim()[1]);
+
 
     //Delete old files
     if(comm.ThreadNum() == 0) {
@@ -64,22 +50,27 @@ int main(int argc, char **argv) {
   // Create a VTK generator
   //VTK vtk(geom.Mesh(), geom.Size());
     real_t dt_vtk = 1.0, t_nextVtk=0.3;
-    multi_real_t offset_vtk = {comm.ThreadIdx()[0]*geom.Length()[0],comm.ThreadIdx()[1]*geom.Length()[1]};
+    multi_real_t offset_vtk = {comm.ThreadIdx()[0]*(geom.Length()[0]),comm.ThreadIdx()[1]*(geom.Length()[1])};
     multi_index_t local_size = geom.Size();
     local_size[0]+=2;
     local_size[1]+=2;
-    VTK vtk(geom.Mesh(), local_size,geom.TotalSize(), offset_vtk,comm.ThreadNum(), comm.ThreadCnt(), comm.ThreadDim());
+    multi_index_t global_size = geom.TotalSize();
+    global_size[0]+=2;
+    global_size[1]+=2;
+    VTK vtk(geom.Mesh(), local_size,global_size,offset_vtk,comm.ThreadNum(), comm.ThreadCnt(), comm.ThreadDim());
 
   const Grid *visugrid;
   bool run = true;
 
-    while (comp.GetTime() < 3.5 && run) {
+    while (comp.GetTime() < param.Tend() && run) {
         if(comp.GetTime() >= t_nextVtk){
             vtk.Init("VTK/field");
             vtk.AddCellScalar("p",comp.GetP());
+            vtk.AddCellScalar("v",comp.GetV());
+            vtk.AddCellScalar("u",comp.GetU());
+            vtk.AddCellScalar("Velocity",comp.GetVelocity());
+            vtk.AddCellScalar("Vorticity",comp.GetVorticity());
             vtk.SwitchToPointData();
-            //vtk.AddPointField("Velocity",comp.GetU(),comp.GetV());
-            //vtk.AddPointScalar("Absolute Velocity",comp.GetVelocity());
             vtk.Finish();
             t_nextVtk += dt_vtk;
         }
@@ -89,7 +80,7 @@ int main(int argc, char **argv) {
         visu.Render(visugrid,0.0,1.0);//, visugrid->Min(), visugrid->Max());
         //if (key == 10) {
             //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
-            comp.TimeStep(true);
+            comp.TimeStep(false);
         //}
         if (key == -1) {
             run = false;
