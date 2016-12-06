@@ -5,15 +5,6 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
     _param (param),
     _comm (comm)
 {
-    /*_p = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]*0.5});
-    _p->Initialize(0.0);
-    _u = new Grid(geom,{_geom->Mesh()[0],_geom->Mesh()[1]*0.5});
-    _v = new Grid(geom,{_geom->Mesh()[0]*0.5,_geom->Mesh()[1]});
-    _F = new Grid(geom);
-    _G = new Grid(geom);
-    _rhs = new Grid(geom);
-    _tmp = new Grid(geom);*/
-
     multi_real_t offset;
 	offset[0] = _geom->Mesh()[0]; offset[1] = 0.5*_geom->Mesh()[1];
 	_u   = new Grid(_geom, offset);
@@ -30,19 +21,17 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
     _t = 0.;
 
     _epslimit = _param->Eps();
-    std::cout << "vor Solver" << std::endl;
+    //std::cout << "vor Solver" << std::endl;
     
     //_solver =  new SOR(_geom, _param->Omega());
     _solver = new RedOrBlackSOR(_geom, _param->Omega(), _comm);
-    std::cout << "nach Solver" << std::endl;
+    
     _dtlimit = _param->Dt();
-  // Init time
-  _t = 0.0;
-  std::cout << "vor Updates" << std::endl;
-   _geom->Update_U(_u);
+    // Init time
+    _t = 0.0;
+    _geom->Update_U(_u);
     _geom->Update_V(_v);
     _geom->Update_P(_p);
-    std::cout << "nach Updates" << std::endl;
 }
 
 Compute::~Compute(){
@@ -61,7 +50,6 @@ Compute::~Compute(){
 void Compute::TimeStep(bool printInfo){
     //Der Algorithmus wie er auf S. 22 im Skript steht:
     //1) compute dt (genaue Berechnung S.22)
-    if(printInfo) std::cout << "Set timestep" << std::endl;
 
     //Gets dt from input file
     real_t dt = 10000;
@@ -74,19 +62,25 @@ void Compute::TimeStep(bool printInfo){
     _dtlimit = _param->Tau() * (_param->Re()/2) * ((h[0]*h[0]*h[1]*h[1])/(h[0]*h[0]+h[1]*h[1]));
     if(_dtlimit < dt) {
     dt = _dtlimit;
-    std::cerr << "Time Step Diffusive Limitation dt = " << dt << std::endl;
+    if(printInfo){ 
+        std::cout << "Thread "<< _comm->ThreadNum() << " : Time Step Diffusive Limitation dt = " << dt << std::endl;
+    }
   }
   // Convection Operator limitation (S25)
     _dtlimit = _param->Tau() * std::min(h[0] / _u->AbsMax(), h[1] / _v->AbsMax());
     if(_dtlimit < dt) {
     dt = _dtlimit;
-    std::cerr << "Time Step Linitation Convection Operator dt = " << dt << " umax Abs = " << _u->AbsMax()<< std::endl;
+    if(printInfo){
+        std::cout << "Thread "<< _comm->ThreadNum() << " : Time Step Linitation Convection Operator dt = " << dt << " umax Abs = " << _u->AbsMax()<< std::endl;
+    }
   }
-    //if(printInfo) std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
-    std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
+    dt = _comm->geatherMin(dt);
+    if(_comm->ThreadNum() == 0){
+        std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
+    }
+    
 
     //2) boundary_val
-    if(printInfo) std::cout << "Setting boundary values" << std::endl;
 
     _geom->Update_U(_u);
     _geom->Update_V(_v);
@@ -95,21 +89,20 @@ void Compute::TimeStep(bool printInfo){
     _geom->Update_U(_F);
     /// Since we have now more Grids, to fulfill the required inequalities for stability
     ///we need to take the minimum of all the grids.
-    dt = _comm->geatherMin(dt);
+    
     MPI_Barrier(MPI_COMM_WORLD);
     //3) compute _F and _G (vorläufige Geschwindigkeiten)
-    if(printInfo) std::cout << "Compute F and G" << std::endl;
+
     ///After the computation of the MomentumEquations, we need to communicate the velocities
     MomentumEqu(dt);
     _comm->copyBoundary(_F);
     _comm->copyBoundary(_G);
 
     //4) compute _rhs
-    if(printInfo) std::cout << "Compute rhs" << std::endl;
+
     RHS(dt);
 
     //5) solve Poisson equation with SOR solver
-    if(printInfo) std::cout << "Starting SOR solver" << std::endl;
 
     real_t res = 0;
     for (index_t i = 1; i<=_param->IterMax(); i++){
@@ -121,14 +114,15 @@ void Compute::TimeStep(bool printInfo){
         if (res < _epslimit)
         {
         //if(printInfo) {std::cout <<"Convergence after " << i << " iterations" <<  std::endl;}
-        std::cout <<"Convergence after " << i << " iterations" <<  std::endl;
+        if(printInfo){
+            std::cout <<"Thread " << _comm->ThreadNum() << " : Convergence after " << i << " iterations" <<  std::endl;
+        }
             break;
         }
 
     }
 
     //6) compute _u und _v
-    if(printInfo) std::cout << "Compute u and v" << std::endl;
     NewVelocities(dt);
 
         _comm->copyBoundary(_u);
@@ -204,11 +198,40 @@ const Grid *Compute::GetVelocity(){
 /// Computes and returns the vorticity
 const Grid *Compute::GetVorticity(){
 
-    // vorticity gleich Rotation : du/y + dv/dx
-    // PRoblem hier: Vorticity wird oben rechts am Rand berechnet
-    real_t vort;
     for(Iterator it(_geom); it.Valid(); it.Next()) {
-        _tmp->Cell(it) = _u->dy_r(it) +_v->dx_r(it);
+		_tmp->Cell(it) = _u->dy_l(it) - _v->dx_l(it);
     }
     return _tmp;
+}
+const Grid* Compute::GetStream() {
+
+	for (Iterator it(_geom);it.Valid();it.Next()) {
+            /// first calculate the integral in the x- direction
+            /// need to separate two cases: 1) if those are the bottom processes
+            ///                             2) if those are not the bottom processes
+        if (it < _geom->Size()[0]){
+            if (_comm->isBottom()){
+                if (it.Pos()[1] == 0 && it.Pos()[0] == 0)
+                    _tmp->Cell(it) = 0;
+                else
+                    _tmp->Cell(it) = _tmp->Cell(it.Left()) + _geom->Mesh()[0] * _v->Cell(it);
+            }
+            ///if it not bottom, yet another non- bottom processes, we can fill the first x-line with zeros, as it will be
+            ///communicated over anyway
+            else {
+                _tmp->Cell(it) = 0;
+            }
+        }
+        else if (it==_geom->Size()[0]){
+                ///communicate x
+                 _comm->CommunicateStreamLineX(_tmp);
+        }
+        else {
+            _tmp->Cell(it) = _tmp->Cell(it.Down()) + _u->Cell(it)*_geom->Mesh()[1];
+        }
+    }
+    ///communicate y
+    _comm->CommunicateStreamLineY(_tmp);
+
+	return _tmp;
 }

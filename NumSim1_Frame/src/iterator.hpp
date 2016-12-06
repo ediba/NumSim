@@ -26,11 +26,13 @@ class Iterator {
 public:
   /// Constructs a new Iterator depending on a geometry
   Iterator(const Geometry *geom);
+  
   /// Constructs a new Iterator on a geometry with a defined starting value
   Iterator(const Geometry *geom, const index_t &value);
 
-  ///     Returns the current position value
+  /// Returns the current position value
   virtual const index_t &Value() const;
+  
   /// Cast operator to convert Iterators to integers
   virtual operator const index_t &() const;
   /// Returns the position coordinates
@@ -38,6 +40,7 @@ public:
 
   /// Sets the iterator to the first element
   virtual void First();
+  
   /// Goes to the next element of the iterator, disables it if position is end
   virtual void Next();
 

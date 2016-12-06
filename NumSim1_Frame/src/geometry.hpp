@@ -64,34 +64,39 @@ public:
     
   /// Returns the number of cells in each dimension
   const multi_index_t &Size() const;
+  
   ///Returns the total size of the domain
   const multi_index_t& TotalSize() const;
+  
   /// Returns the length of the domain
   const multi_real_t &Length() const;
-    /// Returns the total length of the domain
-    const multi_real_t& TotalLength () const;
+  
+  /// Returns the total length of the domain
+  const multi_real_t& TotalLength () const;
+    
   /// Returns the meshwidth
   const multi_real_t &Mesh() const;
 
   /// Updates the velocity field u
   void Update_U(Grid *u) const;
+  
   /// Updates the velocity field v
   void Update_V(Grid *v) const;
+  
   /// Updates the pressure field p
   void Update_P(Grid *p) const;
   
-  ///Für mpi 
+  ///Für mpi gets the size of the threads
   void GetSizesOfThreads ();
 
 private:
-    const Communicator* _comm;
-    multi_index_t	_bsize;
-    multi_real_t	_blength;
+  const Communicator* _comm;
+  multi_index_t _bsize;
+  multi_real_t _blength;
   multi_index_t _size;
   multi_real_t _length;
   multi_real_t _h;
   multi_real_t _mesh;
-
   multi_real_t _velocity;
   real_t _pressure;
 };

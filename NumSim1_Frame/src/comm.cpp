@@ -161,6 +161,40 @@ _tidx(), _tdim(), _mpi_cart_comm(){
     const bool Communicator::isBottom () const{
         return (_tidx[1] == 0);
     }
+    //added by the queen
+
+void Communicator::CommunicateStreamLineX(Grid* grid) const{
+    if (!isRight()){
+        real_t buffer[1];
+        grid->BottomRightChange(buffer);
+        int dest,source;
+        MPI_Cart_shift(this->_mpi_cart_comm,0,-1,&source,&dest);
+        int tag = 0;
+        MPI_Status stat;
+        MPI_Sendrecv_replace( buffer, 1, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
+        grid->ReturnBottomLeft(buffer);
+    }
+}
+
+
+//added by the queen
+
+   void Communicator::CommunicateStreamLineY(Grid* grid) const{
+    if (!isTop()){
+        index_t size = grid->SizeX();
+        real_t buffer[size];
+        grid->GetTopBoundary(buffer);
+        int dest,source;
+        MPI_Cart_shift(this->_mpi_cart_comm,1,1,&source,&dest);
+        int tag = 0;
+        MPI_Status stat;
+        MPI_Sendrecv_replace( buffer, size, MPI_DOUBLE, dest, tag, dest, tag, MPI_COMM_WORLD, &stat );
+        grid->BotBoundaryAdd(buffer);
+    }
+
+
+
+}
 // private:
 // 	multi_index_t _tidx;
 // 	multi_index_t _tdim;

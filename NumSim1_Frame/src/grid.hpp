@@ -47,25 +47,34 @@ public:
 
   /// Interpolate the value at a arbitrary position
   real_t Interpolate(const multi_real_t &pos) const;
+  
   /// Computes the left-sided difference quatient in x-dim at [it]
   real_t dx_l(const Iterator &it) const;
+  
   /// Computes the right-sided difference quatient in x-dim at [it]
   real_t dx_r(const Iterator &it) const;
+  
   /// Computes the left-sided difference quatient in y-dim at [it]
   real_t dy_l(const Iterator &it) const;
+  
   /// Computes the right-sided difference quatient in x-dim at [it]
   real_t dy_r(const Iterator &it) const;
+  
   /// Computes the central difference quatient of 2nd order in x-dim at [it]
   real_t dxx(const Iterator &it) const;
+  
   /// Computes the central difference quatient of 2nd order in y-dim at [it]
   real_t dyy(const Iterator &it) const;
 
   /// Computes u*du/dx with the donor cell method
   real_t DC_udu_x(const Iterator &it, const real_t &alpha) const;
+  
   /// Computes v*du/dy with the donor cell method
   real_t DC_vdu_y(const Iterator &it, const real_t &alpha, const Grid *v) const;
+  
   /// Computes u*dv/dx with the donor cell method
   real_t DC_udv_x(const Iterator &it, const real_t &alpha, const Grid *u) const;
+  
   /// Computes v*dv/dy with the donor cell method
   real_t DC_vdv_y(const Iterator &it, const real_t &alpha) const;
 
@@ -78,8 +87,10 @@ public:
   
   ///Returns the size of the grid in x-Direction
   index_t SizeX();
+  
   ///Returns the size of the grid in y-Direction
   index_t SizeY();
+  
   ///prints grid to console
   void PrintGrid() const;
   
@@ -87,20 +98,37 @@ public:
   
   ///copies the top row of the grid into the buffer
   void GetTopBoundary (real_t* buffer);
+  
   ///copies the Left collum of the grid into the buffer
   void GetLeftBoundary (real_t* buffer);
+  
   ///copies the bottom row of the grid into the buffer
   void GetBotBoundary (real_t* buffer);
+  
   ///copies the right row of the grid into the buffer
   void GetRightBoundary (real_t* buffer);
+  
   ///copies the values of the bufferNew into the Left boundary of the grid
   void SetLeftBoundary(real_t* bufferNew);
+  
   ///copies the values of the bufferNew into the right boundary of the grid
   void SetRightBoundary(real_t* bufferNew);
+  
   ///copies the values of the bufferNew into the top boundary of the grid
   void SetTopBoundary(real_t* bufferNew);
+  
   ///copies the values of the bufferNew into the bottom  boundary of the grid
   void SetBotBoundary(real_t* bufferNew);
+  
+  ///For stream lines
+  ///copies the value of the bufferNew into the bottom right corner of the grid
+  void ReturnBottomLeft(real_t* bufferNew);
+  
+  /// copies the value of the bottom left cell into the bufferNew
+  void BottomRightChange(real_t* bufferNew);
+  
+  ///sums up the values of the buffer into the boundary of the grid
+  void BotBoundaryAdd(real_t* bufferNew);
 
 private:
   real_t *_data;

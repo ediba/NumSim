@@ -288,3 +288,31 @@ void Grid::SetBotBoundary(real_t* bufferNew){
         i++;
     }
 }
+//added by the queen
+void Grid::BottomRightChange(real_t* bufferNew){
+     Iterator iter(_geom);
+         while (iter < _geom->Size()[0]){
+        iter.Next();
+    }
+        real_t buffer=Cell(iter);
+}
+
+
+//added by the queen
+void Grid::ReturnBottomLeft(real_t* bufferNew){
+Iterator iter(_geom);
+         Cell(iter)+=bufferNew[0];
+
+}
+
+//added by the queen
+void Grid::BotBoundaryAdd(real_t* bufferNew){
+    BoundaryIterator iter(_geom);
+    iter.SetBoundary(1);
+    index_t i = 0;
+    while (iter.Valid()){
+        Cell(iter)+=bufferNew[i];
+        iter.Next();
+        i++;
+    }
+}
