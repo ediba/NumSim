@@ -24,23 +24,28 @@
 #include "visu.cpp"
 #include "vtk.hpp"
 #include "solver.hpp"
+#include "zeitgeist.hpp"
+#include "iostream"
+#include "fstream"
 
 int main(int argc, char **argv) {
   // Create parameter and geometry instances with default values
-  std::cout << "main start" << std::endl;
+  
     //Communicator:
   const Communicator comm(&argc, &argv);
+//   if(comm.ThreadNum()==0) 
+      std::cout << "main start with "<<comm.ThreadCnt() <<" Threads"<< std::endl;
     
   Parameter param;
   Geometry geom(&comm);
   // Create the fluid solver
   Compute comp(&geom, &param, &comm);
   // Create and initialize the visualization
-  Renderer visu(geom.Length(), geom.Mesh());
+  //Renderer visu(geom.Length(), geom.Mesh());
 
     int xsize=800;
     int ysize=800;
-    visu.Init(xsize/comm.ThreadDim()[0], ysize/comm.ThreadDim()[1]);
+    //visu.Init(xsize/comm.ThreadDim()[0], ysize/comm.ThreadDim()[1]);
 
 
     //Delete old files
@@ -61,32 +66,44 @@ int main(int argc, char **argv) {
 
   const Grid *visugrid;
   bool run = true;
-
-    while (comp.GetTime() < param.Tend() && run) {
-        if(comp.GetTime() >= t_nextVtk){
-            vtk.Init("VTK/field");
-            vtk.AddCellScalar("p",comp.GetP());
-            vtk.AddCellScalar("v",comp.GetV());
-            vtk.AddCellScalar("u",comp.GetU());
-            vtk.AddCellScalar("Velocity",comp.GetVelocity());
-            vtk.AddCellScalar("Vorticity",comp.GetVorticity());
-            vtk.SwitchToPointData();
-            vtk.Finish();
-            t_nextVtk += dt_vtk;
-        }
-        visugrid = comp.GetVelocity();
+ZeitGeist zg;
+MPI_Barrier(MPI_COMM_WORLD);
+if(comm.ThreadNum() == 0){
+    zg.Start();
+}
+    while (comp.GetTime() < 50 && run) {
+//         if(comp.GetTime() >= t_nextVtk){
+//             vtk.Init("VTK/field");
+//             vtk.AddCellScalar("p",comp.GetP());
+//             vtk.AddCellScalar("v",comp.GetV());
+//             vtk.AddCellScalar("u",comp.GetU());
+//             vtk.AddCellScalar("Velocity",comp.GetVelocity());
+//             vtk.AddCellScalar("Vorticity",comp.GetVorticity());
+//             vtk.SwitchToPointData();
+//             vtk.Finish();
+//             t_nextVtk += dt_vtk;
+//         }
+        //visugrid = comp.GetVelocity();
         // Render and check if window is closed
-        int key = visu.Check();
-        visu.Render(visugrid,0.0,1.0);//, visugrid->Min(), visugrid->Max());
+        //int key = visu.Check();
+        //visu.Render(visugrid,0.0,1.0);//, visugrid->Min(), visugrid->Max());
         //if (key == 10) {
             //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
             comp.TimeStep(false);
         //}
-        if (key == -1) {
-            run = false;
-        }
+//         if (key == -1) {
+//             run = false;
+//         }
     }
+std::ofstream myfile;
+if(comm.ThreadNum() == 0){
+    std::cout << "Zeit gebraucht : " <<zg.Stop()/CLOCKS_PER_SEC<<std::endl;
     
+  myfile.open ("Zeitmessung.txt", std::ios_base::app);
+  myfile << comm.ThreadCnt() << " " << zg.Stop()/CLOCKS_PER_SEC <<"\n" ;
+  myfile.close();
+}
+
     
   return 0;
 }
