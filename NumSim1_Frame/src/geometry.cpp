@@ -105,8 +105,7 @@ GetSizesOfThreads();
       return _mesh;
   }
 
-  /// Updates the velocity field u
-    //TODO Hier bin ich mir nicht sicher ob Ecke gesetzt werden müssen und wenn ja wie evtl. Iterator verändern?
+    /// Updates the velocity field u
     void Geometry::Update_U(Grid *u) const{
          BoundaryIterator it = BoundaryIterator(this);
         if(_comm->isLeft()){
@@ -192,9 +191,8 @@ GetSizesOfThreads();
 //             it.Next();
 //         }
     }
-   /// Updates the velocity field v
-   //TODO Auch hier müssen wir uns noch überlegen wie wir die Eckpunkte behandeln
-   void Geometry::Update_V(Grid *v) const{
+    /// Updates the velocity field v
+    void Geometry::Update_V(Grid *v) const{
         BoundaryIterator it = BoundaryIterator(this);
         if(_comm->isLeft()){
             it.SetBoundary(4);
@@ -229,49 +227,9 @@ GetSizesOfThreads();
                 it.Next();
             }
         }
-       
-//        for(int bound_num = 1; bound_num <= 4; bound_num++){
-//             BoundaryIterator it = BoundaryIterator(this);
-//             it.SetBoundary(bound_num);
-//             it.First();
-//             while(it.Valid()){
-//                 switch(bound_num){
-//                     case 1:
-//                         v->Cell(it) = 0;
-//                         break;
-//                     case 2:
-//                         v->Cell(it) = (-1.0)*v->Cell(it.Left());
-//                         break;
-//                     case 3:
-//                         v->Cell(it) = _velocity[1];
-//                         v->Cell(it.Down()) = _velocity[1];
-//                         break;
-//                     case 4:
-//                         v->Cell(it) = (-1.0)*v->Cell(it.Right());
-//                         break;
-//                     default: std::cout << "Error" << std::endl;
-//                 }
-//                 it.Next();
-//             }
-//         }
-        //Setzt die vier eckpunkte bzw am linken Rand auch die links davon sinnvoll 
-        //Hier ist die Reihenfolge so: 1: links unten, 2 :rechts unten, 3: links oben, 4: rechts oben 
-//         BoundaryIterator it = BoundaryIterator(this);
-//         it.SetBoundary(0);
-//         for (index_t i=1; i<=4; i++){
-//             v->Cell(it)=0;
-//             //Die Ecke rechts oben wird vorher falsch gesetzt
-//             //deshalb hier die Korrektur
-//             if(i==4){
-//                 v->Cell(it.Down()) = _velocity[1];
-//             }
-//             it.Next();
-//         }
     }
-   
-   /// Updates the pressure field p
-   //TODO Auch hier müssen wir uns noch überlegen wie wir die Eckpunkte behandeln
-   void Geometry::Update_P(Grid *p) const{
+    /// Updates the pressure field p
+    void Geometry::Update_P(Grid *p) const{
        
        BoundaryIterator it = BoundaryIterator(this);
         if(_comm->isLeft()){

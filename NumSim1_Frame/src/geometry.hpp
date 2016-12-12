@@ -91,6 +91,7 @@ public:
 
 private:
   const Communicator* _comm;
+  char* _flag;
   multi_index_t _bsize;
   multi_real_t _blength;
   multi_index_t _size;
