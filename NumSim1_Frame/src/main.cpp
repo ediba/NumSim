@@ -29,6 +29,11 @@
 #include "fstream"
 
 int main(int argc, char **argv) {
+    
+    //Parameters
+    bool visualize = false;
+    bool writeVtk = true;
+    
   // Create parameter and geometry instances with default values
   
     //Communicator:
@@ -41,11 +46,12 @@ int main(int argc, char **argv) {
   // Create the fluid solver
   Compute comp(&geom, &param, &comm);
   // Create and initialize the visualization
-  //Renderer visu(geom.Length(), geom.Mesh());
-
-    int xsize=800;
-    int ysize=800;
-    //visu.Init(xsize/comm.ThreadDim()[0], ysize/comm.ThreadDim()[1]);
+    Renderer visu(geom.Length(), geom.Mesh());
+    if(visualize){ 
+        int xsize=800;
+        int ysize=800;
+        visu.Init(xsize/comm.ThreadDim()[0], ysize/comm.ThreadDim()[1]);
+    }
 
 
     //Delete old files
@@ -72,21 +78,23 @@ if(comm.ThreadNum() == 0){
     zg.Start();
 }
     while (comp.GetTime() < 50 && run) {
-//         if(comp.GetTime() >= t_nextVtk){
-//             vtk.Init("VTK/field");
-//             vtk.AddCellScalar("p",comp.GetP());
-//             vtk.AddCellScalar("v",comp.GetV());
-//             vtk.AddCellScalar("u",comp.GetU());
-//             vtk.AddCellScalar("Velocity",comp.GetVelocity());
-//             vtk.AddCellScalar("Vorticity",comp.GetVorticity());
-//             vtk.SwitchToPointData();
-//             vtk.Finish();
-//             t_nextVtk += dt_vtk;
-//         }
+        if(writeVtk && comp.GetTime() >= t_nextVtk){
+            vtk.Init("VTK/field");
+            vtk.AddCellScalar("p",comp.GetP());
+            vtk.AddCellScalar("v",comp.GetV());
+            vtk.AddCellScalar("u",comp.GetU());
+            vtk.AddCellScalar("Velocity",comp.GetVelocity());
+            vtk.AddCellScalar("Vorticity",comp.GetVorticity());
+            vtk.AddCellScalar("Streamlines",comp.GetStream());
+            vtk.SwitchToPointData();
+            vtk.AddPointScalar("Streamlines_point",comp.GetStream());
+            vtk.Finish();
+            t_nextVtk += dt_vtk;
+        }
         //visugrid = comp.GetVelocity();
-        // Render and check if window is closed
+        //Render and check if window is closed
         //int key = visu.Check();
-        //visu.Render(visugrid,0.0,1.0);//, visugrid->Min(), visugrid->Max());
+        if(visualize) visu.Render(visugrid,0.0,1.0);//, visugrid->Min(), visugrid->Max());
         //if (key == 10) {
             //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
             comp.TimeStep(false);
