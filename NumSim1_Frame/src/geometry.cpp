@@ -9,7 +9,9 @@ Geometry::Geometry(const Communicator* comm):_comm(comm)
     _h = 0;
     _velocity = {0, 0};
     _pressure = 0;
-    Load("default.geom");
+    _freeGeom = false;
+    //_flag= new char [_size[0]*_size[1]];
+    Load("UpdateTest.geom");
     //std::cout << " Geometry constructor done " << std::endl;
     
 }
@@ -21,6 +23,9 @@ void Geometry::Load(const char *file){
 FILE* handle = fopen(file,"r");
 double inval[2];
 char name[20];
+bool GameOVER=false;
+std::ofstream myfile;
+myfile.open ("example.txt");
 
 while (!feof(handle)) {
 	if (!fscanf(handle, "%s =", name)) continue;
@@ -50,8 +55,53 @@ while (!feof(handle)) {
 			_pressure = inval[0];
 		continue;
 	}
+	if (strcmp(name,"geometry") == 0) {
+            if (fscanf(handle," %s\n",&name)){
+                    if (strcmp(name,"free")==0){
+                        _freeGeom = true;
+                        
+                        //std::cout << "free geom " << _freeGeom <<std::endl;
+                    }
+                    //continue;
+                }
+                
+	}
+	if(_freeGeom){
+            std::cout << " Read Free geom start" << std::endl;
+            std::cout <<"Size[0] = "<< _size[0] <<" Size[1] = " << _size[1] <<std::endl;
+            _flag= new char [_size[0]*_size[1]];
+            for (int col = _size[1]-1; col>=0 ; col--){
+                for (int row = 0; row < _size[0]; row++){
+                    int getThatChar=fgetc(handle);
+                    _flag[col*_size[0]+row] = (char) getThatChar;
+                    std::cout << "Stelle: " << col*_size[0]+row<< " = "<< _flag[col*_size[0]+row]<<std::endl;
+                }
+                int getThatChar=fgetc(handle);
+            }
+//             for(int i = 0; i<_size[0]*_size[1]; i++){
+//                 int getThatChar=fgetc(handle);
+//                 if((i+1)%_size[0] == 0){
+//                     int getThatChar=fgetc(handle);
+//                     //j --;
+//                 }
+//                 _flag[j*_size[0]-1+i] = (char) getThatChar;
+//                 //_flag[i] = (char) getThatChar;
+//                 
+//             }
+//             break;
+        }
 }
+for (int i=0;i <_size[0]*_size[1]; i++){
+                myfile << _flag[i];
+                if((i+1)%_size[0]==0){myfile<<std::endl;}
+}
+myfile.close();
 fclose(handle);
+//Correction for using the right size 
+if(_freeGeom){
+    _size[0] = _size[0] -2;
+    _size[1] = _size[1] -2;
+}
 GetSizesOfThreads();
 //berechnet die Höhe und Breite eines Elements
 
@@ -141,55 +191,6 @@ GetSizesOfThreads();
                 it.Next();
             }
         }
-
-//         for(int bound_num = 1; bound_num <= 4; bound_num++){
-//             BoundaryIterator it = BoundaryIterator(this);
-//             it.SetBoundary(bound_num);
-//             it.First();
-//             while(it.Valid()){
-//                 switch(bound_num){
-//                     case 1:
-//                         u->Cell(it) = (-1.0)*u->Cell(it.Top());
-//                         break;
-//                     case 2:
-//                         u->Cell(it) = 0;
-//                         u->Cell(it.Left()) = 0;
-//                         break;
-//                     case 3:
-//                         u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
-//                         break;
-//                     case 4:
-//                         u->Cell(it) = 0;
-//                         break;
-//                     default: std::cout << "Error" << std::endl;
-//                 }
-//                 it.Next();
-//             }
-//         }
-        //Setzt die vier eckpunkte bzw am linken Rand auch die links davon sinnvoll 
-        //Hier ist die Reihenfolge so: 1: links unten, 2 :rechts unten, 3: links oben, 4: rechts oben 
-//         BoundaryIterator it = BoundaryIterator(this);
-//         it.SetBoundary(0);
-//         for (index_t i = 1; i<=4; i++){
-//             switch(i){
-//                 case 1:
-//                     u->Cell(it) = 0;
-//                     break;
-//                 case 2:
-//                     //u->Cell(it.Left())= (-1.0)*u->Cell((it.Left()).Top());
-//                     u->Cell(it) = 0;
-//                     break;
-//                 case 3:
-//                     u->Cell(it) =  2.0*_velocity[0] - u->Cell(it.Down());
-//                         break;
-//                 case 4:
-//                     u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Down());
-//                     //u->Cell(it) = 0;
-//                     break;
-//                 default: std::cout << " Error bei outer 4 cells" << std::endl;
-//             }
-//             it.Next();
-//         }
     }
     /// Updates the velocity field v
     void Geometry::Update_V(Grid *v) const{
@@ -264,49 +265,182 @@ GetSizesOfThreads();
                 it.Next();
             }
         }
-       
-//        for(int bound_num = 1; bound_num <= 4; bound_num++){
-//             BoundaryIterator it = BoundaryIterator(this);
-//             it.SetBoundary(bound_num);
-//             it.First();
-//             while(it.Valid()){
-//                 switch(bound_num){
-//                     case 1:
-//                         p->Cell(it) = p->Cell(it.Top());
-//                         break;
-//                     case 2:
-//                         p->Cell(it) = p->Cell(it.Left());
-//                         break;
-//                     case 3:
-//                         p->Cell(it) = p->Cell(it.Down());
-//                         break;
-//                     case 4:
-//                         p->Cell(it) = p->Cell(it.Right());
-//                         break;
-//                     default: std::cout << "Error" << std::endl;
+   }
+    bool Geometry::FreeGeometry(){return _freeGeom;}
+    
+    ///Updates free geometry
+    void Geometry::Update_U_free(Grid *u){
+        Iterator it(this);
+        while (it.Valid()){
+            switch(Flag(it)){
+                //Water
+                case ' ':
+                    break;
+                //NoSlip Boundary
+                case '#':
+                    Set_U_noslip(it, u);
+                    break;
+                //Vertical Inflow
+                case 'V':
+                    Set_U_veritcal(it, u);
+                    break;
+                //Horizontal Inflow
+                case 'H':
+                    Set_U_horizontal(it, u);
+                    break;
+                //Slip Boundary in vertical direction
+                case '|':
+                    Set_U_slipV(it, u);
+                    break;
+                //Slip Boundary in horizontal direction
+                case '-':
+                    Set_U_slipH(it, u);
+                    break;
+                //Outflow Boundary
+                case 'O':
+                    Set_U_outflow(it, u);
+                    break;
+                //Inflow Boundary
+                case 'I':
+                    //Müsste für u das gleiche sein wie case H 
+                    Set_U_horizontal(it, u);
+                    break;
+                default: 
+                    std::cout << "Not a declared Variable in the flag array"<<std::endl;
+                    break;
+            }
+            it.Next();
+        }
+    }
+    //Setzt die Boundary für das u grid bei vertikaler Boundary
+    //Geht davon aus dass nur ein Fluid Nachbar existiert
+    void Geometry::Set_U_veritcal(Iterator it, Grid* u){
+        if(Flag(it.Top()) == ' '){
+            u->Cell(it) = -u->Cell(it.Top());
+        }
+        else if(Flag(it.Right()) == ' '){
+            u->Cell(it) = 0;
+        }
+        else if(Flag(it.Left()) == ' '){
+            u->Cell(it.Left()) = 0;
+            u->Cell(it) = 0;
+        }
+        else if(Flag(it.Down()) == ' '){
+            u->Cell(it) = - u->Cell(it.Down());
+        }
+        else {
+            std::cout << "Set_U_vertical Problem" << std::endl;
+        }
+    }
+    void Geometry::Set_U_horizontal(Iterator it, Grid* u){    
+        if(Flag(it.Top()) == ' '){
+            u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+        }
+        else if(Flag(it.Right()) == ' '){
+            u->Cell(it) = _velocity[0];
+        }
+        else if(Flag(it.Left()) == ' '){
+            u->Cell(it.Left()) = _velocity[0];
+            u->Cell(it) = _velocity[0];
+        }
+        else if(Flag(it.Down()) == ' '){
+            u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+        }
+        else {
+            std::cout << "Set_U_horizontal Problem" << std::endl;
+        }
+    }
+    //TODO muss noch geändert werden wenn auch obstacles mit dabei sind
+    void Geometry::Set_U_noslip(Iterator it, Grid* u){
+        if(Flag(it.Top()) == ' '){
+            u->Cell(it) = -1.0*u->Cell(it.Top());
+        }
+        else if(Flag(it.Right()) == ' '){
+            u->Cell(it) = 0;
+            u->Cell(it.Left()) = 0;
+        }
+        else if(Flag(it.Left()) == ' '){
+            u->Cell(it.Left())=0;
+            u->Cell(it)=0;
+        }
+        else if(Flag(it.Down()) == ' '){
+            u->Cell(it)= -1.0*u->Cell(it.Down());
+        }
+        else {
+            u->Cell(it) = 0;
+            std::cout << "Set_U_noslip cornerpoint at it: "<< it << std::endl;
+        }
+    }
+    //TODO bin mir nicht sicher für top und bottom
+    void Geometry::Set_U_outflow(Iterator it, Grid *u){
+        if(Flag(it.Top()) == ' '){
+            u->Cell(it) = u->Cell(it.Top());
+        }
+        else if(Flag(it.Right()) == ' '){
+            u->Cell(it) = u->Cell(it.Right());
+        }
+        else if(Flag(it.Left()) == ' '){
+            u->Cell(it.Left()) = u->Cell(it.Left().Left());
+            u->Cell(it) = u->Cell(it.Left().Left());
+        }
+        else if(Flag(it.Down()) == ' '){
+            u->Cell(it)= u->Cell(it.Down());
+        }
+        else {
+            std::cout << "Set_U_outflow Problem" << std::endl;
+        }
+    }
+    void Geometry::Set_U_slipV(Iterator it, Grid* u){
+        if(Flag(it.Right()) == ' '){
+            u->Cell(it) = 0;
+        }
+        else if(Flag(it.Left()) == ' '){
+            u->Cell(it.Left()) = 0;
+            u->Cell(it) = 0;
+        }
+        else {
+            std::cout << "Set_U_slipV Problem" << std::endl;
+        }
+    }
+    void Geometry::Set_U_slipH(Iterator it, Grid *u){
+        if(Flag(it.Top()) == ' '){
+            u->Cell(it) = u->Cell(it.Top());
+        }
+        else if(Flag(it.Down()) == ' '){
+            u->Cell(it) = u->Cell(it.Down());
+        }
+        else {
+            std::cout << "Set_U_slipH Problem" << std::endl;
+        }
+        
+    }
+    
+    
+    //     void Geometry::Set_U_slip(Iterator it, Grid* u){
+//     }
+//     void Geometry::Update_U_free(Grid *u){
+//         BoundaryIterator it;
+//         it.SetBoundary(4);
+//         while (it.Valid()){
+//             ///NoSlip
+//             if(Flag(it) == "#"){
+//                 if(Flag(it.Top() == ' '){
+//                     u->Cell(it) = (-1.0)*u->Cell(it.Top());
 //                 }
-//                 it.Next();
-//             }
-//         }
-//         //Setz die vier Eckpunkte gleich einer Nachbarzelle
-//         //Hier ist die Reihenfolge so: 1: links unten, 2 :rechts unten, 3: links oben, 4: rechts oben 
-//         BoundaryIterator it = BoundaryIterator(this);
-//         it.SetBoundary(0);
-//         for (index_t i = 1; i<=4; i++){
-//             switch(i){
-//                 case 1:
-//                     p->Cell(it) = p->Cell(it.Right());
-//                     break;
-//                 case 2:
-//                     p->Cell(it) = p->Cell(it.Left());
-//                     break;
-//                 case 3:
-//                     p->Cell(it) = p->Cell(it.Down());
-//                         break;
-//                 case 4:
-//                     p->Cell(it) = p->Cell(it.Down());
-//                     break;
+//                 }
 //             }
 //             it.Next();
 //         }
-   }
+//         it.SetBoundary(1){
+//             if(Flag(it) == "#"){
+//             }
+//         }
+//     }
+char &Geometry::Flag(const Iterator &it){
+  return _flag[it.Value()];
+}
+
+
+const char &Geometry::Flag(const Iterator &it) const{
+  return _flag[it.Value()];
+}

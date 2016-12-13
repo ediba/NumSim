@@ -88,10 +88,24 @@ public:
   
   ///Für mpi gets the size of the threads
   void GetSizesOfThreads ();
+  
+  ///Für freie Geometries
+  bool FreeGeometry();
+  void Update_U_free(Grid* u);
+  char &Flag(const Iterator &it);
+    const char &Flag(const Iterator &it) const;
 
 private:
+    void Set_U_veritcal(Iterator it, Grid* u);
+    void Set_U_horizontal(Iterator it, Grid* u);
+    void Set_U_slipV(Iterator it, Grid* u);
+    void Set_U_slipH(Iterator it, Grid *u);
+    void Set_U_noslip(Iterator it, Grid* u);
+    void Set_U_outflow(Iterator it, Grid *u);
+    void Set_U_Inflow(Iterator it, Grid *u);
   const Communicator* _comm;
   char* _flag;
+  bool _freeGeom;
   multi_index_t _bsize;
   multi_real_t _blength;
   multi_index_t _size;
