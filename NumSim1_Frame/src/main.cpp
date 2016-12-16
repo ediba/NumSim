@@ -31,7 +31,18 @@
 int main(int argc, char **argv) {
     
     //Parameters
-    bool visualize = false;
+    const char *geometryInput;
+    const char *paramInput;
+    if(argc>2){
+        geometryInput = argv[1];
+        paramInput = argv[2];
+    }
+    else{
+        geometryInput = "default.geom";
+        paramInput = "default.param";
+    }
+    bool visualize = true;
+    int visuStep = 5;
     bool writeVtk = true;
     
   // Create parameter and geometry instances with default values
@@ -41,15 +52,15 @@ int main(int argc, char **argv) {
 //   if(comm.ThreadNum()==0) 
       std::cout << "main start with "<<comm.ThreadCnt() <<" Threads"<< std::endl;
     
-  Parameter param;
-  Geometry geom(&comm);
+  Parameter param(paramInput);
+  Geometry geom(&comm, geometryInput);
   // Create the fluid solver
   Compute comp(&geom, &param, &comm);
   // Create and initialize the visualization
     Renderer visu(geom.Length(), geom.Mesh());
     if(visualize){ 
-        int xsize=800;
-        int ysize=800;
+        int xsize=1000;
+        int ysize=xsize*(int)geom.TotalLength()[1]/geom.TotalLength()[0];
         visu.Init(xsize/comm.ThreadDim()[0], ysize/comm.ThreadDim()[1]);
     }
 
@@ -74,10 +85,12 @@ int main(int argc, char **argv) {
   bool run = true;
 ZeitGeist zg;
 MPI_Barrier(MPI_COMM_WORLD);
+visugrid = comp.GetVelocity();
+int k = 0;
 if(comm.ThreadNum() == 0){
     zg.Start();
 }
-    while (comp.GetTime() < 50 && run) {
+    while (comp.GetTime() < param.Tend() && run) {
         if(writeVtk && comp.GetTime() >= t_nextVtk){
             vtk.Init("VTK/field");
             vtk.AddCellScalar("p",comp.GetP());
@@ -94,10 +107,36 @@ if(comm.ThreadNum() == 0){
         //visugrid = comp.GetVelocity();
         //Render and check if window is closed
         //int key = visu.Check();
-        if(visualize) visu.Render(visugrid,0.0,1.0);//, visugrid->Min(), visugrid->Max());
+        
+        if(visualize && k%visuStep == 0){
+            switch (visu.Render(visugrid, visugrid->Min(), visugrid->Max())){
+                case -1:
+                    run = false;
+                    break;
+                case 0: 
+                    visugrid = comp.GetVelocity();
+                    break;
+                case 1:
+                    visugrid = comp.GetU();
+                    break;
+                case 2:
+                    visugrid = comp.GetV();
+                    break;
+                case 3:
+                    visugrid = comp.GetP();
+                    break;
+                case 4:
+                    visugrid = comp.GetVorticity();
+                    break;
+                case 5:
+                    visugrid = comp.GetStream();
+                    break;
+            }
+        }//, visugrid->Min(), visugrid->Max());
         //if (key == 10) {
             //printf("%f\n",sor.Cycle(&testgrid5,&zeroGrid));
-            comp.TimeStep(false);
+            comp.TimeStep(true);
+            k++;
         //}
 //         if (key == -1) {
 //             run = false;

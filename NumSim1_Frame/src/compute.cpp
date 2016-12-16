@@ -52,9 +52,10 @@ void Compute::TimeStep(bool printInfo){
     //1) compute dt (genaue Berechnung S.22)
 
     //Gets dt from input file
-    real_t dt = 10000;
+    real_t dt;
     if ( _param->Dt() != 0.0)
      dt = _param->Dt();
+    else dt = 1.0;
 
     const multi_real_t &h = _geom->Mesh();
 
@@ -63,7 +64,7 @@ void Compute::TimeStep(bool printInfo){
     if(_dtlimit < dt) {
     dt = _dtlimit;
     if(printInfo){ 
-        std::cout << "Thread "<< _comm->ThreadNum() << " : Time Step Diffusive Limitation dt = " << dt << std::endl;
+        //std::cout << "Thread "<< _comm->ThreadNum() << " : Time Step Diffusive Limitation dt = " << dt << std::endl;
     }
   }
   // Convection Operator limitation (S25)
@@ -71,7 +72,7 @@ void Compute::TimeStep(bool printInfo){
     if(_dtlimit < dt) {
     dt = _dtlimit;
     if(printInfo){
-        std::cout << "Thread "<< _comm->ThreadNum() << " : Time Step Linitation Convection Operator dt = " << dt << " umax Abs = " << _u->AbsMax()<< std::endl;
+        //std::cout << "Thread "<< _comm->ThreadNum() << " : Time Step Linitation Convection Operator dt = " << dt << " umax Abs = " << _u->AbsMax()<< std::endl;
     }
   }
     dt = _comm->geatherMin(dt);
@@ -115,9 +116,12 @@ void Compute::TimeStep(bool printInfo){
         {
         //if(printInfo) {std::cout <<"Convergence after " << i << " iterations" <<  std::endl;}
         if(printInfo){
-            std::cout <<"Thread " << _comm->ThreadNum() << " : Convergence after " << i << " iterations" <<  std::endl;
+            std::cout <<"Thread " << _comm->ThreadNum() << " : Convergence after " << i << " iterations with residuum: "<< res <<  std::endl;
         }
             break;
+        }
+        if(i==_param->IterMax() && printInfo) {
+            std::cout <<"Solver did not converge after "<< i << " Iterations with residuum: "<< res <<std::endl;
         }
 
     }

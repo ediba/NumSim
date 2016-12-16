@@ -1,6 +1,6 @@
 #include "parameter.hpp"
 using namespace std;
-Parameter::Parameter()
+Parameter::Parameter(const char * paramInput)
 {
   _re = 0;
   _omega = 0;
@@ -10,7 +10,7 @@ Parameter::Parameter()
    _eps = 0;
    _tau = 0;
    _itermax = 0;
-   Load("default.param");
+   Load(paramInput);
    //std::cout << "Parameter Constructor vollendet"<<std::endl;
 }
 

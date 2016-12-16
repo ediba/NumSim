@@ -29,11 +29,12 @@ int main(int argc, char **argv) {
   
   TestGrid.Initialize(3);
   geom.Update_U_free(&TestGrid);
+  //geom.Update_U_free(&TestGrid);
     TestGrid.PrintGrid();
-for(Iterator i(&geom); i < 10; i.Next()){
-    if (geom.Flag(i.Right()) == ' '){
-        std::cout << " Leerzeicen bei i = " << i <<std::endl;
-    }
-}
+// for(Iterator i(&geom); i < 10; i.Next()){
+//     if (geom.Flag(i.Right()) == ' '){
+//         std::cout << " Leerzeicen bei i = " << i <<std::endl;
+//     }
+// }
   return 0;
 }

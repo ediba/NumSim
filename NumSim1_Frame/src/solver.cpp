@@ -34,6 +34,13 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
     real_t totalRes = 0;
 
     while (iter.Valid()){
+        // In case of free geometry skips a non fluid cell
+//         if(_geom->FreeGeometry()){
+//             if(_geom->Flag(iter) != ' '){
+//                 iter.Next();
+//                 numOst++;
+//             }
+//         }
         real_t residual = localRes(iter, grid, rhs);
         totalRes += residual*residual;
         //grid->Cell(iter) =(1.0-_omega)*grid->Cell(iter) + multiplier * residual;//old: -=multiplier*residual;
@@ -61,7 +68,9 @@ real_t RedOrBlackSOR::Cycle(Grid *grid, const Grid *rhs) const{
     _comm->copyBoundary(grid);
 
     //for averaging
-    return sqrt((totalRes)/(_geom->Size()[0]*_geom->Size()[1]));
+    index_t t = _geom->NumInteriorBounds();
+    //std::cout << " NumInteriorBounds = " << t<< std::endl;
+    return sqrt((totalRes)/((_geom->Size()[0]*_geom->Size()[1])-t ));
 }
 
 
@@ -73,14 +82,23 @@ real_t RedOrBlackSOR::RedCycle (Grid* grid, const Grid* rhs) const{
     RedIterator iter(_geom);
     iter.First();
     real_t totalRes = 0;
-
+    
+    index_t k = 0;
     while (iter.Valid()){
+        if(_geom->NumInteriorBounds()!= 0){
+            if(_geom->Flag(iter) != ' '){
+                iter.Next();
+                k++;
+                continue;
+            }
+        }
         real_t residual = localRes(iter, grid, rhs);
         totalRes += residual*residual;
         //grid->Cell(iter) =(1.0-_omega)*grid->Cell(iter) + multiplier * residual;//old: -=multiplier*residual;
         grid->Cell(iter) += multiplier * residual;
         iter.Next();
     }
+    //std::cout << "Skipped in iterator Red : " << k << std::endl;
     return totalRes;
 }
 
@@ -92,13 +110,24 @@ real_t RedOrBlackSOR::BlackCycle (Grid* grid, const Grid* rhs) const{
     BlackIterator iter(_geom);
     iter.First();
     real_t totalRes = 0;
+    
+    index_t k = 0;
 
     while (iter.Valid()){
+        if(_geom->NumInteriorBounds()!= 0){
+            if(_geom->Flag(iter) != ' '){
+                iter.Next();
+                k++;
+                continue;
+            }
+        }
+        
         real_t residual = localRes(iter, grid, rhs);
         totalRes += residual*residual;
         //grid->Cell(iter) =(1.0-_omega)*grid->Cell(iter) + multiplier * residual;//old: -=multiplier*residual;
         grid->Cell(iter) += multiplier * residual;
         iter.Next();
     }
+    //std::cout << "Skipped in iterator Red : " << k << std::endl;
     return totalRes;
 }
