@@ -23,8 +23,10 @@
 #include "parameter.hpp"
 #include "vtk.hpp"
 
+
 #include <math.h>
 #include <stdio.h>
+#include<list>
 //------------------------------------------------------------------------------
 #ifndef __COMPUTE_HPP
 #define __COMPUTE_HPP
@@ -61,6 +63,13 @@ public:
   /// Computes and returns the stream line values
   const Grid *GetStream();
 
+  void CalculateStreaklines(const real_t &dt);
+
+  void CalculateParticleTracing(const real_t &dt);
+
+    Grid *_particleTracing;
+    Grid *_streakLines;
+
 private:
   // current timestep
   real_t _t;
@@ -87,8 +96,17 @@ private:
 
   // container for interpolating whichever values
   Grid *_tmp;
+  Grid *_vorticity;
 
   Solver *_solver;
+      //container or vector for all the particle traces
+    std::list<multi_real_t> particelTracing;
+
+    // contains all the points which make a streakline
+    std::list<multi_real_t> StreakLines;
+
+
+
    const Communicator* _comm;
 
   const Geometry *_geom;

@@ -444,7 +444,6 @@ if(_freeGeom){
            // std::cout << "Set_U_vertical Problem" << std::endl;
         }
     }
-    //TODO parabel inflow
     void Geometry::Set_U_horizontal(Iterator it, Grid* u)const{
         real_t ycoord = Mesh()[1]*it.Pos()[1] - 0.5*Mesh()[1];
         if(Flag(it.Right()) == ' '){
@@ -482,7 +481,6 @@ if(_freeGeom){
            // std::cout << "Set_U_horizontal Problem" << std::endl;
         }
     }
-    //TODO muss noch geändert werden wenn auch obstacles mit dabei sind
     void Geometry::Set_U_noslip(Iterator it, Grid* u)const{
         if(Flag(it.Right()) == ' '){
             u->Cell(it) = 0;
@@ -513,7 +511,6 @@ if(_freeGeom){
            // std::cout << "Set_U_noslip cornerpoint at it: "<< it << std::endl;
         }
     }
-    //TODO bin mir nicht sicher für top und bottom
     void Geometry::Set_U_outflow(Iterator it, Grid *u)const{
         if(Flag(it.Top()) == ' '){
             u->Cell(it) = u->Cell(it.Top());
@@ -609,7 +606,7 @@ if(_freeGeom){
          //   std::cout << "Set_V_horizontal Problem" << std::endl;
         }
     }
-    //TODO inflow parabel
+
     void Geometry::Set_V_vertical(Iterator it, Grid* v)const{
         real_t xcoord = Mesh()[0]*it.Pos()[0] - 0.5*Mesh()[0];
         if(Flag(it.Top()) == ' '){
@@ -661,7 +658,7 @@ if(_freeGeom){
           //  std::cout << "Set_V_noslip cornerpoint at it: "<< it << std::endl;
         }
     }
-    //TODO bin mir nicht sicher für top und bottom
+
     void Geometry::Set_V_outflow(Iterator it, Grid *v)const{
         if(Flag(it.Top()) == ' '){
             v->Cell(it) = v->Cell(it.Top());
@@ -718,25 +715,7 @@ if(_freeGeom){
         }
         
     }
-    //TODO
-//     void Geometry::Set_V_inflow(Iterator it, Grid* v)const{
-//         if(Flag(it.Right()) == ' '){
-//             v->Cell(it) = - v->Cell(it.Right());
-//         }
-//         else if(Flag(it.Left()) == ' '){
-//             v->Cell(it) = - v->Cell(it.Left());
-//         }
-//         else if(Flag(it.Top()) == ' '){
-//             v->Cell(it) = 0;
-//         }
-//         else if(Flag(it.Down()) == ' '){
-//             v->Cell(it) = 0;
-//             v->Cell(it.Down()) = 0;
-//         }
-//         else {
-//           //  std::cout << "Set_V_slipH Problem" << std::endl;
-//         }
-//     }
+
     /////////////////////////////////////////////
     //P functions
     ////////////////////////////////////////////
@@ -774,7 +753,6 @@ if(_freeGeom){
          //   std::cout << "Set_V_horizontal Problem" << std::endl;
         }
     }
-    //TODO muss noch gemacht werden
     void Geometry::Set_P_noslip(Iterator it, Grid* p)const{
         if( (Flag(it.Top()) == ' ') && (Flag(it.Right()) == ' ') ){
             p->Cell(it) = 0.5 * (p->Cell(it.Top()) + p->Cell(it.Right()) );

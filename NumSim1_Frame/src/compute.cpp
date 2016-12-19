@@ -5,6 +5,9 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
     _param (param),
     _comm (comm)
 {
+    _particleTracing = new Grid(geom);
+	_streakLines = new Grid(geom);
+	_particleTracing->Initialize(0);
     multi_real_t offset;
 	offset[0] = _geom->Mesh()[0]; offset[1] = 0.5*_geom->Mesh()[1];
 	_u   = new Grid(_geom, offset);
@@ -16,22 +19,26 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
 	_p   = new Grid(_geom, offset);
 	_rhs = new Grid(_geom, offset);
 	_tmp = new Grid(_geom, offset);
+        offset[0] = _geom->Mesh()[0]; offset[1] = _geom->Mesh()[1];
+        _vorticity = new Grid(_geom, offset);
 
 
     _t = 0.;
 
     _epslimit = _param->Eps();
     //std::cout << "vor Solver" << std::endl;
-    
+
     //_solver =  new SOR(_geom, _param->Omega());
     _solver = new RedOrBlackSOR(_geom, _param->Omega(), _comm);
-    
+
     _dtlimit = _param->Dt();
     // Init time
     _t = 0.0;
     _geom->Update_U(_u);
     _geom->Update_V(_v);
     _geom->Update_P(_p);
+    particelTracing.push_back({0.0,0.7});
+	StreakLines.push_back({0,0.0});
 }
 
 Compute::~Compute(){
@@ -43,6 +50,8 @@ Compute::~Compute(){
     delete _rhs;
     delete _tmp;
     delete _solver;
+    delete _particleTracing;
+    delete _streakLines;
 }
  /// Execute one time step of the fluid simulation (with or without debug info)
   // @ param printInfo print information about current solver state (residual
@@ -63,7 +72,7 @@ void Compute::TimeStep(bool printInfo){
     _dtlimit = _param->Tau() * (_param->Re()/2) * ((h[0]*h[0]*h[1]*h[1])/(h[0]*h[0]+h[1]*h[1]));
     if(_dtlimit < dt) {
     dt = _dtlimit;
-    if(printInfo){ 
+    if(printInfo){
         //std::cout << "Thread "<< _comm->ThreadNum() << " : Time Step Diffusive Limitation dt = " << dt << std::endl;
     }
   }
@@ -79,9 +88,13 @@ void Compute::TimeStep(bool printInfo){
     if(_comm->ThreadNum() == 0){
         std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
     }
-    
+
 
     //2) boundary_val
+    if (_t>0.7)
+        CalculateParticleTracing(dt);
+
+    CalculateStreaklines(dt);
 
     _geom->Update_U(_u);
     _geom->Update_V(_v);
@@ -90,7 +103,7 @@ void Compute::TimeStep(bool printInfo){
     _geom->Update_U(_F);
     /// Since we have now more Grids, to fulfill the required inequalities for stability
     ///we need to take the minimum of all the grids.
-    
+
     MPI_Barrier(MPI_COMM_WORLD);
     //3) compute _F and _G (vorläufige Geschwindigkeiten)
 
@@ -203,9 +216,9 @@ const Grid *Compute::GetVelocity(){
 const Grid *Compute::GetVorticity(){
 
     for(Iterator it(_geom); it.Valid(); it.Next()) {
-		_tmp->Cell(it) = _u->dy_l(it) - _v->dx_l(it);
+		_vorticity->Cell(it) = _u->dy_r(it) - _v->dx_r(it);
     }
-    return _tmp;
+    return _vorticity;
 }
 const Grid* Compute::GetStream() {
 
@@ -239,3 +252,23 @@ const Grid* Compute::GetStream() {
 
 	return _tmp;
 }
+
+    void Compute::CalculateStreaklines(const real_t &dt){
+
+       //calculate them
+}
+
+    void Compute::CalculateParticleTracing(const real_t &dt){
+
+		multi_real_t trace = particelTracing.back();
+		if(trace[0]<=_geom->Length()[0]){
+			trace[0] = trace[0]+dt*_u->Interpolate(trace);
+			trace[1] = trace[1]+dt*_v->Interpolate(trace);
+			particelTracing.push_back(trace);
+
+			index_t cell_x = (index_t)ceil((trace[0]/_geom->Mesh()[0]));
+			index_t cell_y = (index_t)ceil((trace[1]/_geom->Mesh()[1]));
+			Iterator it = Iterator(_geom, cell_y*_geom->Size()[0] + cell_x);
+
+		}
+  }

@@ -93,13 +93,18 @@ if(comm.ThreadNum() == 0){
     while (comp.GetTime() < param.Tend() && run) {
         if(writeVtk && comp.GetTime() >= t_nextVtk){
             vtk.Init("VTK/field");
-            vtk.AddCellScalar("p",comp.GetP());
+            vtk.AddCellScalar("p_Cell",comp.GetP());
             vtk.AddCellScalar("v",comp.GetV());
             vtk.AddCellScalar("u",comp.GetU());
             vtk.AddCellScalar("Velocity",comp.GetVelocity());
             vtk.AddCellScalar("Vorticity",comp.GetVorticity());
             vtk.AddCellScalar("Streamlines",comp.GetStream());
             vtk.SwitchToPointData();
+            vtk.AddPointScalar("p_Cell",comp.GetP());
+            vtk.AddPointScalar("v",comp.GetV());
+            vtk.AddPointScalar("u",comp.GetU());
+            vtk.AddPointScalar("Velocity",comp.GetVelocity());
+            vtk.AddPointScalar("Vorticity",comp.GetVorticity());
             vtk.AddPointScalar("Streamlines_point",comp.GetStream());
             vtk.Finish();
             t_nextVtk += dt_vtk;
@@ -130,6 +135,14 @@ if(comm.ThreadNum() == 0){
                     break;
                 case 5:
                     visugrid = comp.GetStream();
+                    break;
+                case 6:
+                    visugrid = comp._particleTracing;
+                    break;
+                case 7:
+                    visugrid = comp._streakLines;
+                    break;
+                default:
                     break;
             }
         }//, visugrid->Min(), visugrid->Max());
