@@ -5,7 +5,7 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
     _param (param),
     _comm (comm)
 {
-    _particleTracing = new Grid(geom);
+    _particleTracing = new Grid(geom); //TODO:Offset auf 0.5 setzen
 	_streakLines = new Grid(geom);
 	_particleTracing->Initialize(0);
     multi_real_t offset;
@@ -38,7 +38,7 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
     _geom->Update_V(_v);
     _geom->Update_P(_p);
     particelTracing.push_back({0.0,0.7});
-	StreakLines.push_back({0,0.0});
+	StreakLines.push_back({0,0.6});
 }
 
 Compute::~Compute(){
@@ -52,6 +52,7 @@ Compute::~Compute(){
     delete _solver;
     delete _particleTracing;
     delete _streakLines;
+    delete _vorticity;
 }
  /// Execute one time step of the fluid simulation (with or without debug info)
   // @ param printInfo print information about current solver state (residual
@@ -84,6 +85,8 @@ void Compute::TimeStep(bool printInfo){
         //std::cout << "Thread "<< _comm->ThreadNum() << " : Time Step Linitation Convection Operator dt = " << dt << " umax Abs = " << _u->AbsMax()<< std::endl;
     }
   }
+    /// Since we have now more Grids, to fulfill the required inequalities for stability
+    ///we need to take the minimum of all the grids.
     dt = _comm->geatherMin(dt);
     if(_comm->ThreadNum() == 0){
         std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
@@ -101,8 +104,6 @@ void Compute::TimeStep(bool printInfo){
     _geom->Update_P(_p);
     _geom->Update_V(_G);
     _geom->Update_U(_F);
-    /// Since we have now more Grids, to fulfill the required inequalities for stability
-    ///we need to take the minimum of all the grids.
 
     MPI_Barrier(MPI_COMM_WORLD);
     //3) compute _F and _G (vorläufige Geschwindigkeiten)
@@ -254,8 +255,27 @@ const Grid* Compute::GetStream() {
 }
 
     void Compute::CalculateStreaklines(const real_t &dt){
+        multi_real_t start =  StreakLines.back();
+       // _streakLines->Initialize(0);
+        for (std::list<multi_real_t>::iterator it=StreakLines.begin(); it != StreakLines.end(); ++it)
+        {
+            multi_real_t &position=*it;
+            if(position[0]<=_geom->Length()[0]){
+               // std::cout<<"position of 0 is "<<position[0]<<" and of 1 is: "<<position[1]<<std::endl;
 
-       //calculate them
+                position[0] = position[0]+dt*_u->Interpolate(position);
+                position[1] = position[1]+dt*_v->Interpolate(position);
+                index_t cell_x = (index_t)ceil((position[0]/_geom->Mesh()[0]));
+                index_t cell_y = (index_t)ceil((position[1]/_geom->Mesh()[1]));
+                Iterator it = Iterator(_geom, cell_y*_geom->Size()[0] + cell_x);
+                _streakLines->Cell(it) = 1;
+            }
+        }
+        StreakLines.push_back(start);
+        index_t cell_x = (index_t)ceil((start[0]/_geom->Mesh()[0]));
+        index_t cell_y = (index_t)ceil((start[1]/_geom->Mesh()[1]));
+        Iterator it = Iterator(_geom, cell_y*_geom->Size()[0] + cell_x);
+        _streakLines->Cell(it) = 1;
 }
 
     void Compute::CalculateParticleTracing(const real_t &dt){
@@ -269,6 +289,7 @@ const Grid* Compute::GetStream() {
 			index_t cell_x = (index_t)ceil((trace[0]/_geom->Mesh()[0]));
 			index_t cell_y = (index_t)ceil((trace[1]/_geom->Mesh()[1]));
 			Iterator it = Iterator(_geom, cell_y*_geom->Size()[0] + cell_x);
+			_particleTracing->Cell(it) = 1;
 
 		}
   }
