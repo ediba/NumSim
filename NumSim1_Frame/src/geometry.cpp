@@ -28,6 +28,8 @@ bool GameOVER=false;
 std::ofstream myfile;
 myfile.open ("example.txt");
 
+bool geometryRead = false;
+
 while (!feof(handle)) {
 	if (!fscanf(handle, "%s =", name)) continue;
 	if (strcmp(name,"size") == 0) {
@@ -67,7 +69,7 @@ while (!feof(handle)) {
                 }
                 
 	}
-	if(_freeGeom){
+	if(_freeGeom & !geometryRead){
             std::cout << " Read Free geom start" << std::endl;
             std::cout <<"Size[0] = "<< _size[0] <<" Size[1] = " << _size[1] <<std::endl;
             _flag= new char [_size[0]*_size[1]];
@@ -90,6 +92,7 @@ while (!feof(handle)) {
 //                 
 //             }
 //             break;
+            geometryRead = true;
         }
 }
 for (int i=0;i <_size[0]*_size[1]; i++){
