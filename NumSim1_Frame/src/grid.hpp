@@ -136,6 +136,7 @@ private:
   real_t *Data();
   multi_real_t _offset;
   const Geometry *_geom;
+  multi_real_t _meshInv;
 };
 //------------------------------------------------------------------------------
 #endif // __GRID_HPP

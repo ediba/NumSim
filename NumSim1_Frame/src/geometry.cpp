@@ -25,8 +25,8 @@ FILE* handle = fopen(file,"r");
 double inval[2];
 char name[20];
 bool GameOVER=false;
-std::ofstream myfile;
-myfile.open ("example.txt");
+//std::ofstream myfile;
+//myfile.open ("example.txt");
 
 bool geometryRead = false;
 
@@ -70,8 +70,8 @@ while (!feof(handle)) {
                 
 	}
 	if(_freeGeom & !geometryRead){
-            std::cout << " Read Free geom start" << std::endl;
-            std::cout <<"Size[0] = "<< _size[0] <<" Size[1] = " << _size[1] <<std::endl;
+            //std::cout << " Read Free geom start" << std::endl;
+            //std::cout <<"Size[0] = "<< _size[0] <<" Size[1] = " << _size[1] <<std::endl;
             _flag= new char [_size[0]*_size[1]];
             for (int col = _size[1]-1; col>=0 ; col--){
                 for (int row = 0; row < _size[0]; row++){
@@ -95,12 +95,12 @@ while (!feof(handle)) {
             geometryRead = true;
         }
 }
-for (int i=0;i <_size[0]*_size[1]; i++){
+/*for (int i=0;i <_size[0]*_size[1]; i++){
                 myfile << _flag[i];
                 if((i+1)%_size[0]==0){myfile<<std::endl;}
 }
 myfile.close();
-fclose(handle);
+fclose(handle);*/
 //Correction for using the right size 
 if(_freeGeom){
     _size[0] = _size[0] -2;

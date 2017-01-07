@@ -11,6 +11,8 @@ Grid::Grid(const Geometry *geom, const multi_real_t &offset) : _geom(geom)
      _offset=offset;
      _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
   this->Initialize(0.0);
+    _meshInv[0]=1.0/(_geom->Mesh()[0]);
+    _meshInv[1]=1.0/(_geom->Mesh()[1]);
    //std::cout << " Grid Initialized " <<std::endl;
 }
 Grid::Grid(const Geometry* geom) :_geom(geom)
@@ -77,23 +79,23 @@ real_t Grid::Interpolate(const multi_real_t &pos) const{
 }
 
 real_t Grid::dx_l(const Iterator& it) const
-{return (_data[it] - _data[it.Left()])/((_geom->Mesh())[0]);}
+{return (_data[it] - _data[it.Left()])*_meshInv[0];}//{return (_data[it] - _data[it.Left()])/((_geom->Mesh())[0]);}
 
 real_t Grid::dx_r(const Iterator& it) const
-{return (_data[it.Right()] - _data[it])/((_geom->Mesh())[0]);}
+{return (_data[it.Right()] - _data[it])*_meshInv[0];}//{return (_data[it.Right()] - _data[it])/((_geom->Mesh())[0]);}
 
 real_t Grid::dy_l(const Iterator& it) const
-{return (_data[it] - _data[it.Down()])/((_geom->Mesh())[1]);}
+{return (_data[it] - _data[it.Down()])*_meshInv[1];}//{return (_data[it] - _data[it.Down()])/((_geom->Mesh())[1]);}
 
 real_t Grid::dy_r(const Iterator& it) const
-{return (_data[it.Top()] - _data[it])/((_geom->Mesh())[1]);}
+{return (_data[it.Top()] - _data[it])*_meshInv[1];}//{return (_data[it.Top()] - _data[it])/((_geom->Mesh())[1]);}
 
 real_t Grid:: dxx(const Iterator &it) const{
-    return (_data[it.Right()]-(2.0*_data[it])+_data[it.Left()])/(((_geom->Mesh())[0])*((_geom->Mesh())[0]));
+    return (_data[it.Right()]-(2.0*_data[it])+_data[it.Left()])*_meshInv[0]*_meshInv[0];//    return (_data[it.Right()]-(2.0*_data[it])+_data[it.Left()])/(((_geom->Mesh())[0])*((_geom->Mesh())[0]));
 }
 /// Computes the central difference quatient of 2nd order in y-dim at [it]
 real_t Grid::dyy(const Iterator &it) const{
-    return (_data[it.Top()]-(2.0*_data[it])+_data[it.Down()])/(((_geom->Mesh())[1])*((_geom->Mesh())[1]));
+    return (_data[it.Top()]-(2.0*_data[it])+_data[it.Down()])*_meshInv[1]*_meshInv[1];//return (_data[it.Top()]-(2.0*_data[it])+_data[it.Down()])/(((_geom->Mesh())[1])*((_geom->Mesh())[1]));
 }
 
 /// Computes u*du/dx with the donor cell method

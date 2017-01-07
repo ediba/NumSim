@@ -88,7 +88,7 @@ void Compute::TimeStep(bool printInfo){
     /// Since we have now more Grids, to fulfill the required inequalities for stability
     ///we need to take the minimum of all the grids.
     dt = _comm->geatherMin(dt);
-    if(_comm->ThreadNum() == 0){
+    if(_comm->ThreadNum() == 0 && printInfo){   //TODO: evtl 2te Abfrage wieder entfernen
         std::cout << "Current Time " << _t << ", Timestep " << dt << std::endl;
     }
 

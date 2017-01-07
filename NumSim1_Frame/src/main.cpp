@@ -41,7 +41,39 @@ int main(int argc, char **argv) {
         geometryInput = "default.geom";
         paramInput = "default.param";
     }
-    bool visualize = true;
+    
+    //---------------------------------------------------------------------
+    //Program for uncertainty quantification
+    const char *output;
+    if(argc>3){
+        output = argv[3];
+    }
+    double dt_dot = 5.0, t_dot=0.0;    //makes for each 5s one dot so one can see how far the program has run
+    std::cout << "Progress(100%=10*): " << std::endl;
+    const Communicator comm(&argc, &argv);
+    Parameter param(paramInput);
+    Geometry geom(&comm, geometryInput);
+    Compute comp(&geom, &param, &comm);
+    std::ofstream outputStream;    
+    outputStream.open (output, std::ios_base::app);
+    const Grid* u = comp.GetU();
+    Iterator pos1(&geom,901);   //(120,5) = (120+1)+(5+1)*(128+2)
+    Iterator pos2(&geom,8515);  //(64,64) = (64+1)+(64+1)*(128+2)
+    Iterator pos3(&geom,15736); //(5,120) = (5+1)+(120+1)*(128+2)
+    while (comp.GetTime() < param.Tend()){
+        outputStream << u->Cell(pos1) << "\t" << u->Cell(pos2) << "\t" << u->Cell(pos3) << "\n" ;
+        comp.TimeStep(false);
+        if(comp.GetTime() > t_dot){
+            std::cout << "*"<<std::endl;
+            t_dot+=dt_dot;
+        }
+    }
+    std::cout << std::endl;
+    outputStream << u->Cell(pos1) << "\t" << u->Cell(pos2) << "\t" << u->Cell(pos3) << "\n" ;
+    outputStream.close();
+    //-----------------------------------------------------------------------
+    
+/*    bool visualize = true;
     int visuStep = 5;
     bool writeVtk = true;
     
@@ -163,7 +195,7 @@ if(comm.ThreadNum() == 0){
   myfile << comm.ThreadCnt() << " " << zg.Stop()/CLOCKS_PER_SEC <<"\n" ;
   myfile.close();
 }
-
+*/
     
   return 0;
 }
