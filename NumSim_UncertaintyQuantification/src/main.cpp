@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
         i_end = strtol(argv[2],NULL,10);
     }
     //Choose random distribution
-    double mu = 1600.0, sigma = 1000.0/6.0;
+    double mu = 1500.0, sigma = 1000.0/6.0;
     //Choose true random generator
     std::random_device generator;
     //Choose normal distribution
