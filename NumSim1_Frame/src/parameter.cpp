@@ -65,7 +65,7 @@ Parameter::Parameter(const char * paramInput)
                     //cout<< "variableName = " << variableName << " tau= " << _tau << endl;
                 }
                 else if(variableName.compare("numOfRef") == 0){
-                    _numOfRef = (variableValue.c_str());
+                    _numOfRef = atof(variableValue.c_str());
                 }
                 else 
                 {
