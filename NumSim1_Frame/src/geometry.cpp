@@ -14,9 +14,20 @@ Geometry::Geometry(const Communicator* comm, const char*geometryInput):_comm(com
     //_flag= new char [_size[0]*_size[1]];
     Load(geometryInput);
     //std::cout << " Geometry constructor done " << std::endl;
-    
 }
 
+Geometry::Geometry(Geometry &other, index_t coarseLevel)
+    :_size(other._size), _length(other._length), _h(other._h), _velocity(other._velocity), _pressure(other._pressure), _freeGeom(other._freeGeom), _numInteriorBounds(other._numInteriorBounds), _mesh(other._mesh), _bsize(other._bsize), _comm(other._comm), _blength(other._blength)
+{
+    _size[0]=_size[0]/(1<<coarseLevel);
+    _size[1]=_size[1]/(1<<coarseLevel);
+    _bsize[0]=_bsize[0]/(1<<coarseLevel);
+    _bsize[1]=_bsize[1]/(1<<coarseLevel);
+    //_h = _h*(1<<coarseLevel);
+    _mesh[0] = _mesh[0]*(1<<coarseLevel);
+    _mesh[1] = _mesh[1]*(1<<coarseLevel);
+}
+    
 
   /// Loads a geometry from a file
 void Geometry::Load(const char *file){
@@ -873,4 +884,17 @@ char &Geometry::Flag(const Iterator &it){
 
 const char &Geometry::Flag(const Iterator &it) const{
   return _flag[it.Value()];
+}
+
+void Geometry::printGeometry(){
+    std::cout<<"Print Geometry:" << std::endl;
+    std::cout<<"_freeGeom: " <<_freeGeom << std::endl;
+    std::cout<<"_numInteriorBounds: " <<_numInteriorBounds <<std::endl;
+    std::cout<<"_bsize: " <<_bsize[0] << "|"<<_bsize[1] <<std::endl;
+    std::cout<<"_blength: " <<_blength[0] << "|"<<_blength[1] <<std::endl;
+    std::cout<<"_size: " <<_size[0] << "|"<<_size[1] <<std::endl;
+    std::cout<<"_length: " <<_length[0] << "|"<<_length[1] <<std::endl;
+    std::cout<<"_mesh: " <<_mesh[0] << "|"<<_mesh[1] <<std::endl;
+    std::cout<<"_velocity: " <<_velocity[0] << "|"<<_velocity[1] <<std::endl;
+    std::cout<<"_pressure: " <<_pressure <<std::endl;
 }

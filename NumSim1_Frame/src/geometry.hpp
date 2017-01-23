@@ -55,8 +55,8 @@ public:
   //Geometry();
   //Neuer Constructor
     Geometry(const Communicator* comm, const char * geometryInput);
-  
-  
+    
+    Geometry(Geometry &other, index_t coarseLevel=0);
   
 
   /// Loads a geometry from a file
@@ -97,6 +97,8 @@ public:
   void Update_P_free(Grid *p)const;
   char &Flag(const Iterator &it);
     const char &Flag(const Iterator &it) const;
+    
+    void printGeometry();
 
 private:
     void Set_U_vertical(Iterator it, Grid* u)const;
