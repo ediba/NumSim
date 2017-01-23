@@ -24,6 +24,11 @@ Grid::Grid(const Geometry* geom) :_geom(geom)
     //std::cout << " Grid Initialized " <<std::endl;
     
 }
+Grid::Grid(const Geometry* geom, index_t refinement) : _geom(geom){
+    _offset={0.0,0.0};
+    _data = new realt_t [(_geom->Size()[0]/(1<<refinement)+2) * (_geom->Size()[1]/(1<<refinement)+2)];
+    this->Initialize(0.0);
+}
 Grid::~Grid(){
     delete[] _data;
 }

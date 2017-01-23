@@ -131,3 +131,4 @@ real_t RedOrBlackSOR::BlackCycle (Grid* grid, const Grid* rhs) const{
     //std::cout << "Skipped in iterator Red : " << k << std::endl;
     return totalRes;
 }
+real_t 

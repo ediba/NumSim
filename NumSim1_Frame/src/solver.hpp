@@ -81,5 +81,15 @@ public:
 	real_t RedCycle (Grid* grid, const Grid* rhs) const;
 	real_t BlackCycle (Grid* grid, const Grid* rhs) const;
 };
+class Multigrid : public Solver {
+private:
+    const Communicator* _comm;
+    void smooth(Grid *grid, const Grid *rhs, N);
+    Grid* restrict(Grid* fine);
+    Grid* interpolate(Grid* coarse);
+
+public:
+    real_t Cycle(Grid *grid, const Grid *rhs) const;
+};
 //------------------------------------------------------------------------------
 #endif // __SOLVER_HPP
