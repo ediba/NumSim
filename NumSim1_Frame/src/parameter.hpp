@@ -43,6 +43,7 @@ public:
   const index_t &IterMax() const;
   const real_t &Eps() const;
   const real_t &Tau() const;
+  const index_t &NumOfRef() const;
 
 private:
   real_t _re;
@@ -53,6 +54,7 @@ private:
   real_t _eps;
   real_t _tau;
   index_t _itermax;
+  index_t _numOfRef;
 };
 //------------------------------------------------------------------------------
 #endif // __PARAMETER_HPP

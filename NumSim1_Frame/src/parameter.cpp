@@ -64,6 +64,9 @@ Parameter::Parameter(const char * paramInput)
                     _tau = atof(variableValue.c_str());
                     //cout<< "variableName = " << variableName << " tau= " << _tau << endl;
                 }
+                else if(variableName.compare("numOfRef") == 0){
+                    _numOfRef = (variableValue.c_str());
+                }
                 else 
                 {
                     cout << variableName << " aus Parameter File konnte nicht korrekt eingelesen werden"<<endl;
@@ -120,4 +123,7 @@ Parameter::Parameter(const char * paramInput)
   const real_t &Parameter::Tau() const
   {
       return _tau;
+  }
+  const index_t &Parameter::NumOfRef() const{
+      return _numOfRef;
   }

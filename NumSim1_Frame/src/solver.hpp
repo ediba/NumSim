@@ -82,11 +82,14 @@ public:
 	real_t BlackCycle (Grid* grid, const Grid* rhs) const;
 };
 class Multigrid : public Solver {
+    Multigrid (Geometry _geom, index_t numOfRef);
 private:
+    std::vector<Geometry> _geometries;
+    std::vector<Grid> _grids;
     const Communicator* _comm;
-    void smooth(Grid *grid, const Grid *rhs, N);
-    Grid* restrict(Grid* fine);
-    Grid* interpolate(Grid* coarse);
+    void smooth(Grid *grid, const Grid *rhs);
+    void restrict(Grid* fine, Grid* coarse);
+    void interCorse2Fine(Grid* coarse, Grid* fine);
 
 public:
     real_t Cycle(Grid *grid, const Grid *rhs) const;
