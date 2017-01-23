@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
         geometryInput = "default.geom";
         paramInput = "default.param";
     }
-    
+/*    
     //---------------------------------------------------------------------
     //Program for uncertainty quantification
     const char *output;
@@ -72,8 +72,8 @@ int main(int argc, char **argv) {
     outputStream << u->Cell(pos1) << "\t" << u->Cell(pos2) << "\t" << u->Cell(pos3) << "\n" ;
     outputStream.close();
     //-----------------------------------------------------------------------
-    
-/*    bool visualize = true;
+*/    
+    bool visualize = true;
     int visuStep = 5;
     bool writeVtk = true;
     
@@ -195,7 +195,7 @@ if(comm.ThreadNum() == 0){
   myfile << comm.ThreadCnt() << " " << zg.Stop()/CLOCKS_PER_SEC <<"\n" ;
   myfile.close();
 }
-*/
+
     
   return 0;
 }
