@@ -56,7 +56,7 @@ public:
   //Neuer Constructor
     Geometry(const Communicator* comm, const char * geometryInput);
     
-    Geometry(Geometry &other, index_t coarseLevel=0);
+    Geometry(const Geometry &other, index_t coarseLevel=0);
   
 
   /// Loads a geometry from a file

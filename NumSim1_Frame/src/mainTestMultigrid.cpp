@@ -43,8 +43,20 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
     std::cout << "Communicator constructed" << std::endl;
     
-  Parameter param;
-  Geometry geom(&comm);
+        //Parameters
+    const char *geometryInput;
+    const char *paramInput;
+    if(argc>2){
+        geometryInput = argv[1];
+        paramInput = argv[2];
+    }
+    else{
+        geometryInput = "default.geom";
+        paramInput = "default.param";
+    }
+    
+  Parameter param(paramInput);
+  Geometry geom(&comm, geometryInput);
   
   multi_real_t offset = {0.5*geom.Mesh()[0],0.5*geom.Mesh()[1]};
   Grid testgrid(&geom, offset);
@@ -78,9 +90,13 @@ int main(int argc, char **argv) {
   }
   Grid zerogrid(&geom);
   zerogrid.Initialize(0);
-  Multigrid multigrid(&geom, param.Omega(), &comm);
+  //Multigrid multigrid(&geom, &comm, 2);
   MPI_Barrier(MPI_COMM_WORLD);
-  
+  /////////////////////////////////////
+  // Test for Multigrid functions
+  /////////////////////////////////////
+
+/*  
     // Create and initialize the visualization
     Renderer visu(geom.Length(), geom.Mesh());
     //std::cout << "Renderer done" << std::endl;
@@ -102,6 +118,6 @@ int main(int argc, char **argv) {
             run = false;
         }
     }
-    
+*/    
   return 0;
 }

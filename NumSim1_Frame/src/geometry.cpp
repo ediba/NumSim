@@ -16,7 +16,7 @@ Geometry::Geometry(const Communicator* comm, const char*geometryInput):_comm(com
     //std::cout << " Geometry constructor done " << std::endl;
 }
 
-Geometry::Geometry(Geometry &other, index_t coarseLevel)
+Geometry::Geometry(const Geometry &other, index_t coarseLevel)
     :_size(other._size), _length(other._length), _h(other._h), _velocity(other._velocity), _pressure(other._pressure), _freeGeom(other._freeGeom), _numInteriorBounds(other._numInteriorBounds), _mesh(other._mesh), _bsize(other._bsize), _comm(other._comm), _blength(other._blength)
 {
     _size[0]=_size[0]/(1<<coarseLevel);

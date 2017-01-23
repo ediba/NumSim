@@ -131,3 +131,16 @@ real_t RedOrBlackSOR::BlackCycle (Grid* grid, const Grid* rhs) const{
     //std::cout << "Skipped in iterator Red : " << k << std::endl;
     return totalRes;
 }
+
+
+Multigrid::Multigrid (const Geometry *geom, const Communicator *comm, index_t numOfRef) : Solver(geom){
+    _comm=comm;
+    for(index_t i=0; i<numOfRef; i++){
+        _geometries.push_back(new Geometry(*_geom, i));
+        _grids.push_back(new Grid(_geometries[i]));
+    }
+}
+
+Multigrid::~Multigrid(){}
+
+real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) const {}
