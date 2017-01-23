@@ -47,6 +47,13 @@ int main(int argc, char **argv) {
     index_t refine = 1;
     Geometry coarse(geom,refine);
     coarse.printGeometry();
-  
-  return 0;
+    
+    std::cout << std::endl;
+    std::vector<Geometry*> geometries;
+    for(index_t i=0; i<2; i++){
+        geometries.push_back(new Geometry(geom, i));
+    }
+    geometries[0]->printGeometry();
+    geometries[1]->printGeometry();
+    return 0;
 }
