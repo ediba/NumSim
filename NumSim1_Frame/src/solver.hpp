@@ -89,13 +89,16 @@ public:
     Multigrid (const Geometry *geom, const Communicator *comm, index_t numOfRef);
     ~Multigrid();
     real_t Cycle(Grid *grid, const Grid *rhs) const;
+    
+    //nur für TestZecke Public
+    void restrict(Grid* pFine, Grid* pCoarse, Grid* rhsFine, Grid* rhsCoarse, index_t ref);
 private:
-    std::vector<Geometry> _geometries;
+    std::vector<Geometry*> _geometries;
     std::vector<Grid*> _res;
-    std::vector<Grid> _error;
+    std::vector<Grid*> _error;
     std::vector<RedOrBlackSOR*> _solver;
     const Communicator* _comm;
-    void restrict(Grid* fineGrid, Grid* coarseGrid, index_t ref);
+    //void restrict(Grid* pFine, Grid* pCoarse, Grid* rhsFine, Grid* rhsCoarse, index_t ref);
     void interCorse2Fine(Grid* coarseGrid, Grid* fineGrid, index_t ref);
 
 };

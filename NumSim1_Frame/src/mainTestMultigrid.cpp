@@ -81,16 +81,30 @@ int main(int argc, char **argv) {
           std::cout<< "Positionierung unten" << std::endl;
       }*/
   }
-  for(int i=0; i<comm.ThreadCnt();i++){
-      if(comm.ThreadNum() == i){
-          std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid vor SOR " << std::endl;
-          testgrid.PrintGrid();
-      }
-      MPI_Barrier(MPI_COMM_WORLD);
-  }
-  Grid zerogrid(&geom);
-  zerogrid.Initialize(0);
-  //Multigrid multigrid(&geom, &comm, 2);
+//   for(int i=0; i<comm.ThreadCnt();i++){
+//       if(comm.ThreadNum() == i){
+//           std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid vor SOR " << std::endl;
+//           testgrid.PrintGrid();
+//       }
+//       MPI_Barrier(MPI_COMM_WORLD);
+//   }
+  Grid pFine(&geom);
+  pFine.Initialize(0);
+  Grid rhsFine(&geom);
+  rhsFine.Initialize(1);
+  index_t coarseLevel = 1;
+  Geometry coarseGeom(geom,coarseLevel);
+  Grid pCoarse(&coarseGeom);
+  pCoarse.Initialize(0);
+  Grid rhsCoarse(&coarseGeom);
+  rhsCoarse.Initialize(0);
+  Multigrid multigrid(&geom, &comm, 2);
+  index_t resLevel = 0;
+    multigrid.restrict(&pFine, &pCoarse, &rhsFine, &rhsCoarse, resLevel); 
+  rhsCoarse.PrintGrid();
+  
+  
+ 
   MPI_Barrier(MPI_COMM_WORLD);
   /////////////////////////////////////
   // Test for Multigrid functions
