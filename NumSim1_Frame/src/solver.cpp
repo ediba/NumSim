@@ -137,9 +137,27 @@ Multigrid::Multigrid (const Geometry *geom, const Communicator *comm, index_t nu
     _comm=comm;
     for(index_t i=0; i<numOfRef; i++){
         _geometries.push_back(new Geometry(*_geom, i));
-        _grids.push_back(new Grid(_geometries[i]));
+        _error.push_back(new Grid(_geometries[i]));
+        _residuum.push_back(new Grid(_geometries[i]));
+        _solver.push_back(new RedOrBlackSOR(_geometries[i], 1., comm));
     }
 }
+//Restric Funktion Fine to Coarse
+//  void Multigrid::restrict(index_t ref){
+//   for(InteriorIterator it(_geometries[ref+1]); it.Valid(); it.Next()) {
+//         multi_index_t value2= it.Pos();
+//         index_t value=(2*value2(0)-1)+(2*value2(1)-1)*(_geometries[ref+1]->Size()+2);
+//         _error[ref]->Cell(it) = 0;
+//         const InteriorIterator it2(_geometries[ref],value);
+//         
+//         if(ref==-1){
+//             _res[ref+1]->Cell(it) = 0.25* ( localRes(it2,_p, _rhs) + localRes	(it2.Right(), _p, _rhs)+ localRes(it2.Top(), _p, _rhs) + localRes	(it2.Top().Right(), _p, _rhs) );
+//         }
+//         else {
+//             _res[ref+1]->Cell(it) = 0.25* ( localRes(it2,_error[ref], _res[ref])+ 	localRes(it2.Right(),_error[ref], _res[ref])+ localRes(it2.Top(), 	_error[ref], _res[ref]) + localRes(it2.Top().Right(),_error[ref], 	_res[ref]) );
+//         }
+//     }
+// }
 
 Multigrid::~Multigrid(){}
 
