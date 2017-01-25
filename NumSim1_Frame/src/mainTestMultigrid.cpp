@@ -88,10 +88,18 @@ int main(int argc, char **argv) {
 //       }
 //       MPI_Barrier(MPI_COMM_WORLD);
 //   }
+
+//Test for restrict
   Grid pFine(&geom);
-  pFine.Initialize(0);
+  pFine.Initialize(0.);
   Grid rhsFine(&geom);
-  rhsFine.Initialize(1);
+  rhsFine.Initialize(0.);
+  Iterator it(&geom, (index_t) 9);
+  std::cout << "iterator position = " << it.Pos()[0] << " " << it.Pos()[1] <<std::endl;
+  rhsFine.Cell(it.Top()) = 5;
+  //pFine.Cell(it) = 3;
+  //pFine.Cell(it.Right()) = 1;
+  //pFine.Cell(it.Top().Right()) = 2;
   index_t coarseLevel = 1;
   Geometry coarseGeom(geom,coarseLevel);
   Grid pCoarse(&coarseGeom);
@@ -99,11 +107,36 @@ int main(int argc, char **argv) {
   Grid rhsCoarse(&coarseGeom);
   rhsCoarse.Initialize(0);
   Multigrid multigrid(&geom, &comm, 2);
+  
+//   std::cout<<"p start" << std::endl;
+//   pFine.PrintGrid();
+//   std::cout<<"rhs start" << std::endl;
+//   rhsFine.PrintGrid();
+ //multigrid.Cycle(&pFine, &rhsFine);
   index_t resLevel = 0;
-    multigrid.restrict(&pFine, &pCoarse, &rhsFine, &rhsCoarse, resLevel); 
-  rhsCoarse.PrintGrid();
+//      multigrid.restrict(&pFine, &pCoarse, &rhsFine, &rhsCoarse, resLevel); 
+//      std::cout << " Fine Grid " << std::endl;
+//      rhsFine.PrintGrid();
+//      std::cout << " Coarse Grid " << std::endl;
+//    rhsCoarse.PrintGrid();
+//   //resLevel = 1;
+  //multigrid.interCorse2Fine(&pFine, &rhsCoarse, resLevel);
+  //std::cout << " Fine Grid after " << std::endl;
+//  pFine.PrintGrid();
+//   std::cout << std::endl;
+real_t residuum = 1;
+index_t k = 0;
+while (residuum > 0.001){
+    
+   //std::cout << " residdum = " << <<std::endl;
+    residuum = multigrid.Cycle(&pFine, &rhsFine);
+    std::cout << " residdum = " << residuum <<std::endl;
+    k++;
+    if (k == 5) break;
+}
+
   
-  
+  //end test restrict
  
   MPI_Barrier(MPI_COMM_WORLD);
   /////////////////////////////////////

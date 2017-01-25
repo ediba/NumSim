@@ -91,7 +91,9 @@ public:
     real_t Cycle(Grid *grid, const Grid *rhs) const;
     
     //nur für TestZecke Public
-    void restrict(Grid* pFine, Grid* pCoarse, Grid* rhsFine, Grid* rhsCoarse, index_t ref);
+    void restrict(Grid* pFine, Grid* const pCoarse, const Grid* rhsFine, Grid* const  rhsCoarse, index_t ref) const;
+    void interCorse2Fine(Grid* pFine, Grid* pCoarse, index_t ref) const;
+    void TestFunktion(Grid* grid);
 private:
     std::vector<Geometry*> _geometries;
     std::vector<Grid*> _res;
@@ -99,7 +101,7 @@ private:
     std::vector<RedOrBlackSOR*> _solver;
     const Communicator* _comm;
     //void restrict(Grid* pFine, Grid* pCoarse, Grid* rhsFine, Grid* rhsCoarse, index_t ref);
-    void interCorse2Fine(Grid* coarseGrid, Grid* fineGrid, index_t ref);
+    //void interCorse2Fine(Grid* pFine, Grid* pCoarse, index_t ref);
 
 };
 //------------------------------------------------------------------------------
