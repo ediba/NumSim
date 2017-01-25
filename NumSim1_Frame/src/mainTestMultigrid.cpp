@@ -90,13 +90,14 @@ int main(int argc, char **argv) {
 //   }
 
 //Test for restrict
-  Grid pFine(&geom);
+ //multi_real_t offset = {0.5*geom.Mesh()[0],0.5*geom.Mesh()[1]};
+  Grid pFine(&geom, offset);
   pFine.Initialize(0.);
-  Grid rhsFine(&geom);
+  Grid rhsFine(&geom, offset);
   rhsFine.Initialize(0.);
-  Iterator it(&geom, (index_t) 9);
+  Iterator it(&geom, (index_t) 44);
   std::cout << "iterator position = " << it.Pos()[0] << " " << it.Pos()[1] <<std::endl;
-  rhsFine.Cell(it.Top()) = 5;
+  pFine.Cell(it.Top()) = 1;
   //pFine.Cell(it) = 3;
   //pFine.Cell(it.Right()) = 1;
   //pFine.Cell(it.Top().Right()) = 2;
@@ -124,15 +125,28 @@ int main(int argc, char **argv) {
   //std::cout << " Fine Grid after " << std::endl;
 //  pFine.PrintGrid();
 //   std::cout << std::endl;
+  Renderer visu(geom.Length(), geom.Mesh());
+  visu.Init(400, 400);
+   visu.Render(&pFine);
+   //visu.Render(&pFine);
+   bool run = true;
 real_t residuum = 1;
 index_t k = 0;
-while (residuum > 0.001){
-    
+while (run){
+    int key = visu.Check();
+    //key = (int)std::cin;
    //std::cout << " residdum = " << <<std::endl;
-    residuum = multigrid.Cycle(&pFine, &rhsFine);
-    std::cout << " residdum = " << residuum <<std::endl;
+    if (key == 10) {
+            printf("%f\n",multigrid.Cycle(&pFine, &rhsFine));
+            //pFine.PrintGrid();
+        }
+    //residuum = multigrid.Cycle(&pFine, &rhsFine);
+    visu.Render(&pFine);
+    //visu.Render(&pFine);
+    //std::cout << " residdum = " << residuum <<std::endl;
     k++;
-    if (k == 5) break;
+    if (key == -1) run == false;
+    //if (k == 5) break;
 }
 
   

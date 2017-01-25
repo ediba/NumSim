@@ -29,7 +29,8 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
     //std::cout << "vor Solver" << std::endl;
 
     //_solver =  new SOR(_geom, _param->Omega());
-    _solver = new RedOrBlackSOR(_geom, _param->Omega(), _comm);
+     _solver = new Multigrid(_geom, _comm, (index_t) 2);
+    //_solver = new RedOrBlackSOR(_geom, _param->Omega(), _comm);
 
     _dtlimit = _param->Dt();
     // Init time

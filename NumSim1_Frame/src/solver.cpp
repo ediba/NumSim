@@ -170,7 +170,7 @@ Multigrid::Multigrid (const Geometry *geom, const Communicator *comm, index_t nu
         const Iterator it2(_geometries[ref],value);
         
             rhsCoarse->Cell(it) = 0.25* ( localRes(it2,pFine, rhsFine)+ localRes(it2.Right(),pFine, rhsFine)+ localRes(it2.Top(), pFine, rhsFine) + localRes(it2.Top().Right(),pFine, rhsFine) );
-            std::cout << "local Res of Cell " << it << " = " << rhsCoarse->Cell(it) << std::endl;
+            //std::cout << "local Res of Cell " << it << " = " << rhsCoarse->Cell(it) << std::endl;
     }
 }
 
@@ -209,6 +209,67 @@ Multigrid::Multigrid (const Geometry *geom, const Communicator *comm, index_t nu
 
     }
 }
+// void MultiGrid::Boundaries(index_t ref){
+// 	
+// 	 for(BoundaryIterator bit(_geometries[ref+1]); bit.Valid(); bit.Next()) {
+// 			if(value2[0]*2-1<0) value2[0] = 0;
+//                         else if( value2[0] >_geometries[ref]->Size()[0]) value2[0] = _geometries[ref]->Size()[0];
+//                         else value2[0] = value2[0]*2-1;
+//                         
+//                         if(value2[1]*2-1<0) value2[1] = 0;
+//                         else if( value2[0] >_geometries[ref]->Size()[1]) value2[1] = _geometries[ref]->Size()[1];
+//                         else value2[1] = value2[1]*2-1;
+// 
+//                         const index_t value = pFine->IterFromPos(value2);
+//     			const Iterator bit2(_geometries[ref],value);
+// 
+// 		 if(ref==-1){
+// 
+// 			
+// 			if (){
+// 				bit.SetBoundary(1);
+// 				_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dy_r(bit2)+_p[ref]->dy_r(bit2.Right()));
+// 				
+// 			}
+// 			else if (){
+// 				bit.SetBoundary(2);
+// 				_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dx_l(bit2)+_p[ref]->dx_l(bit2.Top()));
+// 			}
+// 			else if (){
+// 				bit.SetBoundary(3);
+// 				_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dy_l(bit2)+_p[ref]->dy_l(bit2.Left()));
+// 			}
+// 			else if (){
+// 				bit.SetBoundary(4);
+// 				_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dx_r(bit2)+_p[ref]->dx_r(bit2.Bottom()));
+// 			}
+// 			
+// 			
+// 		}
+// 		else {
+//     			
+// // hier muss noch für parallel hinzugefügt werden
+// 			//if (){
+// 				bit.SetBoundary(1);
+// 				_res[ref+1]->Cell(bit)= 0.5*(_error[ref]->dy_r(bit2)+_error[ref]->dy_r(bit2.Right()));
+// 				
+// 			//}
+// 			//else if (){
+// 				bit.SetBoundary(2);
+// 				_res[ref+1]->Cell(bit)= 0.5*(_error[ref]->dx_l(bit2)+_error[ref]->dx_l(bit2.Top()));
+// 			//}
+// 			//else if (){
+// 				bit.SetBoundary(3);
+// 				_res[ref+1]->Cell(bit)= 0.5*(_error[ref]->dy_l(bit2)+_error[ref]->dy_l(bit2.Left()));
+// 			//}
+// 			//else if (){
+// 				bit.SetBoundary(4);
+// 				_res[ref+1]->Cell(bit)= 0.5*(_error[ref]->dx_r(bit2)+_error[ref]->dx_r(bit2.Bottom()));
+// 			//}
+// 			
+// 		}		
+// 	}
+// }
 
 Multigrid::~Multigrid(){}
 // real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) const{
@@ -224,40 +285,52 @@ real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) const{
     //_res[0]->Initialize(0.);
     //Glätten
     
-    std::cout<<"p start" << std::endl;
-    grid->PrintGrid();
-    std::cout<<"rhs start" << std::endl;
-    rhs->PrintGrid();
+    //std::cout<<"p start" << std::endl;
+    //grid->PrintGrid();
+    //std::cout<<"rhs start" << std::endl;
+    //rhs->PrintGrid();
     
-    //_geometries[0]->Update_P(grid);
+    _geometries[0]->Update_P(grid);
+    res = _solver[0]->Cycle(grid, rhs);
+    _geometries[0]->Update_P(grid);
+    res = _solver[0]->Cycle(grid, rhs);
+    _geometries[0]->Update_P(grid);
     res = _solver[0]->Cycle(grid, rhs);
     
-    std::cout<<"p Nach Glätter"<<std::endl;
-    grid->PrintGrid();
+//     std::cout<<"p Nach Glätter"<<std::endl;
+//     grid->PrintGrid();
     
     //Resiuduals and restrict
     restrict(grid, _error[1], rhs, _res[1], (index_t)0);
     
-    std::cout<<"Error 1.Stufe vor glätter"<<std::endl;
-    _error[1]->PrintGrid();
+//     std::cout<<"Error 1.Stufe vor glätter"<<std::endl;
+//     _error[1]->PrintGrid();
     
-    //_geometries[1]->Update_P(_error[1]);
+    _geometries[1]->Update_P(_error[1]);
+    res = _solver[1]->Cycle(_error[1], _res[1]);
+    _geometries[1]->Update_P(_error[1]);
+    res = _solver[1]->Cycle(_error[1], _res[1]);
+    _geometries[1]->Update_P(_error[1]);
     res = _solver[1]->Cycle(_error[1], _res[1]);
 
-    std::cout<<"Error 1.Stufe nach glätter"<<std::endl;
-    _error[1]->PrintGrid();
+//     std::cout<<"Error 1.Stufe nach glätter"<<std::endl;
+//     _error[1]->PrintGrid();
     
     interCorse2Fine(grid, _error[1],(index_t) 0);
     
-    std::cout<<"p Vor 2. Glätter"<<std::endl;
-    grid->PrintGrid();
+//     std::cout<<"p Vor 2. Glätter"<<std::endl;
+//     grid->PrintGrid();
     
     //Glätten
-    //_geometries[0]->Update_P(grid);
+    _geometries[0]->Update_P(grid);
+    res = _solver[0]->Cycle(grid, rhs);
+    _geometries[0]->Update_P(grid);
+    res = _solver[0]->Cycle(grid, rhs);
+    _geometries[0]->Update_P(grid);
     res = _solver[0]->Cycle(grid, rhs);
     
-    std::cout<<"p Nach 2. Glätter"<<std::endl;
-    grid->PrintGrid();
+//     std::cout<<"p Nach 2. Glätter"<<std::endl;
+//     grid->PrintGrid();
     //std::cout<<"rhs Nach 2. Glätter"<<std::endl;
     //rhs->PrintGrid();
     
