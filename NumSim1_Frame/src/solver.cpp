@@ -25,7 +25,8 @@ SOR::SOR(const Geometry *geom, const real_t &omega) : Solver(geom) {
 
 SOR::~SOR(){}
 
-real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
+//real_t SOR:: Cycle(Grid *grid, const Grid *rhs) const{
+real_t SOR:: Cycle(Grid *grid, const Grid *rhs){
     const real_t h1 = _geom->Mesh()[0];
     const real_t h2 = _geom->Mesh()[1];
     //the multiplier is not changing for any point in grid, that is why it is before the loop
@@ -57,7 +58,8 @@ RedOrBlackSOR::RedOrBlackSOR (const Geometry* geom, const real_t& omega, const C
 // Destructor
 RedOrBlackSOR::~RedOrBlackSOR(){}
 
-real_t RedOrBlackSOR::Cycle(Grid *grid, const Grid *rhs) const{
+//real_t RedOrBlackSOR::Cycle(Grid *grid, const Grid *rhs) const{
+real_t RedOrBlackSOR::Cycle(Grid *grid, const Grid *rhs){
     real_t totalRes = 0;
     totalRes += RedCycle(grid,rhs);
 
@@ -74,8 +76,8 @@ real_t RedOrBlackSOR::Cycle(Grid *grid, const Grid *rhs) const{
     return sqrt((totalRes)/((_geom->Size()[0]*_geom->Size()[1])-t ));
 }
 
-
-real_t RedOrBlackSOR::RedCycle (Grid* grid, const Grid* rhs) const{
+//real_t RedOrBlackSOR::RedCycle (Grid* grid, const Grid* rhs) const{
+real_t RedOrBlackSOR::RedCycle (Grid* grid, const Grid* rhs){
     const real_t h1 = _geom->Mesh()[0];
     const real_t h2 = _geom->Mesh()[1];
     //the multiplier is not changing for any point in grid, that is why it is before the loop
@@ -103,8 +105,8 @@ real_t RedOrBlackSOR::RedCycle (Grid* grid, const Grid* rhs) const{
     //std::cout << "Skipped in iterator Red : " << k << std::endl;
     return totalRes;
 }
-
-real_t RedOrBlackSOR::BlackCycle (Grid* grid, const Grid* rhs) const{
+//real_t RedOrBlackSOR::BlackCycle (Grid* grid, const Grid* rhs) const{
+real_t RedOrBlackSOR::BlackCycle (Grid* grid, const Grid* rhs) {
     const real_t h1 = _geom->Mesh()[0];
     const real_t h2 = _geom->Mesh()[1];
     //the multiplier is not changing for any point in grid, that is why it is before the loop
@@ -138,7 +140,9 @@ real_t RedOrBlackSOR::BlackCycle (Grid* grid, const Grid* rhs) const{
 
 Multigrid::Multigrid (const Geometry *geom, const Communicator *comm, index_t numOfRef) : Solver(geom){
     _comm=comm;
-    for(index_t i=0; i<numOfRef; i++){
+    _N = -1;
+    _maxN = numOfRef;
+    for(index_t i=0; i<=numOfRef; i++){
         _geometries.push_back(new Geometry(*_geom, i));
         _error.push_back(new Grid(_geometries[i]));
         _res.push_back(new Grid(_geometries[i]));
@@ -147,54 +151,23 @@ Multigrid::Multigrid (const Geometry *geom, const Communicator *comm, index_t nu
 }
 //Restric Funktion Fine to Coarse
  void Multigrid::restrict(Grid* pFine, Grid* const pCoarse,  const Grid* rhsFine, Grid* const  rhsCoarse, index_t ref) const{
-//   for(InteriorIterator it(_geometries[ref+1]); it.Valid(); it.Next()) {
-//         multi_index_t value2= it.Pos();
-//         index_t value=(2*value2(0)-1)+(2*value2(1)-1)*(_geometries[ref+1]->Size()+2);
-//         _error[ref]->Cell(it) = 0;
-//         const InteriorIterator it2(_geometries[ref],value);
-//         
-//         if(ref==-1){
-//             _res[ref+1]->Cell(it) = 0.25* ( localRes(it2,_p, _rhs) + localRes	(it2.Right(), _p, _rhs)+ localRes(it2.Top(), _p, _rhs) + localRes	(it2.Top().Right(), _p, _rhs) );
-//         }
-//         else {
-//             _res[ref+1]->Cell(it) = 0.25* ( localRes(it2,_error[ref], _res[ref])+ 	localRes(it2.Right(),_error[ref], _res[ref])+ localRes(it2.Top(), 	_error[ref], _res[ref]) + localRes(it2.Top().Right(),_error[ref], 	_res[ref]) );
-//         }
-//     }
+     pCoarse->Initialize(0);
+     rhsCoarse->Initialize(0);
+     
       for(InteriorIterator it(_geometries[ref+1]); it.Valid(); it.Next()) {
         multi_index_t value2= it.Pos();
         value2[0] = value2[0]*2-1;
         value2[1] = value2[1]*2-1;
-        //const index_t value=(2*value2[0]-1)+(2*value2[1]-1)*(_geometries[ref+1]->Size()[0]+2);
+        
         const index_t value = pFine->IterFromPos(value2);
-        pCoarse->Cell(it) = 0;
         const Iterator it2(_geometries[ref],value);
         
             rhsCoarse->Cell(it) = 0.25* ( localRes(it2,pFine, rhsFine)+ localRes(it2.Right(),pFine, rhsFine)+ localRes(it2.Top(), pFine, rhsFine) + localRes(it2.Top().Right(),pFine, rhsFine) );
-            //std::cout << "local Res of Cell " << it << " = " << rhsCoarse->Cell(it) << std::endl;
     }
 }
 
  void Multigrid::interCorse2Fine(Grid* pFine, Grid* pCoarse, index_t ref) const{
-	
-//     for(Iterator it(_geometries[ref+1]); it.Valid(); it.Next()) {
-//         multi_index_t value2= it.Pos();
-//         index_t value=(2*value2(0)-1)+(2*value2(1)-1)*(_geometries[ref+1]->Size()+2);
-//         const Iterator it2(_geometries[ref],value);
-//         //0 oder -1
-//         if(ref == -1){
-//                 _p->Cell(it2) += _error[ref+1]->Cell(it);
-//             _p->Cell(it2.Right()) += _error[ref+1]->Cell(it);
-//             _p->Cell(it2.Top()) += _error[ref+1]->Cell(it);
-//             _p->Cell(it2.Top().Right()) += _error[ref+1]->Cell(it);
-// 
-//         }
-//         else {
-//             _error[ref]->Cell(it2) += _error[ref+1]->Cell(it);
-//             _error[ref]->Cell(it2.Right()) += _error[ref+1]->Cell(it);
-//             _error[ref]->Cell(it2.Top()) += _error[ref+1]->Cell(it);
-//             _error[ref]->Cell(it2.Top().Right()) += _error[ref+1]->Cell(it);
-//         }
-//     }
+
     for(InteriorIterator it(_geometries[ref+1]); it.Valid(); it.Next()) {
         multi_index_t value2= it.Pos();
         value2[0] = value2[0]*2-1;
@@ -209,87 +182,153 @@ Multigrid::Multigrid (const Geometry *geom, const Communicator *comm, index_t nu
 
     }
 }
-// void MultiGrid::Boundaries(index_t ref){
-// 	
-// 	 for(BoundaryIterator bit(_geometries[ref+1]); bit.Valid(); bit.Next()) {
-// 			if(value2[0]*2-1<0) value2[0] = 0;
-//                         else if( value2[0] >_geometries[ref]->Size()[0]) value2[0] = _geometries[ref]->Size()[0];
-//                         else value2[0] = value2[0]*2-1;
-//                         
-//                         if(value2[1]*2-1<0) value2[1] = 0;
-//                         else if( value2[0] >_geometries[ref]->Size()[1]) value2[1] = _geometries[ref]->Size()[1];
-//                         else value2[1] = value2[1]*2-1;
-// 
-//                         const index_t value = pFine->IterFromPos(value2);
-//     			const Iterator bit2(_geometries[ref],value);
-// 
-// 		 if(ref==-1){
-// 
-// 			
-// 			if (){
-// 				bit.SetBoundary(1);
-// 				_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dy_r(bit2)+_p[ref]->dy_r(bit2.Right()));
-// 				
-// 			}
-// 			else if (){
-// 				bit.SetBoundary(2);
-// 				_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dx_l(bit2)+_p[ref]->dx_l(bit2.Top()));
-// 			}
-// 			else if (){
-// 				bit.SetBoundary(3);
-// 				_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dy_l(bit2)+_p[ref]->dy_l(bit2.Left()));
-// 			}
-// 			else if (){
-// 				bit.SetBoundary(4);
-// 				_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dx_r(bit2)+_p[ref]->dx_r(bit2.Bottom()));
-// 			}
-// 			
-// 			
-// 		}
-// 		else {
-//     			
-// // hier muss noch für parallel hinzugefügt werden
-// 			//if (){
-// 				bit.SetBoundary(1);
-// 				_res[ref+1]->Cell(bit)= 0.5*(_error[ref]->dy_r(bit2)+_error[ref]->dy_r(bit2.Right()));
-// 				
-// 			//}
-// 			//else if (){
-// 				bit.SetBoundary(2);
-// 				_res[ref+1]->Cell(bit)= 0.5*(_error[ref]->dx_l(bit2)+_error[ref]->dx_l(bit2.Top()));
-// 			//}
-// 			//else if (){
-// 				bit.SetBoundary(3);
-// 				_res[ref+1]->Cell(bit)= 0.5*(_error[ref]->dy_l(bit2)+_error[ref]->dy_l(bit2.Left()));
-// 			//}
-// 			//else if (){
-// 				bit.SetBoundary(4);
-// 				_res[ref+1]->Cell(bit)= 0.5*(_error[ref]->dx_r(bit2)+_error[ref]->dx_r(bit2.Bottom()));
-// 			//}
-// 			
-// 		}		
-// 	}
-// }
+void Multigrid::Boundaries(Grid* pFine, Grid* rhsCoarse, index_t ref) const{
+    BoundaryIterator bit(_geometries[ref+1]);
+
+        if (_comm->isBottom()){
+            bit.SetBoundary(1);
+            
+            while(bit.Valid()){
+                
+            multi_index_t value2 = bit.Pos();
+            value2[0] = value2[0]*2-1;
+            value2[1] = value2[1]*2-1;
+            if(value2[0]<0) value2[0] = 0;
+            else if( value2[0] >_geometries[ref]->Size()[0]+1) value2[0] = _geometries[ref]->Size()[0]+1;
+            if(value2[1]<0) value2[1] = 0;
+            else if( value2[1] >_geometries[ref]->Size()[1]+1) value2[1] = _geometries[ref]->Size()[1];
+            
+            const index_t value = pFine->IterFromPos(value2);
+            const Iterator bit2(_geometries[ref],value);
+            
+            rhsCoarse->Cell(bit)= -0.5*(pFine->dy_r(bit2)+pFine->dy_r(bit2.Right()));
+            bit.Next();
+            }
+        }
+
+        if (_comm->isRight()){
+            bit.SetBoundary(2);
+            while(bit.Valid()){
+                
+            multi_index_t value2 = bit.Pos();
+            value2[0] = value2[0]*2-1;
+            value2[1] = value2[1]*2-1;
+            
+            if(value2[0]<0) value2[0] = 0;
+            else if( value2[0] >_geometries[ref]->Size()[0]+1) value2[0] = _geometries[ref]->Size()[0]+1;
+            if(value2[1]<0) value2[1] = 0;
+            else if( value2[1] >_geometries[ref]->Size()[1]+1) value2[1] = _geometries[ref]->Size()[1];
+                
+            const index_t value = pFine->IterFromPos(value2);
+            const Iterator bit2(_geometries[ref],value);
+        
+            rhsCoarse->Cell(bit)= 0.5*(pFine->dx_l(bit2)+pFine->dx_l(bit2.Top()));
+            bit.Next();
+            }
+        }
+
+        if (_comm->isTop()){
+            bit.SetBoundary(3);
+            while(bit.Valid()){
+                
+            multi_index_t value2 = bit.Pos();
+            value2[0] = value2[0]*2-1;
+            value2[1] = value2[1]*2-1;
+            
+            if(value2[0]<0) value2[0] = 0;
+            else if( value2[0] >_geometries[ref]->Size()[0]+1) value2[0] = _geometries[ref]->Size()[0]+1;
+            if(value2[1]<0) value2[1] = 0;
+            else if( value2[1] >_geometries[ref]->Size()[1]+1) value2[1] = _geometries[ref]->Size()[1];
+                
+            const index_t value = pFine->IterFromPos(value2);
+            const Iterator bit2(_geometries[ref],value);
+            
+            //_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dy_l(bit2)+_p[ref]->dy_l(bit2.Left()));
+            rhsCoarse->Cell(bit)= 0.5*(pFine->dy_l(bit2)+pFine->dy_l(bit2.Right()));
+            bit.Next();
+            }
+        }
+        
+        if (_comm->isLeft()){
+            bit.SetBoundary(4);
+            
+            while (bit.Valid()){
+                
+            multi_index_t value2 = bit.Pos();
+            value2[0] = 0;
+            if(value2[1]*2-1<0)value2[1]=0;
+            else value2[1] = value2[1]*2-1;
+            
+            if(value2[0]<0) value2[0] = 0;
+            else if( value2[0] >_geometries[ref]->Size()[0]+1) value2[0] = _geometries[ref]->Size()[0]+1;
+            if(value2[1]<0) value2[1] = 0;
+            else if( value2[1] >_geometries[ref]->Size()[1]+1) value2[1] = _geometries[ref]->Size()[1];
+            //_res[ref+1]->Cell(bit)= 0.5*(_p[ref]->dx_r(bit2)+_p[ref]->dx_r(bit2.Bottom()));
+            
+            const index_t value = pFine->IterFromPos(value2);
+            const Iterator bit2(_geometries[ref],value);
+            rhsCoarse->Cell(bit)= 0.5*(pFine->dx_r(bit2)+pFine->dx_r(bit2.Top()));
+            bit.Next();
+            }
+        }
+}
 
 Multigrid::~Multigrid(){}
-// real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) const{
-//     grid->PrintGrid();
-//     TestFunktion(grid);
-// }
-// void Multigrid::TestFunktion(Grid* grid){
-//    // _error[0]->PrintGrid();
-// }
-real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) const{
+
+real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) {
+    _N++;
     real_t res = 0;
-    //_error[0]->Initialize(0.);
-    //_res[0]->Initialize(0.);
-    //Glätten
+    if(_N == 0){
+        _geometries[0]->Update_P(grid);
+        res = _solver[0]->Cycle(grid, rhs);
+         _geometries[0]->Update_P(grid);
+         res = _solver[0]->Cycle(grid, rhs);
+         _geometries[0]->Update_P(grid);
+         res = _solver[0]->Cycle(grid, rhs);
+    }
+    else{
+         _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
+         res = _solver[_N]->Cycle(grid, rhs);
+        _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
+        res = _solver[_N]->Cycle(grid, rhs);
+        _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
+        res = _solver[_N]->Cycle(grid, rhs);
+    }
+    //Abbruch bedingung
+    if(_N==_maxN) {_N--; return res;}
     
-    //std::cout<<"p start" << std::endl;
-    //grid->PrintGrid();
-    //std::cout<<"rhs start" << std::endl;
-    //rhs->PrintGrid();
+    restrict(grid, _error[_N+1], rhs, _res[_N+1], _N);
+    Boundaries(grid, _res[_N+1], _N);
     
+    Cycle(_error[_N+1], _res[_N+1]);
+    
+    if(_N == 0){
+        
+        interCorse2Fine(grid, _error[1], _N);
+         _geometries[0]->Update_P(grid);
+        res = _solver[0]->Cycle(grid, rhs);
+        _geometries[0]->Update_P(grid);
+        res = _solver[0]->Cycle(grid, rhs);
+        _geometries[0]->Update_P(grid);
+        res = _solver[0]->Cycle(grid, rhs); 
+    }
+    else{
+        //std::cout << " Grid vor  Coarse2Fine : "<<std::endl;_error[_N+1]->PrintGrid();
+        //std::cout << " Grid vor  Coarse2Fine : "<<std::endl;grid->PrintGrid();
+        interCorse2Fine(grid, _error[_N+1], _N);
+        //std::cout << " Grid nach Coarse2Fine: "<<std::endl;grid->PrintGrid();
+        _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
+         res = _solver[_N]->Cycle(grid, rhs);
+        _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
+        res = _solver[_N]->Cycle(grid, rhs);
+        _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
+        res = _solver[_N]->Cycle(grid, rhs);
+    }
+    _N--;
+    return res;
+    /*
+     //TODO Alter nicht rekursiver Algorithmus (todos sind nur für übersichtlichkeit
+    real_t res = 0;
     _geometries[0]->Update_P(grid);
     res = _solver[0]->Cycle(grid, rhs);
     _geometries[0]->Update_P(grid);
@@ -297,29 +336,39 @@ real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) const{
     _geometries[0]->Update_P(grid);
     res = _solver[0]->Cycle(grid, rhs);
     
-//     std::cout<<"p Nach Glätter"<<std::endl;
-//     grid->PrintGrid();
-    
+    // //TODO Stufe 0 nach 1
     //Resiuduals and restrict
     restrict(grid, _error[1], rhs, _res[1], (index_t)0);
+    Boundaries(grid, _res[1], (index_t) 0);
     
-//     std::cout<<"Error 1.Stufe vor glätter"<<std::endl;
-//     _error[1]->PrintGrid();
-    
-    _geometries[1]->Update_P(_error[1]);
+    _geometries[1]->BoundaryUpdateCoarse(_error[1], _res[1]);
     res = _solver[1]->Cycle(_error[1], _res[1]);
-    _geometries[1]->Update_P(_error[1]);
+    _geometries[1]->BoundaryUpdateCoarse(_error[1], _res[1]);
     res = _solver[1]->Cycle(_error[1], _res[1]);
-    _geometries[1]->Update_P(_error[1]);
+    _geometries[1]->BoundaryUpdateCoarse(_error[1], _res[1]);
     res = _solver[1]->Cycle(_error[1], _res[1]);
 
-//     std::cout<<"Error 1.Stufe nach glätter"<<std::endl;
-//     _error[1]->PrintGrid();
+    //TODO Stufe 1 nach 2
+    restrict(_error[1], _error[2], _res[1],  _res[2], (index_t)1);
+    Boundaries(_error[1], _res[2], (index_t) 1);
+
     
+    _geometries[2]->BoundaryUpdateCoarse(_error[2], _res[2]);
+    res = _solver[2]->Cycle(_error[2], _res[2]);
+    _geometries[2]->BoundaryUpdateCoarse(_error[2], _res[2]);
+    res = _solver[2]->Cycle(_error[2], _res[2]);
+    
+    //TODO Stufe 2 nach 1
+    interCorse2Fine(_error[1], _error[2], (index_t) 1);
+    
+    _geometries[1]->BoundaryUpdateCoarse(_error[1], _res[2]);
+    res = _solver[1]->Cycle(_error[1], _res[1]);
+    _geometries[1]->BoundaryUpdateCoarse(_error[1], _res[2]);
+    res = _solver[1]->Cycle(_error[1], _res[1]);
+    
+    //TODO Stufe 1 nach 0
     interCorse2Fine(grid, _error[1],(index_t) 0);
     
-//     std::cout<<"p Vor 2. Glätter"<<std::endl;
-//     grid->PrintGrid();
     
     //Glätten
     _geometries[0]->Update_P(grid);
@@ -328,13 +377,6 @@ real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) const{
     res = _solver[0]->Cycle(grid, rhs);
     _geometries[0]->Update_P(grid);
     res = _solver[0]->Cycle(grid, rhs);
-    
-//     std::cout<<"p Nach 2. Glätter"<<std::endl;
-//     grid->PrintGrid();
-    //std::cout<<"rhs Nach 2. Glätter"<<std::endl;
-    //rhs->PrintGrid();
-    
-    
-    
-    return res;
+
+    return res;*/
 }

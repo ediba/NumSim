@@ -99,6 +99,8 @@ public:
     const char &Flag(const Iterator &it) const;
     
     void printGeometry();
+    
+    void BoundaryUpdateCoarse(Grid* error, const Grid* residual);
 
 private:
     void Set_U_vertical(Iterator it, Grid* u)const;

@@ -36,7 +36,8 @@ public:
   // @param [in][out] grid current values
   // @param [in]      rhs  right hand side values
   // @returns accumulated residual
-  virtual real_t Cycle(Grid *grid, const Grid *rhs) const = 0;
+  //virtual real_t Cycle(Grid *grid, const Grid *rhs) const = 0;
+  virtual real_t Cycle(Grid *grid, const Grid *rhs) = 0;
 
 protected:
   const Geometry *_geom;
@@ -59,7 +60,8 @@ public:
   /// Returns the total residual and executes a solver cycle
   // @param grid current pressure values
   // @param rhs right hand side
-  virtual real_t Cycle(Grid *grid, const Grid *rhs) const;
+  //virtual real_t Cycle(Grid *grid, const Grid *rhs) const;
+  virtual real_t Cycle(Grid *grid, const Grid *rhs);
 
 protected:
   real_t _omega;
@@ -78,9 +80,13 @@ public:
 	/// Destructor
 	~RedOrBlackSOR();
 
-        real_t Cycle(Grid *grid, const Grid *rhs) const;
-	real_t RedCycle (Grid* grid, const Grid* rhs) const;
-	real_t BlackCycle (Grid* grid, const Grid* rhs) const;
+//         real_t Cycle(Grid *grid, const Grid *rhs) const;
+// 	real_t RedCycle (Grid* grid, const Grid* rhs) const;
+// 	real_t BlackCycle (Grid* grid, const Grid* rhs) const;
+        
+        real_t Cycle(Grid *grid, const Grid *rhs);
+	real_t RedCycle (Grid* grid, const Grid* rhs);
+	real_t BlackCycle (Grid* grid, const Grid* rhs);
 };
 
 
@@ -88,16 +94,26 @@ class Multigrid : public Solver {
 public:
     Multigrid (const Geometry *geom, const Communicator *comm, index_t numOfRef);
     ~Multigrid();
-    real_t Cycle(Grid *grid, const Grid *rhs) const;
+    real_t Cycle(Grid *grid, const Grid *rhs);
     
     //nur für TestZecke Public
     void restrict(Grid* pFine, Grid* const pCoarse, const Grid* rhsFine, Grid* const  rhsCoarse, index_t ref) const;
     void interCorse2Fine(Grid* pFine, Grid* pCoarse, index_t ref) const;
     void TestFunktion(Grid* grid);
-private:
+    void Boundaries(Grid* pFine, Grid* rhsCoarse, index_t ref) const;
     std::vector<Geometry*> _geometries;
     std::vector<Grid*> _res;
     std::vector<Grid*> _error;
+    
+protected:
+    
+private:
+    index_t _maxN;
+    int _N;
+    
+//     std::vector<Geometry*> _geometries;
+//     std::vector<Grid*> _res;
+//     std::vector<Grid*> _error;
     std::vector<RedOrBlackSOR*> _solver;
     const Communicator* _comm;
     //void restrict(Grid* pFine, Grid* pCoarse, Grid* rhsFine, Grid* rhsCoarse, index_t ref);

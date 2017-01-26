@@ -62,69 +62,96 @@ int main(int argc, char **argv) {
   Grid testgrid(&geom, offset);
   
   /////////////////////////////////////////////////////
-  //Test für SOR solver für 4 Prozessoren
+  //Test von verschiedenen Funktionen
+  //
   /////////////////////////////////////////////////////
   testgrid.Initialize(0);
-  if(comm.ThreadIdx()[0] == 1 && comm.ThreadIdx()[1]==1){
-      Iterator it(&geom, 63);
-      testgrid.Cell(it)=1;
-      /*if(comm.isTop()){
-          std::cout<< "Positionierung oben" << std::endl;
-      }
-      if(comm.isRight()){
-          std::cout<< "Positionierung rechts" << std::endl;
-      }
-      if(comm.isLeft()){
-          std::cout<< "Positionierung links" << std::endl;
-      }
-      if(comm.isBottom()){
-          std::cout<< "Positionierung unten" << std::endl;
-      }*/
-  }
-//   for(int i=0; i<comm.ThreadCnt();i++){
-//       if(comm.ThreadNum() == i){
-//           std::cout << " ich bin Prozess " << comm.ThreadNum() << " Mein grid vor SOR " << std::endl;
-//           testgrid.PrintGrid();
-//       }
-//       MPI_Barrier(MPI_COMM_WORLD);
-//   }
 
-//Test for restrict
- //multi_real_t offset = {0.5*geom.Mesh()[0],0.5*geom.Mesh()[1]};
-  Grid pFine(&geom, offset);
+  bool testBoundaries = true;
+  bool testRestrict = false;
+  bool testInterCoarse2Fine = false;
+  
+Grid pFine(&geom, offset);
   pFine.Initialize(0.);
   Grid rhsFine(&geom, offset);
   rhsFine.Initialize(0.);
-  Iterator it(&geom, (index_t) 44);
-  std::cout << "iterator position = " << it.Pos()[0] << " " << it.Pos()[1] <<std::endl;
-  pFine.Cell(it.Top()) = 1;
-  //pFine.Cell(it) = 3;
-  //pFine.Cell(it.Right()) = 1;
-  //pFine.Cell(it.Top().Right()) = 2;
-  index_t coarseLevel = 1;
-  Geometry coarseGeom(geom,coarseLevel);
+   Geometry coarseGeom(geom, (index_t) 1);
   Grid pCoarse(&coarseGeom);
   pCoarse.Initialize(0);
   Grid rhsCoarse(&coarseGeom);
   rhsCoarse.Initialize(0);
   Multigrid multigrid(&geom, &comm, 2);
-  
-//   std::cout<<"p start" << std::endl;
-//   pFine.PrintGrid();
-//   std::cout<<"rhs start" << std::endl;
-//   rhsFine.PrintGrid();
- //multigrid.Cycle(&pFine, &rhsFine);
   index_t resLevel = 0;
-//      multigrid.restrict(&pFine, &pCoarse, &rhsFine, &rhsCoarse, resLevel); 
-//      std::cout << " Fine Grid " << std::endl;
-//      rhsFine.PrintGrid();
-//      std::cout << " Coarse Grid " << std::endl;
-//    rhsCoarse.PrintGrid();
-//   //resLevel = 1;
-  //multigrid.interCorse2Fine(&pFine, &rhsCoarse, resLevel);
-  //std::cout << " Fine Grid after " << std::endl;
-//  pFine.PrintGrid();
-//   std::cout << std::endl;
+
+  if(testBoundaries){
+ //multi_real_t offset = {0.5*geom.Mesh()[0],0.5*geom.Mesh()[1]};
+  
+  
+  
+  for (InteriorIterator it(&geom); it.Valid(); it.Next()){
+      pFine.Cell(it) = 1.;
+  }
+  //pFine.Cell(it.Top()) = 1;
+  //pFine.Cell(it) = 3;
+  //pFine.Cell(it.Right()) = 1;
+  //pFine.Cell(it.Top().Right()) = 2;
+  index_t coarseLevel = 1;
+ 
+  
+  //Test für Boundaries BoundaryUpdateCoarse
+  std::cout << "pFine vor Boundaries" <<std::endl;
+  pFine.PrintGrid();
+  std::cout << "rhsCoarse vor Boundaries" <<std::endl;
+  rhsCoarse.PrintGrid();
+  multigrid.Boundaries(&pFine,&rhsCoarse,(index_t)0);
+  std::cout << "rhsCoarse nach Boundaries" <<std::endl;
+  rhsCoarse.PrintGrid();
+  std::cout << "pCoarse vor BoundaryUpdateCoarse" <<std::endl;
+  pCoarse.PrintGrid();
+  std::cout << "rhsCoarse vor BoundaryUpdateCoarse" <<std::endl;
+  rhsCoarse.PrintGrid();
+  coarseGeom.BoundaryUpdateCoarse(&pCoarse, &rhsCoarse);
+  std::cout << "pCoarse vor BoundaryUpdateCoarse" <<std::endl;
+  pCoarse.PrintGrid();
+  
+  }
+  //endTest für Boundaries
+  
+if(testRestrict){
+  resLevel = 0;
+  //test für restrict
+  Iterator it(&geom, (index_t) 10);
+  pFine.Initialize(0.);
+  rhsFine.Initialize(0.);
+  pCoarse.Initialize(0.);
+  rhsCoarse.Initialize(0.);
+  pFine.Cell(it) = 3;
+  std::cout << "pFine Before restrict" <<std::endl;
+  pFine.PrintGrid();
+  std::cout << "rhsCoarse Before restrict" <<std::endl;
+  rhsCoarse.PrintGrid();
+  multigrid.restrict(&pFine, &pCoarse, &rhsFine, &rhsCoarse, resLevel); 
+  std::cout << "rhsCoarse After restrict" <<std::endl;
+  rhsCoarse.PrintGrid();
+  
+}
+if(testInterCoarse2Fine){
+    Iterator it3(&geom, (index_t) 10);
+  pFine.Initialize(0.);
+  rhsFine.Initialize(0.);
+  pCoarse.Initialize(0.);
+  rhsCoarse.Initialize(0.);
+  pCoarse.Cell(it3) = 3;
+    std::cout << " Fine Grid before interCoarse2Fine" << std::endl;
+    rhsFine.PrintGrid();
+    std::cout << " Coarse Grid before interCoarse2Fine " << std::endl;
+    pCoarse.PrintGrid();
+    resLevel = 0;
+    multigrid.interCorse2Fine(&pFine, &pCoarse, resLevel);
+    std::cout << " Fine Grid after interCoarse2Fine" << std::endl;
+    pFine.PrintGrid();
+    std::cout << std::endl;
+}
   Renderer visu(geom.Length(), geom.Mesh());
   visu.Init(400, 400);
    visu.Render(&pFine);
@@ -132,6 +159,7 @@ int main(int argc, char **argv) {
    bool run = true;
 real_t residuum = 1;
 index_t k = 0;
+/*
 while (run){
     int key = visu.Check();
     //key = (int)std::cin;
@@ -148,6 +176,7 @@ while (run){
     if (key == -1) run == false;
     //if (k == 5) break;
 }
+*/
 
   
   //end test restrict

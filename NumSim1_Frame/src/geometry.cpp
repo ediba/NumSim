@@ -129,7 +129,7 @@ if(_freeGeom){
 }
 //berechnet die Höhe und Breite eines Elements
 
-//std::cout << "Prozess " << _comm->ThreadNum() << ": Geometry constructed with _blength[0]=" << _blength[0] << "; _bsize[0]=" << _bsize[0] << "; _mesh[0]=" << _mesh[0] << std::endl;
+std::cout << "Prozess " << _comm->ThreadNum() << ": Geometry constructed with _blength[0]=" << _blength[0] << "; _bsize[0]=" << _bsize[0] << "; _mesh[0]=" << _mesh[0] << std::endl;
 
 }
     void Geometry::GetSizesOfThreads (){
@@ -897,4 +897,43 @@ void Geometry::printGeometry(){
     std::cout<<"_mesh: " <<_mesh[0] << "|"<<_mesh[1] <<std::endl;
     std::cout<<"_velocity: " <<_velocity[0] << "|"<<_velocity[1] <<std::endl;
     std::cout<<"_pressure: " <<_pressure <<std::endl;
+}
+void Geometry::BoundaryUpdateCoarse(Grid* error, const Grid* residual){
+    BoundaryIterator it = BoundaryIterator(this);
+            if(_comm->isLeft()){
+                it.SetBoundary(4);
+                it.First();
+                while(it.Valid()){
+                    //error->Cell(it) = error->Cell(it.Right()) + Mesh()[0]*residual->Cell(it);
+                    error->Cell(it) = error->Cell(it.Right()) - Mesh()[0]*residual->Cell(it);
+                    it.Next();
+                }
+            }
+            if(_comm->isBottom()){
+                it.SetBoundary(1);
+                it.First();
+                while(it.Valid()){
+                    //error->Cell(it) = error->Cell(it.Top()) + Mesh()[1]*residual->Cell(it);
+                    error->Cell(it) = error->Cell(it.Top()) - Mesh()[1]*residual->Cell(it);
+                    it.Next();
+                }
+            }
+            if(_comm->isRight()){
+                it.SetBoundary(2);
+                it.First();
+                while(it.Valid()){
+                    //error->Cell(it) = error->Cell(it.Left()) + Mesh()[0]*residual->Cell(it);
+                    error->Cell(it) = error->Cell(it.Left()) + Mesh()[0]*residual->Cell(it);
+                    it.Next();
+                }
+            }
+            if(_comm->isTop()){
+                it.SetBoundary(3);
+                it.First();
+                while(it.Valid()){
+                    //error->Cell(it) = error->Cell(it.Down()) + Mesh()[1]*residual->Cell(it);
+                    error->Cell(it) = error->Cell(it.Down()) + Mesh()[1]*residual->Cell(it);
+                    it.Next();
+                }
+            }
 }
