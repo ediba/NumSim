@@ -187,12 +187,16 @@ void Multigrid::Boundaries(Grid* pFine, Grid* rhsCoarse, index_t ref) const{
 
         if (_comm->isBottom()){
             bit.SetBoundary(1);
+            bit.Next();
             
             while(bit.Valid()){
-                
             multi_index_t value2 = bit.Pos();
-            value2[0] = value2[0]*2-1;
-            value2[1] = value2[1]*2-1;
+                
+            if(value2[0]*2-1<0)value2[0]=0;
+            else value2[0] = value2[0]*2-1;
+            
+            
+            value2[1] = 0;
             if(value2[0]<0) value2[0] = 0;
             else if( value2[0] >_geometries[ref]->Size()[0]+1) value2[0] = _geometries[ref]->Size()[0]+1;
             if(value2[1]<0) value2[1] = 0;
@@ -208,6 +212,8 @@ void Multigrid::Boundaries(Grid* pFine, Grid* rhsCoarse, index_t ref) const{
 
         if (_comm->isRight()){
             bit.SetBoundary(2);
+            bit.Next();
+            
             while(bit.Valid()){
                 
             multi_index_t value2 = bit.Pos();
@@ -229,6 +235,8 @@ void Multigrid::Boundaries(Grid* pFine, Grid* rhsCoarse, index_t ref) const{
 
         if (_comm->isTop()){
             bit.SetBoundary(3);
+            bit.Next();
+            
             while(bit.Valid()){
                 
             multi_index_t value2 = bit.Pos();
@@ -252,7 +260,9 @@ void Multigrid::Boundaries(Grid* pFine, Grid* rhsCoarse, index_t ref) const{
         if (_comm->isLeft()){
             bit.SetBoundary(4);
             
-            while (bit.Valid()){
+            bit.Next();
+            
+            while(bit.Valid()){
                 
             multi_index_t value2 = bit.Pos();
             value2[0] = 0;
@@ -311,6 +321,7 @@ real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) {
         res = _solver[0]->Cycle(grid, rhs);
         _geometries[0]->Update_P(grid);
         res = _solver[0]->Cycle(grid, rhs); 
+        
     }
     else{
         //std::cout << " Grid vor  Coarse2Fine : "<<std::endl;_error[_N+1]->PrintGrid();
