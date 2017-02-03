@@ -191,10 +191,10 @@ void Multigrid::GetResiduals(Grid* p, const Grid* rhs, Grid* res, index_t ref)co
         const index_t value = pFine->IterFromPos(value2);
         const Iterator it2(_geometries[ref],value);
         //0 oder -1
-            pFine->Cell(it2)            -= pCoarse->Cell(it);                  //TODO:Vorzeichen
-            pFine->Cell(it2.Right())    -= pCoarse->Cell(it);
-            pFine->Cell(it2.Top())      -= pCoarse->Cell(it);
-            pFine->Cell(it2.Top().Right()) -= pCoarse->Cell(it);
+            pFine->Cell(it2)            += pCoarse->Cell(it);                  //TODO:Vorzeichen
+            pFine->Cell(it2.Right())    += pCoarse->Cell(it);
+            pFine->Cell(it2.Top())      += pCoarse->Cell(it);
+            pFine->Cell(it2.Top().Right()) += pCoarse->Cell(it);
 
     }
 }
