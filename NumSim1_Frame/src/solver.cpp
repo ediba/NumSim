@@ -304,17 +304,18 @@ real_t Multigrid::smooth(Grid *grid, const Grid *rhs) {
     if(_N == 0){
         _geometries[0]->Update_P(grid);
         res = _solver[0]->Cycle(grid, rhs);
-         _geometries[0]->Update_P(grid);
-         res = _solver[0]->Cycle(grid, rhs);
+        _geometries[0]->Update_P(grid);
+        // res = _solver[0]->Cycle(grid, rhs);
          //_geometries[0]->Update_P(grid);
          //res = _solver[0]->Cycle(grid, rhs);
     }
     else{
          //_geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
+         _geometries[_N]->Update_P(grid);
          res = _solver[_N]->Cycle(grid, rhs);
          _geometries[_N]->Update_P(grid);
         //_geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
-        res = _solver[_N]->Cycle(grid, rhs);
+        //res = _solver[_N]->Cycle(grid, rhs);
         //_geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
         //res = _solver[_N]->Cycle(grid, rhs);
     }
