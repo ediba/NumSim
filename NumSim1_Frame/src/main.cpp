@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     //-----------------------------------------------------------------------
 */    
     bool visualize = true;
-    int visuStep = 5;
+    int visuStep = 1;
     bool writeVtk = true;
     
   // Create parameter and geometry instances with default values
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
     }
   // Create a VTK generator
   //VTK vtk(geom.Mesh(), geom.Size());
-    real_t dt_vtk = 1.0, t_nextVtk=0.3;
+    real_t dt_vtk = 1.0, t_nextVtk=0.00001;
     multi_real_t offset_vtk = {comm.ThreadIdx()[0]*(geom.Length()[0]),comm.ThreadIdx()[1]*(geom.Length()[1])};
     multi_index_t local_size = geom.Size();
     local_size[0]+=2;
@@ -125,6 +125,7 @@ if(comm.ThreadNum() == 0){
     while (comp.GetTime() < param.Tend() && run) {
         if(writeVtk && comp.GetTime() >= t_nextVtk){
             vtk.Init("VTK/field");
+            vtk.AddCellScalar("residuum", comp.GetResiduum());
             vtk.AddCellScalar("p_Cell",comp.GetP());
             vtk.AddCellScalar("v",comp.GetV());
             vtk.AddCellScalar("u",comp.GetU());
@@ -143,7 +144,7 @@ if(comm.ThreadNum() == 0){
         }
         //visugrid = comp.GetVelocity();
         //Render and check if window is closed
-        //int key = visu.Check();
+        int key = visu.Check();
         
         if(visualize && k%visuStep == 0){
             switch (visu.Render(visugrid, visugrid->Min(), visugrid->Max())){
@@ -152,6 +153,7 @@ if(comm.ThreadNum() == 0){
                     break;
                 case 0: 
                     visugrid = comp.GetVelocity();
+                    //visugrid = comp.GetResiduum();
                     break;
                 case 1:
                     visugrid = comp.GetU();
@@ -174,6 +176,8 @@ if(comm.ThreadNum() == 0){
                 case 7:
                     visugrid = comp._streakLines;
                     break;
+//                 case:10: run = true;
+//                         break;
                 default:
                     break;
             }

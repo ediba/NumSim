@@ -45,7 +45,8 @@ public:
 
   /// Returns the simulated time in total
   const real_t &GetTime() const;
-
+    ///Returns _residuum
+  const Grid *  GetResiduum()const;
   /// Returns the pointer to U
   const Grid *GetU() const;
   /// Returns the pointer to V
@@ -93,12 +94,14 @@ private:
 
   // right-hand side
   Grid *_rhs;
+  Grid * _residuum;
 
   // container for interpolating whichever values
   Grid *_tmp;
   Grid *_vorticity;
 
   Solver *_solver;
+  Multigrid* _solverMultigrid;
       //container or vector for all the particle traces
     std::list<multi_real_t> particelTracing;
 

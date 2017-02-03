@@ -19,6 +19,7 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
 	_p   = new Grid(_geom, offset);
 	_rhs = new Grid(_geom, offset);
 	_tmp = new Grid(_geom, offset);
+        _residuum = new Grid(_geom, offset);
         offset[0] = _geom->Mesh()[0]; offset[1] = _geom->Mesh()[1];
         _vorticity = new Grid(_geom, offset);
 
@@ -29,7 +30,8 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
     //std::cout << "vor Solver" << std::endl;
 
     //_solver =  new SOR(_geom, _param->Omega());
-    _solver = new Multigrid(_geom, _comm, (index_t) 2);
+    _solverMultigrid = new Multigrid(_geom, _comm, (index_t) 4);
+    //_solver = new Multigrid(_geom, _comm, (index_t) 2);
     //_solver = new RedOrBlackSOR(_geom, _param->Omega(), _comm);
 
     _dtlimit = _param->Dt();
@@ -122,7 +124,12 @@ void Compute::TimeStep(bool printInfo){
 
     real_t res = 0;
     for (index_t i = 1; i<=_param->IterMax(); i++){
-        res = _solver->Cycle(_p, _rhs);
+        res = _solverMultigrid->Cycle(_p, _rhs);
+        //res = _solver->Cycle(_p, _rhs);
+        
+        //für debugging
+        _residuum = _solverMultigrid->returnResiduum( 0);
+        
         ///everybody needs the same residual afterwards
         res = _comm->geatherMax(res);
         _geom->Update_P(_p);
@@ -189,6 +196,10 @@ void Compute::RHS(const real_t &dt){
 const real_t &Compute::GetTime() const{
     return _t;
 }
+
+///Returns residuum
+const Grid* Compute::GetResiduum()const
+{return _residuum;}
 /// Returns the pointer to U
 const Grid* Compute::GetU() const
 {return _u;}

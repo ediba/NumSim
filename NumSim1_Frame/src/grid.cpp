@@ -12,8 +12,10 @@ Grid::Grid(const Geometry *geom, const multi_real_t &offset) : _geom(geom)
      _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
   this->Initialize(0.0);
     _meshInv[0]=1.0/(_geom->Mesh()[0]);
+    
     _meshInv[1]=1.0/(_geom->Mesh()[1]);
-   //std::cout << " Grid Initialized " <<std::endl;
+    //std::cout << " meshInv = " << _meshInv[0]<< " "<<_meshInv[1]<<  std::endl;
+    //std::cout << " Grid Initialized " <<std::endl;
 }
 Grid::Grid(const Geometry* geom) :_geom(geom)
 {
@@ -22,6 +24,9 @@ Grid::Grid(const Geometry* geom) :_geom(geom)
     _data = new real_t[(_geom->Size()[0]+2) * (_geom->Size()[1]+2)];
     this->Initialize(0.0);
     //std::cout << " Grid Initialized " <<std::endl;
+    _meshInv[0]=1.0/(_geom->Mesh()[0]);
+    
+    _meshInv[1]=1.0/(_geom->Mesh()[1]);
     
 }
 Grid::~Grid(){
@@ -91,6 +96,9 @@ real_t Grid::dy_r(const Iterator& it) const
 {return (_data[it.Top()] - _data[it])*_meshInv[1];}//{return (_data[it.Top()] - _data[it])/((_geom->Mesh())[1]);}
 
 real_t Grid:: dxx(const Iterator &it) const{
+//     std::cout << " data bei  it = " << it << " = " << _data[it] << std::endl;
+//     std::cout << " dxx bei  it = " << it << " = " << (_data[it.Right()]-(2.0*_data[it])+_data[it.Left()])*_meshInv[0]*_meshInv[0] << std::endl;
+    
     return (_data[it.Right()]-(2.0*_data[it])+_data[it.Left()])*_meshInv[0]*_meshInv[0];//    return (_data[it.Right()]-(2.0*_data[it])+_data[it.Left()])/(((_geom->Mesh())[0])*((_geom->Mesh())[0]));
 }
 /// Computes the central difference quatient of 2nd order in y-dim at [it]
