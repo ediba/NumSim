@@ -101,6 +101,10 @@ public:
     void interCorse2Fine(Grid* pFine, Grid* pCoarse, index_t ref) const;
     void TestFunktion(Grid* grid);
     void Boundaries(Grid* pFine, Grid* rhsCoarse, index_t ref) const;
+    Grid*  returnResiduum ( index_t level);
+    Grid* returnError (index_t level);
+    void GetResiduals(Grid* p, const Grid* rhs, Grid* res, index_t ref)const;
+    real_t smooth(Grid *grid, const Grid *rhs);
     std::vector<Geometry*> _geometries;
     std::vector<Grid*> _res;
     std::vector<Grid*> _error;
@@ -115,6 +119,7 @@ private:
 //     std::vector<Grid*> _res;
 //     std::vector<Grid*> _error;
     std::vector<RedOrBlackSOR*> _solver;
+    //std::vector<SOR*> _solver;
     const Communicator* _comm;
     //void restrict(Grid* pFine, Grid* pCoarse, Grid* rhsFine, Grid* rhsCoarse, index_t ref);
     //void interCorse2Fine(Grid* pFine, Grid* pCoarse, index_t ref);

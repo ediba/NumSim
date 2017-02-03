@@ -54,7 +54,9 @@ real_t SOR:: Cycle(Grid *grid, const Grid *rhs){
 }
 
 /// Constructs an actual SOR solver
-RedOrBlackSOR::RedOrBlackSOR (const Geometry* geom, const real_t& omega, const Communicator* comm) : SOR(geom,omega), _comm(comm) {}
+RedOrBlackSOR::RedOrBlackSOR (const Geometry* geom, const real_t& omega, const Communicator* comm) : SOR(geom,omega), _comm(comm) {
+    std::cout<<"RedOrBlackSOR constructed with omeaga = " <<_omega<<std::endl;
+}
 // Destructor
 RedOrBlackSOR::~RedOrBlackSOR(){}
 
@@ -147,9 +149,23 @@ Multigrid::Multigrid (const Geometry *geom, const Communicator *comm, index_t nu
         _error.push_back(new Grid(_geometries[i]));
         _res.push_back(new Grid(_geometries[i]));
         _solver.push_back(new RedOrBlackSOR(_geometries[i], (real_t)1., comm));
+        //_solver.push_back(new SOR(_geometries[i], (real_t)1.));
     }
 }
+
+Grid* Multigrid::returnResiduum ( index_t level){
+    return _res[level];
+}
+Grid* Multigrid::returnError (index_t level){
+    return _error[level];
+}
 //Restric Funktion Fine to Coarse
+void Multigrid::GetResiduals(Grid* p, const Grid* rhs, Grid* res, index_t ref)const{
+    for(InteriorIterator it(_geometries[ref]); it.Valid(); it.Next() ){
+        res->Cell(it) = localRes(it, p, rhs);
+        //std::cout << "res of cell "<<it << " = " << res->Cell(it) << std::endl;
+    }
+}
  void Multigrid::restrict(Grid* pFine, Grid* const pCoarse,  const Grid* rhsFine, Grid* const  rhsCoarse, index_t ref) const{
      pCoarse->Initialize(0);
      rhsCoarse->Initialize(0);
@@ -175,10 +191,10 @@ Multigrid::Multigrid (const Geometry *geom, const Communicator *comm, index_t nu
         const index_t value = pFine->IterFromPos(value2);
         const Iterator it2(_geometries[ref],value);
         //0 oder -1
-            pFine->Cell(it2) += pCoarse->Cell(it);
-            pFine->Cell(it2.Right()) += pCoarse->Cell(it);
-            pFine->Cell(it2.Top()) += pCoarse->Cell(it);
-            pFine->Cell(it2.Top().Right()) += pCoarse->Cell(it);
+            pFine->Cell(it2)            -= pCoarse->Cell(it);                  //TODO:Vorzeichen
+            pFine->Cell(it2.Right())    -= pCoarse->Cell(it);
+            pFine->Cell(it2.Top())      -= pCoarse->Cell(it);
+            pFine->Cell(it2.Top().Right()) -= pCoarse->Cell(it);
 
     }
 }
@@ -283,10 +299,7 @@ void Multigrid::Boundaries(Grid* pFine, Grid* rhsCoarse, index_t ref) const{
         }
 }
 
-Multigrid::~Multigrid(){}
-
-real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) {
-    _N++;
+real_t Multigrid::smooth(Grid *grid, const Grid *rhs) {
     real_t res = 0;
     if(_N == 0){
         _geometries[0]->Update_P(grid);
@@ -304,6 +317,15 @@ real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) {
         _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
         res = _solver[_N]->Cycle(grid, rhs);
     }
+    return res;
+}
+
+Multigrid::~Multigrid(){}
+
+real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) {
+    _N++;
+    real_t res = 0;
+    res = smooth(grid,rhs);
     //Abbruch bedingung
     if(_N==_maxN) {_N--; return res;}
     
@@ -312,30 +334,10 @@ real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) {
     
     Cycle(_error[_N+1], _res[_N+1]);
     
-    if(_N == 0){
-        
-        interCorse2Fine(grid, _error[1], _N);
-         _geometries[0]->Update_P(grid);
-        res = _solver[0]->Cycle(grid, rhs);
-        _geometries[0]->Update_P(grid);
-        res = _solver[0]->Cycle(grid, rhs);
-        _geometries[0]->Update_P(grid);
-        res = _solver[0]->Cycle(grid, rhs); 
-        
-    }
-    else{
-        //std::cout << " Grid vor  Coarse2Fine : "<<std::endl;_error[_N+1]->PrintGrid();
-        //std::cout << " Grid vor  Coarse2Fine : "<<std::endl;grid->PrintGrid();
-        interCorse2Fine(grid, _error[_N+1], _N);
-        //std::cout << " Grid nach Coarse2Fine: "<<std::endl;grid->PrintGrid();
-        _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
-         res = _solver[_N]->Cycle(grid, rhs);
-        _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
-        res = _solver[_N]->Cycle(grid, rhs);
-        _geometries[_N]->BoundaryUpdateCoarse(grid, rhs);
-        res = _solver[_N]->Cycle(grid, rhs);
-    }
+    interCorse2Fine(grid, _error[_N+1],_N);
+    res = smooth(grid,rhs);
     _N--;
+    
     return res;
     /*
      //TODO Alter nicht rekursiver Algorithmus (todos sind nur für übersichtlichkeit
