@@ -99,7 +99,8 @@ private:
   // container for interpolating whichever values
   Grid *_tmp;
   Grid *_vorticity;
-
+    index_t _multigridIteration;
+    index_t _solverType;
   Solver *_solver;
   Multigrid* _solverMultigrid;
       //container or vector for all the particle traces

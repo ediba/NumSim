@@ -44,6 +44,8 @@ public:
   const real_t &Eps() const;
   const real_t &Tau() const;
   const index_t &NumOfRef() const;
+  const index_t &SolverType() const;
+  const index_t &MultiGridLevels() const;
 
 private:
   real_t _re;
@@ -55,6 +57,8 @@ private:
   real_t _tau;
   index_t _itermax;
   index_t _numOfRef;
+  index_t _solverType;
+  index_t _multigridLevel;
 };
 //------------------------------------------------------------------------------
 #endif // __PARAMETER_HPP

@@ -27,10 +27,23 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
     _t = 0.;
 
     _epslimit = _param->Eps();
+    _solverType = _param->SolverType();
+    
     //std::cout << "vor Solver" << std::endl;
 
     //_solver =  new SOR(_geom, _param->Omega());
-    _solverMultigrid = new Multigrid(_geom, _comm, (index_t) 4);
+    if (_solverType == 2){
+    _solverMultigrid = new Multigrid(_geom, _comm, param->MultiGridLevels());
+    std::cout << "Multigrid Solver is used" <<std::endl;
+    }
+    else if (_solverType == 1){
+        _solver = new RedOrBlackSOR(_geom, _param->Omega(), _comm);
+        std::cout << "RedOrBlackSOR is use"<<std::endl;
+    }
+    else if (_solverType == 0){
+        _solver =  new SOR(_geom, _param->Omega());
+        std::cout << "SOR is use"<<std::endl;
+    }
     //_solver = new Multigrid(_geom, _comm, (index_t) 2);
     //_solver = new RedOrBlackSOR(_geom, _param->Omega(), _comm);
 
@@ -124,11 +137,15 @@ void Compute::TimeStep(bool printInfo){
 
     real_t res = 0;
     for (index_t i = 1; i<=_param->IterMax(); i++){
+        if(_solverType == 2){
         res = _solverMultigrid->Cycle(_p, _rhs);
-        //res = _solver->Cycle(_p, _rhs);
+        }
+        else {
+        res = _solver->Cycle(_p, _rhs);
+        }
         
         //für debugging
-        _residuum = _solverMultigrid->returnResiduum( 0);
+        //_residuum = _solverMultigrid->returnResiduum( 0);
         
         ///everybody needs the same residual afterwards
         res = _comm->geatherMax(res);
@@ -143,7 +160,7 @@ void Compute::TimeStep(bool printInfo){
             break;
         }
         if(i==_param->IterMax() && printInfo) {
-            std::cout <<"Solver did not converge after "<< i << " Iterations with residuum: "<< res <<std::endl;
+            std::cout <<"Solver Type "<< _solverType<< " did not converge after "<< i << " Iterations with residuum: "<< res <<std::endl;
         }
 
     }

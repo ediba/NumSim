@@ -67,6 +67,14 @@ Parameter::Parameter(const char * paramInput)
                 else if(variableName.compare("numOfRef") == 0){
                     _numOfRef = atof(variableValue.c_str());
                 }
+                else if(variableName.compare("solver") == 0){
+                    _solverType = atof(variableValue.c_str());
+                    std::cout <<"solvertype = " <<_solverType<<std::endl;
+                }
+                else if(variableName.compare("multigridLevel") == 0){
+                    _multigridLevel = atof(variableValue.c_str());
+                    std::cout <<"multiLevel = " <<_multigridLevel<<std::endl;
+                }
                 else 
                 {
                     cout << variableName << " aus Parameter File konnte nicht korrekt eingelesen werden"<<endl;
@@ -127,3 +135,9 @@ Parameter::Parameter(const char * paramInput)
   const index_t &Parameter::NumOfRef() const{
       return _numOfRef;
   }
+    const index_t &Parameter::SolverType() const{
+        return _solverType;
+    }
+    const index_t &Parameter::MultiGridLevels() const{
+        return _multigridLevel;
+    }
