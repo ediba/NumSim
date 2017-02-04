@@ -126,5 +126,25 @@ private:
     //void interCorse2Fine(Grid* pFine, Grid* pCoarse, index_t ref);
 
 };
+
+class CGSolver : public Solver {
+public:
+    CGSolver (const Geometry *geom, const Communicator *comm);
+    ~CGSolver();
+    real_t Cycle(Grid *grid, const Grid *rhs);
+    
+    void GetResiduals(Grid* p, const Grid* rhs, Grid* res);
+    void LaPlace(Grid* grid, Grid* result);
+    real_t scalarProduct(Grid* first, Grid* second);
+    void add(Grid* first, Grid* second, Grid* result, real_t multiplier = 1.);
+    void copy(Grid* origin, Grid* result);
+    real_t sumResiduals(Grid* grid);
+private:
+    real_t _alpha;
+    Grid* _d;
+    Grid* _z;
+    //Grid* _r;
+    const Communicator* _comm;
+};
 //------------------------------------------------------------------------------
 #endif // __SOLVER_HPP

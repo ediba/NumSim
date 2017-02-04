@@ -438,3 +438,91 @@ real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) {
 
     return res;*/
 }
+
+CGSolver::CGSolver (const Geometry *geom, const Communicator *comm) : Solver(geom){
+    _comm=comm;
+    _alpha = 0.;
+    _d = new Grid(_geom);
+    _z = new Grid(_geom);
+    //_r = new Grid(_geom);
+}
+
+CGSolver::~CGSolver(){
+    delete _d;
+    delete _z;
+    //delete _r;
+}
+
+real_t CGSolver::Cycle(Grid *grid, const Grid *rhs){
+    GetResiduals(grid, rhs, _d);
+    //std::cout << "Residuals calculated" << std::endl;
+    LaPlace(_d,_z);
+    //std::cout << "LaPlace calculated" << std::endl;
+    _alpha = scalarProduct(_d,_d) / scalarProduct(_d,_z);
+    //std::cout << "alpha calculated" << std::endl;
+    //calculate new p
+    add(grid, _d, grid, _alpha);
+    //std::cout << "new p calculated" << std::endl;
+    //calculate new residual
+    add(_d, _z, _d, -_alpha);
+    //std::cout << "new residuals calculated" << std::endl;
+    return sumResiduals(_d);
+}
+
+void CGSolver::GetResiduals(Grid* p, const Grid* rhs, Grid* res){
+    for(InteriorIterator it(_geom); it.Valid(); it.Next() ){
+        res->Cell(it) = (-1.)*localRes(it, p, rhs);
+        //std::cout << "res of cell "<<it << " = " << res->Cell(it) << std::endl;
+    }
+}
+
+void CGSolver::LaPlace(Grid* grid, Grid* result){
+    InteriorIterator iter(_geom);
+    iter.First();
+    while(iter.Valid()){
+        result->Cell(iter) = grid->dxx(iter) + grid->dyy(iter);
+        iter.Next();
+    }
+}
+
+real_t CGSolver::scalarProduct(Grid* first, Grid* second){
+    real_t result = 0.;
+    InteriorIterator iter(_geom);
+    iter.First();
+    while(iter.Valid()){
+        result += first->Cell(iter) * second->Cell(iter);  //TODO: für sehr große Gitter gibt es hier Auslöschung...
+        iter.Next();
+    }
+    return result;
+}
+
+void CGSolver::add(Grid* first, Grid* second, Grid* result, real_t multiplier){
+    InteriorIterator iter(_geom);
+    iter.First();
+    while(iter.Valid()){
+        result->Cell(iter) = first->Cell(iter) + multiplier * second->Cell(iter);
+        iter.Next();
+    }
+    return;
+}
+
+void CGSolver::copy(Grid* origin, Grid* result){
+    InteriorIterator iter(_geom);
+    iter.First();
+    while(iter.Valid()){
+        result->Cell(iter) = origin->Cell(iter);
+        iter.Next();
+    }
+    return;
+}
+
+real_t CGSolver::sumResiduals(Grid* grid){
+    real_t result = 0.;
+    InteriorIterator iter(_geom);
+    iter.First();
+    while(iter.Valid()){
+        result += grid->Cell(iter)*grid->Cell(iter);
+        iter.Next();
+    }
+    return sqrt((result)/(_geom->Size()[0]*_geom->Size()[1]));
+}
