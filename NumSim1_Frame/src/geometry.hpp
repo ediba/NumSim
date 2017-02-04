@@ -101,6 +101,9 @@ public:
     void printGeometry();
     
     void BoundaryUpdateCoarse(Grid* error, const Grid* residual);
+    
+    //returns the maximal coarse level the is possible in this geoemtry
+     const index_t &maxCoarseLevel(const index_t &coarseLevel)const;
 
 private:
     void Set_U_vertical(Iterator it, Grid* u)const;
@@ -139,6 +142,7 @@ private:
   multi_real_t _mesh;
   multi_real_t _velocity;
   real_t _pressure;
+  index_t _maxCoarseLevel;
 };
 //------------------------------------------------------------------------------
 #endif // __GEOMETRY_HPP

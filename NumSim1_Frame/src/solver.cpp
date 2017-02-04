@@ -304,7 +304,10 @@ real_t Multigrid::smooth(Grid *grid, const Grid *rhs) {
     if(_N == 0){
         _geometries[0]->Update_P(grid);
         res = _solver[0]->Cycle(grid, rhs);
+        
         _geometries[0]->Update_P(grid);
+        
+        GetResiduals(grid, rhs, _res[_N], _N);
         // res = _solver[0]->Cycle(grid, rhs);
          //_geometries[0]->Update_P(grid);
          //res = _solver[0]->Cycle(grid, rhs);

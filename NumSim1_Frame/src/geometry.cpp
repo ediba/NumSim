@@ -1,4 +1,5 @@
 #include "geometry.hpp"
+#include <cmath>
 
 ///Constructor Geometry
 Geometry::Geometry(const Communicator* comm, const char*geometryInput):_comm(comm)
@@ -133,9 +134,17 @@ std::cout << "Prozess " << _comm->ThreadNum() << ": Geometry constructed with _b
 
 }
     void Geometry::GetSizesOfThreads (){
+        
         //changes the total number of cells (_size) into an even number with respect to the number of threads
         _size[0] = _size[0] - (_size[0]%(_comm->ThreadDim ()[0]*2));
         _size[1] = _size[1] - (_size[1]%(_comm->ThreadDim ()[1]*2));
+        
+        int k = (log(_size[0])/log(2));
+        int y = (log(_size[1])/log(2));
+        
+        _size[0] = 1 << (index_t)(log(_size[0])/log(2));
+        _size[1] = 1 << (index_t)(log(_size[1])/log(2));
+        
         
         _mesh[0] = _length[0]/_size[0];
         _mesh[1] = _length[1]/_size[1];
@@ -143,6 +152,12 @@ std::cout << "Prozess " << _comm->ThreadNum() << ": Geometry constructed with _b
         //calculates the number of cells for each thread (_bsize)
         _bsize[0] = _size[0]/_comm->ThreadDim ()[0];
         _bsize[1] = _size[1]/_comm->ThreadDim ()[1];
+        
+      
+        
+        //calculates the maximal coarse level that is possible
+        _maxCoarseLevel = std::min (log(_bsize[0])/log(2), log(_bsize[1])/log(2)) -1;
+       
         
         if(_bsize[0] < 2 || _bsize[1] < 2){
             std::cout <<" !!! Error Inputparameter _size is too small for the number of threads used!!! " << std::endl;
@@ -152,6 +167,11 @@ std::cout << "Prozess " << _comm->ThreadNum() << ": Geometry constructed with _b
         _blength[0] = _length[0]/(_comm->ThreadDim ()[0]);
         _blength[1] = _length[1]/(_comm->ThreadDim ()[1]);
         
+    }
+    ///returns the maximal coarse Level that is possible 
+    ///Input Parameter is the maximal level the user wants
+    const index_t &Geometry::maxCoarseLevel(const index_t &coarseLevel)const{
+        return std::min(coarseLevel, _maxCoarseLevel);
     }
         
     

@@ -33,8 +33,9 @@ Compute::Compute(const Geometry *geom, const Parameter *param, const Communicato
 
     //_solver =  new SOR(_geom, _param->Omega());
     if (_solverType == 2){
-    _solverMultigrid = new Multigrid(_geom, _comm, param->MultiGridLevels());
-    std::cout << "Multigrid Solver is used" <<std::endl;
+    index_t coarseLevel = _geom->maxCoarseLevel(param->MultiGridLevels());
+    _solverMultigrid = new Multigrid(_geom, _comm, coarseLevel);
+    std::cout << "Multigrid Solver is used with maximal coarse Level = "<< coarseLevel <<std::endl;
     }
     else if (_solverType == 1){
         _solver = new RedOrBlackSOR(_geom, _param->Omega(), _comm);
@@ -139,6 +140,7 @@ void Compute::TimeStep(bool printInfo){
     for (index_t i = 1; i<=_param->IterMax(); i++){
         if(_solverType == 2){
         res = _solverMultigrid->Cycle(_p, _rhs);
+        _residuum = _solverMultigrid->returnResiduum( 0);
         }
         else {
         res = _solver->Cycle(_p, _rhs);
