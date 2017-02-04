@@ -3,7 +3,11 @@
 #include "geometry.hpp"
 #include "grid.hpp"
 #include <cmath>
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+using namespace std;
 ///Implementing the solver class
 Solver::Solver(const Geometry *geom) : _geom(geom) {}
 
@@ -324,6 +328,39 @@ real_t Multigrid::smooth(Grid *grid, const Grid *rhs) {
     }
     return res;
 }
+void Multigrid::GetResultsPerLevel(int level){
+
+    ofstream file;
+
+    ostringstream fileWrite;
+    fileWrite << "errorPlotLevel_"<<level << ".txt";
+    std::string fileName = fileWrite.str();
+
+    file.open(fileName.c_str());
+
+     for(InteriorIterator it(_geometries[level]); it.Valid(); it.Next()) {
+        file<<_error[level]->Cell(it)<<" "<<endl;
+     }
+
+    //fileWrite << "Writing this to a file.\n";
+    file.close();
+
+    ofstream residuumFile;
+
+    ostringstream residuumFileWrite;
+    residuumFileWrite << "residuumPlotLevel_"<<level << ".txt";
+    std::string residuumFileName = residuumFileWrite.str();
+
+    residuumFile.open(residuumFileName.c_str());
+
+     for(InteriorIterator it(_geometries[level]); it.Valid(); it.Next()) {
+        residuumFile<<_res[level]->Cell(it)<<" "<<std::endl;
+     }
+
+    //fileWrite << "Writing this to a file.\n";
+    residuumFile.close();
+
+}
 
 Multigrid::~Multigrid(){}
 
@@ -336,6 +373,9 @@ real_t Multigrid::Cycle(Grid *grid, const Grid *rhs) {
     
     restrict(grid, _error[_N+1], rhs, _res[_N+1], _N);
     Boundaries(grid, _res[_N+1], _N);
+    
+    //If results need to be plotted
+    //GetResultsPerLevel(_N);
     
     Cycle(_error[_N+1], _res[_N+1]);
     

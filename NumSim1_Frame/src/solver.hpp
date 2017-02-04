@@ -105,6 +105,7 @@ public:
     Grid* returnError (index_t level);
     void GetResiduals(Grid* p, const Grid* rhs, Grid* res, index_t ref)const;
     real_t smooth(Grid *grid, const Grid *rhs);
+    void GetResultsPerLevel(int level);
     std::vector<Geometry*> _geometries;
     std::vector<Grid*> _res;
     std::vector<Grid*> _error;
